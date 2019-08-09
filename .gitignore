@@ -1,0 +1,30 @@
+# Visual Studio
+
+.vs/
+*.ilk
+*.pdb
+*.log
+*.idb
+*.exp
+*.iobj
+*.ipdb
+*.tlog
+*.tlog/
+*.lastbuildstate
+
+*.sdf
+*.user
+*.suo
+
+Intermediates/
+ipch/
+
+# Other
+
+*.cll
+Debug/
+Release/
+
+# For development period
+
+CLL/lib/

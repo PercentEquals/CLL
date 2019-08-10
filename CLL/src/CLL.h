@@ -53,6 +53,7 @@ namespace cll
 		friend std::istream& operator>>(std::istream& in, var& v);
 
 		// BOOLEAN OPERATORS //
+		var operator~() const;
 		var operator!() const;
 		var operator==(const var& v) const;
 		var operator!=(const var& v) const;
@@ -71,6 +72,13 @@ namespace cll
 		var operator%(const var& v) const;
 
 		var pow(const var& v) const;
+
+		// BITWISE OPERATORS //
+		var operator<<(const var& v) const;
+		var operator>>(const var& v) const;
+		var operator^(const var& v) const;
+		var operator&(const var& v) const;
+		var operator|(const var& v) const;
 	};
 
 	// Function that provides lexer capabilities (i.e. converts line to arguments/vars/tokens)
@@ -124,6 +132,17 @@ namespace cll
 			enableLogging();
 			disableDebug();
 			random_engine.seed(rd());
+
+			// SETS KEYWORDS
+			vars.emplace_back(var("and", "&&"));
+			vars.emplace_back(var("not", "!"));
+			vars.emplace_back(var("xor", "^"));
+			vars.emplace_back(var("or", "||"));
+			vars.emplace_back(var("is", "=="));
+			vars.emplace_back(var("true", "1"));
+			vars.emplace_back(var("false", "0"));
+			std::sort(vars.begin(), vars.end(), [](var a, var b) { return a.name < b.name; });
+
 			start = std::chrono::high_resolution_clock::now();
 		}
 

@@ -44,22 +44,26 @@ namespace cll
 	};
 
 	// Vector of multiple char operators
-	std::vector<std::string> msymbols =
+	std::vector<std::string> multi_symbols =
 	{
-		"==", "!=", ">=", "<=", "**", "&&", "||", "+=", "-=", "/=", "*=", "%="
+		"==", "!=", ">=", "<=", 
+		"**", "&&", "||", "<<", ">>",
+		"+=", "-=", "/=", "*=", "%=",
+		"|=", "&=", "^="
 	};
 
-	// Vector of bool operators
-	std::vector<std::string> bsymbols =
+	// Vector of math operators
+	std::vector<std::string> math_symbols =
 	{
-		"==", "!=", ">=", "<=", "**", "&&", "||", ">", "<"
+		">", "<", "+", "-", "*", "/", "%", "^", "&", "|",
+		"==", "!=", ">=", "<=", "**", "&&", "||"
 	};
 
 	// Symbols that are illegal in variable name
-	std::string symbols = "{}/,.<>\\|&*!@#$%^&*()+-=;':\"?"; 
+	std::string symbols = "~{}/,.<>\\|&*!@#$%^&*()+-=;':\"?"; 
 
 	// Symbols that create new token
-	std::string lexer_symbols = " ,{}/<>\\|&*!@#$%^&*+-=;:\?"; 
+	std::string lexer_symbols = " ~{}/,<>\\|&*!@#$%^&*+-=;:\?"; 
 
 	//// VARIABLE ABSTRACT ////
 
@@ -84,9 +88,8 @@ namespace cll
 		type = "UNDEFINED";
 		if (v == "") return;
 
-		if (v == "true" || v == "false") type = "BOOL"; // Checks for bool
-		else if (v == "inf" || v == "-inf" || v == "-nan(ind)") type = "DOUBLE";
-
+		if (v == "inf" || v == "-inf" || v == "-nan(ind)") type = "DOUBLE";
+		
 		if (v.find_first_not_of("-.0123456789f") == std::string::npos) // Checks for numerical
 		{
 			if (v == "-" || v == "-=") type = "SYMBOL";
@@ -97,7 +100,7 @@ namespace cll
 
 				if (v == ".") type = "SYMBOL";
 			}
-			else if(v.find("f") == std::string::npos) type = "INT";
+			else if (v.find("f") == std::string::npos) type = "INT";
 		}
 
 		if (v.length() > 0) // Checks for string, char or array
@@ -117,7 +120,7 @@ namespace cll
 		if (type == "UNDEFINED")
 		{
 			if (v.find_first_of(symbols) != std::string::npos && v.length() == 1) type = "SYMBOL"; // Checks for symbols
-			else if (std::find(msymbols.begin(), msymbols.end(), v) != msymbols.end()) type = "SYMBOL"; // Check for multiple symbols (==, !=, ...)
+			else if (std::find(multi_symbols.begin(), multi_symbols.end(), v) != multi_symbols.end()) type = "SYMBOL"; // Check for multiple symbols (==, !=, ...)
 			else if (std::find(barewords.begin(), barewords.end(), v) != barewords.end()) type = "BARE"; // Checks for bare words
 			else if(v.find("(") != std::string::npos && v.find(")") != std::string::npos) // Checks for functions
 			{
@@ -144,13 +147,11 @@ namespace cll
 		setType(v);
 
 		if (type == "STRING" || type == "CHAR") value = v;
-		else if (type == "BOOL" && v == "true") value = "1";  // Represents true as 1
-		else if (type == "BOOL" && v == "false") value = "0"; // Represents false as 0
 		else if (type == "INT" || type == "FLOAT" || type == "DOUBLE")
 		{
 			try 
 			{ 
-				if(type == "INT") value = std::to_string(std::stoll(v)); 
+				if (type == "INT") value = std::to_string(std::stoll(v));
 				else if(type == "FLOAT") value = std::to_string(std::stof(v));
 				else if (type == "DOUBLE")
 				{
@@ -251,12 +252,12 @@ namespace cll
 
 	bool var::getBool() const
 	{ 
-		return (value == "false" || value == "0" || value == "" || getInt() == 0) ? false : true; 
+		return (value == "0" || value == "" || getInt() == 0) ? false : true; 
 	}
 
 	char var::getChar(const size_t& n = 0) const
 	{
-		if (type == "CHAR" || type == "INT") return char(getInt());
+		if (type == "CHAR" || type == "INT") return char((getInt() != 27) ? getInt() : ' ');
 		else if (type == "STRING") return (n < value.length() - 2) ? value[n + 1] : '\0';
 		else return '\0';
 	}
@@ -353,20 +354,25 @@ namespace cll
 	}
 
 	// BOOLEAN OPERATORS //
+	var var::operator~() const
+	{
+		return var(std::to_string(~getInt()));
+	}
+
 	var var::operator!() const
 	{
-		return (getBool()) ? var("false") : var("true");
+		return (getBool()) ? var("0") : var("1");
 	}
 
 	var var::operator==(const var& v) const
 	{
 		std::string val = value;
 
-		if (getValue() == v.getValue()) val = "true";
-		else if (getInt() == v.getInt() || getInt() == v.getFloat() || getInt() == v.getDouble()) val = "true";
-		else if (getFloat() == v.getInt() || getFloat() == v.getFloat() || getFloat() == v.getDouble()) val = "true";
-		else if (getDouble() == v.getInt() || getDouble() == v.getFloat() || getDouble() == v.getDouble()) val = "true";
-		else val = "false";
+		if (getValue() == v.getValue()) val = "1";
+		else if (getInt() == v.getInt() || getInt() == v.getFloat() || getInt() == v.getDouble()) val = "1";
+		else if (getFloat() == v.getInt() || getFloat() == v.getFloat() || getFloat() == v.getDouble()) val = "1";
+		else if (getDouble() == v.getInt() || getDouble() == v.getFloat() || getDouble() == v.getDouble()) val = "1";
+		else val = "0";
 
 		return var(val);
 	}
@@ -375,7 +381,7 @@ namespace cll
 	{
 		std::string val = value;
 
-		val = ((var(val) == v).value == "1") ? "false" : "true";
+		val = ((var(val) == v).value == "1") ? "0" : "1";
 
 		return var(val);
 	}
@@ -386,7 +392,7 @@ namespace cll
 		bool state = true;
 
 		if (type == "STRING") state = (getString() > v.getString());
-		else if (type == "INT" || type == "BOOL" || type == "CHAR")
+		else if (type == "INT" || type == "CHAR")
 		{
 			if (v.type == "DOUBLE") state = (getFloat() > v.getDouble());
 			else if (v.type == "FLOAT") state = (getFloat() > v.getFloat());
@@ -405,7 +411,7 @@ namespace cll
 			else state = (getDouble() > v.getInt());
 		}
 
-		val = (state) ? "true" : "false";
+		val = (state) ? "1" : "0";
 		return var(val);
 	}
 
@@ -415,7 +421,7 @@ namespace cll
 		bool state = true;
 
 		if (type == "STRING") state = (getString() < v.getString());
-		else if (type == "INT" || type == "BOOL" || type == "CHAR")
+		else if (type == "INT" || type == "CHAR")
 		{
 			if (v.type == "DOUBLE") state = (getFloat() < v.getDouble());
 			else if (v.type == "FLOAT") state = (getFloat() < v.getFloat());
@@ -434,7 +440,7 @@ namespace cll
 			else state = (getDouble() < v.getInt());
 		}
 
-		val = (state) ? "true" : "false";
+		val = (state) ? "1" : "0";
 		return var(val);
 	}
 
@@ -442,7 +448,7 @@ namespace cll
 	{
 		std::string val = value;
 
-		val = ((var(val) > v).value == "1" || (var(val) == v).value == "1") ? "true" : "false";
+		val = ((var(val) > v).value == "1" || (var(val) == v).value == "1") ? "1" : "0";
 
 		return var(val);
 	}
@@ -451,7 +457,7 @@ namespace cll
 	{
 		std::string val = value;
 
-		val = ((var(val) < v).value == "1" || (var(val) == v).value == "1") ? "true" : "false";
+		val = ((var(val) < v).value == "1" || (var(val) == v).value == "1") ? "1" : "0";
 
 		return var(val);
 	}	
@@ -460,7 +466,7 @@ namespace cll
 	{
 		std::string val = value;
 
-		val = (getBool() && v.getBool()) ? "true" : "false";
+		val = (getBool() && v.getBool()) ? "1" : "0";
 
 		return var(val);
 	}
@@ -469,7 +475,7 @@ namespace cll
 	{
 		std::string val = value;
 
-		val = (getBool() || v.getBool()) ? "true" : "false";
+		val = (getBool() || v.getBool()) ? "1" : "0";
 
 		return var(val);
 	}
@@ -493,7 +499,7 @@ namespace cll
 			if(v.type == "CHAR") val = "\"" + getString() + v.getChar() + "\"";
 			else val = "\"" + getString() + v.getString() + "\"";
 		}
-		else if (type == "INT" || type == "BOOL" || type == "CHAR")
+		else if (type == "INT" || type == "CHAR")
 		{
 			if(v.type == "DOUBLE") val = std::to_string(getFloat() + v.getDouble());
 			else if(v.type == "FLOAT") val = std::to_string(getFloat() + v.getFloat());
@@ -523,7 +529,7 @@ namespace cll
 		std::string val = value;
 
 		if (type == "STRING") val = getString();
-		else if (type == "INT" || type == "BOOL" || type == "CHAR")
+		else if (type == "INT" || type == "CHAR")
 		{
 			if (v.type == "DOUBLE") val = std::to_string(getFloat() - v.getDouble());
 			else if (v.type == "FLOAT") val = std::to_string(getFloat() - v.getFloat());
@@ -558,7 +564,7 @@ namespace cll
 			if (v.getInt() > 0) for (int i = 0; i < v.getInt(); i++) val += getString();
 			val += '"';
 		}
-		else if (type == "INT" || type == "BOOL" || type == "CHAR" || type == "FLOAT")
+		else if (type == "INT" || type == "CHAR" || type == "FLOAT")
 		{
 			if (v.type == "DOUBLE") val = std::to_string(getFloat() * v.getDouble());
 			else if (v.type == "FLOAT") val = std::to_string(getFloat() * v.getFloat());
@@ -582,7 +588,7 @@ namespace cll
 		std::string val = value;
 
 		if (type == "STRING") val = getString();
-		else if (type == "INT" || type == "BOOL" || type == "CHAR" || type == "FLOAT")
+		else if (type == "INT" || type == "CHAR" || type == "FLOAT")
 		{
 			if (v.type == "DOUBLE" && v.getDouble() != 0) val = std::to_string(getFloat() / v.getDouble());
 			else if (v.type == "FLOAT" && v.getFloat() != 0) val = std::to_string(getFloat() / v.getFloat());
@@ -628,7 +634,7 @@ namespace cll
 		std::string val = value;
 
 		if (type == "STRING") val = getString();
-		else if (type == "INT" || type == "BOOL" || type == "CHAR")
+		else if (type == "INT" || type == "CHAR")
 		{
 			if (v.type == "DOUBLE") val = std::to_string(std::pow(getFloat(), v.getDouble()));
 			else if (v.type == "FLOAT") val = std::to_string(std::powf(getFloat(), v.getFloat()));
@@ -648,6 +654,93 @@ namespace cll
 			else if (v.type == "FLOAT") val = std::to_string(std::pow(getDouble(), v.getFloat()));
 			else val = std::to_string(std::pow(getDouble(), v.getInt()));
 		}
+
+		return var(val);
+	}
+
+	// BITWISE OPERATORS //
+
+	var var::operator^(const var& v) const
+	{
+		std::string val = value;
+
+		if (type == "INT" || type == "FLOAT" || type == "DOUBLE" || type == "CHAR")
+		{
+			if (v.type == "INT" || v.type == "FLOAT" || v.type == "DOUBLE" || v.type == "CHAR")
+			{
+				val = std::to_string(getInt() ^ v.getInt());
+			}
+			else val = "inf";
+		}
+		else val = "0";
+
+		return var(val);
+	}
+
+	var var::operator&(const var& v) const
+	{
+		std::string val = value;
+
+		if (type == "INT" || type == "FLOAT" || type == "DOUBLE" || type == "CHAR")
+		{
+			if (v.type == "INT" || v.type == "FLOAT" || v.type == "DOUBLE" || v.type == "CHAR")
+			{
+				val = std::to_string(getInt() & v.getInt());
+			}
+			else val = "inf";
+		}
+		else val = "0";
+
+		return var(val);
+	}
+
+	var var::operator|(const var& v) const
+	{
+		std::string val = value;
+
+		if (type == "INT" || type == "FLOAT" || type == "DOUBLE" || type == "CHAR")
+		{
+			if (v.type == "INT" || v.type == "FLOAT" || v.type == "DOUBLE" || v.type == "CHAR")
+			{
+				val = std::to_string(getInt() | v.getInt());
+			}
+			else val = "inf";
+		}
+		else val = "0";
+
+		return var(val);
+	}
+
+	var var::operator<<(const var& v) const
+	{
+		std::string val = value;
+
+		if (type == "INT" || type == "FLOAT" || type == "DOUBLE" || type == "CHAR")
+		{
+			if (v.type == "INT" || v.type == "FLOAT" || v.type == "DOUBLE" || v.type == "CHAR")
+			{
+				val = std::to_string(getInt() << v.getInt());
+			}
+			else val = "inf";
+		}
+		else val = "0";
+
+		return var(val);
+	}
+
+	var var::operator>>(const var& v) const
+	{
+		std::string val = value;
+
+		if (type == "INT" || type == "FLOAT" || type == "DOUBLE" || type == "CHAR")
+		{
+			if (v.type == "INT" || v.type == "FLOAT" || v.type == "DOUBLE" || v.type == "CHAR")
+			{
+				val = std::to_string(getInt() >> v.getInt());
+			}
+			else val = "inf";
+		}
+		else val = "0";
 
 		return var(val);
 	}
@@ -704,9 +797,9 @@ namespace cll
 							// CHECKS FOR DOUBLE SPECIALS CHARS (==, !=, ...)
 							if (i != l.length() - 1)
 							{
-								for (size_t ii = 0; ii < msymbols.size(); ii++)
+								for (size_t ii = 0; ii < multi_symbols.size(); ii++)
 								{
-									if (l[i] == msymbols[ii][0] && l[i + 1] == msymbols[ii][1])
+									if (l[i] == multi_symbols[ii][0] && l[i + 1] == multi_symbols[ii][1])
 									{
 										special += l[i + 1];
 										break;
@@ -1158,9 +1251,9 @@ namespace cll
 				if (scope > 0) scope = 0;
 				else error = "Unexpected symbol '}' - nothing to close!";
 			}
-			else if (v.size() == 3)
+			else if (v.size() >= 3)
 			{
-				// TODO: scale it
+				// TODO: Make it in math
 				if (v[1].type == "SYMBOL")
 				{
 					if(v[1].value == "=") setVar(v[0].name, v[2].value);
@@ -1169,6 +1262,9 @@ namespace cll
 					else if(v[1].value == "/=") setVar(v[0].name, (v[0] / v[2]).value);
 					else if(v[1].value == "*=") setVar(v[0].name, (v[0] * v[2]).value);
 					else if(v[1].value == "%=") setVar(v[0].name, (v[0] % v[2]).value);
+					else if(v[1].value == "&=") setVar(v[0].name, (v[0] & v[2]).value);
+					else if(v[1].value == "|=") setVar(v[0].name, (v[0] | v[2]).value);
+					else if(v[1].value == "^=") setVar(v[0].name, (v[0] ^ v[2]).value);
 				}
 			}
 			else
@@ -1223,96 +1319,116 @@ namespace cll
 			else vec.emplace_back(v[i]);
 		}
 
-		for (size_t i = 0; i < vec.size(); i++)
-		{
-			if (i > 0)
-			{
-				if (vec[i - 1].type == "SYMBOL")
-				{
-					if (vec[i - 1].value == "!")
-					{
-						if (vec[i].type == "SYMBOL" || vec[i].type == "UNDEFINED") continue;
+		// MATH WITH OPERATOR PRECEDENCE
 
-						var ins = !vec[i];
-
-						vec.erase(vec.begin() + (i - 1), vec.begin() + i + 1);
-						vec.insert(vec.begin() + (i - 1), ins);
-						i -= 2;
-					}
-					else if (vec[i - 1].value == "-")
-					{
-						if (vec[i].type == "SYMBOL") continue;
-
-						if (i > 1)
-						{
-							if (vec[i - 2].type != "SYMBOL") continue;
-						}
-
-						var ins = var("0") - vec[i];
-
-						vec.erase(vec.begin() + (i - 1), vec.begin() + i + 1);
-						vec.insert(vec.begin() + (i - 1), ins);
-						i -= 2;
-					}
-				}
-			}
-		}
-
-		for (unsigned char step = 0; step < 3; step++)
+		for (unsigned char step = 0; step < 12; step++)
 		{
 			for (size_t i = 0; i < vec.size(); i++)
 			{
-				if (i > 1)
+				if (i > 0 && step == 0)
+				{
+					// PREFIX OPERATORS
+
+					if (vec[i - 1].type == "SYMBOL")
+					{
+						if (vec[i - 1].value == "!" || vec[i - 1].value == "~" || vec[i - 1].value == "-")
+						{
+							if (vec[i].type == "SYMBOL" || vec[i].type == "UNDEFINED") continue;
+
+							var ins;
+
+							if (vec[i - 1].value == "!") ins = !vec[i];
+							else if (vec[i - 1].value == "~") ins = ~vec[i];
+							else if (vec[i - 1].value == "-")
+							{
+								if (i > 1)
+								{
+									if (vec[i - 2].type != "SYMBOL") continue;
+								}
+
+								ins = var("0") - vec[i];
+							}
+
+							vec.erase(vec.begin() + (i - 1), vec.begin() + i + 1);
+							vec.insert(vec.begin() + (i - 1), ins);
+							i -= 2;
+						}
+					}
+				}
+				else if (i > 1 && step < 11)
 				{
 					if (vec[i - 1].type == "SYMBOL")
 					{
 						if (vec[i].type == "SYMBOL" || vec[i].type == "UNDEFINED") continue;
 						if (vec[i - 2].type == "SYMBOL" && vec[i - 1].value != "-") continue;
+						if (std::find(math_symbols.begin(), math_symbols.end(), vec[i - 1].value) == math_symbols.end()) continue;
 
-						var ins;
-						std::vector<var> buff;
-						buff.emplace_back(vec[i - 2]);
-						buff.emplace_back(vec[i - 1]);
-						buff.emplace_back(vec[i]);
+						var ins("");
 
-						//std::cout << "step " << step << ": " << buff[0] << buff[1] << buff[2] << '\n'; // DEBUG
-						if (step == 0 && (buff[1].value == "*" || buff[1].value == "/" || buff[1].value == "%" || buff[1].value == "**"))
+						//std::cout << "step " << (int)step << ": " << vec[i - 2] << vec[i - 1] << vec[i] << '\n'; // DEBUG
+
+						if (step == 1 && vec[i - 1].value == "**") ins = vec[i - 2].pow(vec[i]);
+						else if (step == 2)
+						{
+							if (vec[i - 1].value == "*") ins = vec[i - 2] * vec[i];
+							else if (vec[i - 1].value == "/") ins = vec[i - 2] / vec[i];
+							else if (vec[i - 1].value == "%") ins = vec[i - 2] % vec[i];
+						}
+						else if (step == 3)
+						{
+							if (vec[i - 1].value == "+") ins = vec[i - 2] + vec[i];
+							else if (vec[i - 1].value == "-") ins = vec[i - 2] - vec[i];
+						}
+						else if (step == 4)
+						{
+							if (vec[i - 1].value == "<<") ins = vec[i - 2] << vec[i];
+							else if (vec[i - 1].value == ">>") ins = vec[i - 2] >> vec[i];
+						}
+						else if (step == 5)
+						{
+							if (vec[i - 1].value == "<=") ins = vec[i - 2] <= vec[i];
+							else if (vec[i - 1].value == ">=") ins = vec[i - 2] >= vec[i];
+							else if (vec[i - 1].value == "<") ins = vec[i - 2] < vec[i];
+							else if (vec[i - 1].value == ">") ins = vec[i - 2] > vec[i];
+						}
+						else if (step == 6)
+						{
+							if (vec[i - 1].value == "==") ins = vec[i - 2] == vec[i];
+							else if (vec[i - 1].value == "!=") ins = vec[i - 2] != vec[i];
+						}
+						else if (step == 7 && vec[i - 1].value == "&") ins = vec[i - 2] & vec[i];
+						else if (step == 8 && vec[i - 1].value == "^") ins = vec[i - 2] ^ vec[i];
+						else if (step == 9 && vec[i - 1].value == "|") ins = vec[i - 2] | vec[i];
+						else if (step == 10)
+						{
+							if (vec[i - 1].value == "&&") ins = vec[i - 2] && vec[i];
+							else if (vec[i - 1].value == "||") ins = vec[i - 2] || vec[i];
+						}
+
+						if (ins.value != "")
 						{
 							vec.erase(vec.begin() + i - 2, vec.begin() + i + 1);
-
-							if (buff[1].value == "**") ins = buff[0].pow(buff[2]);
-							else if (buff[1].value == "*") ins = buff[0] * buff[2];
-							else if (buff[1].value == "/") ins = buff[0] / buff[2];
-							else if (buff[1].value == "%") ins = buff[0] % buff[2];
-
 							vec.insert(vec.begin() + (i - 2), ins);
 							i -= 2;
 						}
-						else if (step == 1 && (buff[1].value == "+" || buff[1].value == "-"))
+					}
+				}
+				else if (i > 3 && step == 11)
+				{
+					// TERNARY OPERATOR
+
+					if (vec[i - 1].type == "SYMBOL" && vec[i - 1].value == ":")
+					{
+						if (vec[i - 3].type == "SYMBOL" && vec[i - 3].value == "?")
 						{
-							vec.erase(vec.begin() + i - 2, vec.begin() + i + 1);
+							var ins;
 
-							if (buff[1].value == "+") ins = buff[0] + buff[2];
-							else if (buff[1].value == "-") ins = buff[0] - buff[2];
+							if (vec[i - 4].getBool()) ins = vec[i - 2];
+							else ins = vec[i];
 
-							vec.insert(vec.begin() + (i - 2), ins);
-							i -= 2;
-						}
-						else if (step == 2 && std::find(bsymbols.begin(), bsymbols.end(), buff[1].value) != bsymbols.end())
-						{
-							vec.erase(vec.begin() + i - 2, vec.begin() + i + 1);
-
-							if (buff[1].value == "&&") ins = buff[0] && buff[2];
-							else if (buff[1].value == "||") ins = buff[0] || buff[2];
-							else if (buff[1].value == "==") ins = buff[0] == buff[2];
-							else if (buff[1].value == "!=") ins = buff[0] != buff[2];
-							else if (buff[1].value == "<=") ins = buff[0] <= buff[2];
-							else if (buff[1].value == ">=") ins = buff[0] >= buff[2];
-							else if (buff[1].value == "<") ins = buff[0] < buff[2];
-							else if (buff[1].value == ">") ins = buff[0] > buff[2];
-
-							vec.insert(vec.begin() + (i - 2), ins);
-							i -= 2;
+							vec.erase(vec.begin() + (i - 4), vec.begin() + i + 1);
+							vec.insert(vec.begin() + (i - 4), ins);
+							i -= 4;
 						}
 					}
 				}

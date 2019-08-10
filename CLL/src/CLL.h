@@ -121,16 +121,18 @@ namespace cll
 		std::vector<var> math(const std::vector<var>& v); // Procesess math equations
 		size_t searchVar(const std::string& name, const size_t& l, const size_t& r);
 
-		// INITIALIZER METHOD - sets up variables to their defualt states (used in contructors) //
-		inline void init()
-		{
+	public:
+
+		// CONSTRUCTORS //
+		Interpreter() 
+		{ 
 			error = "";
 			filename = "";
 			scope = 0;
 			line = 0;
 			returned = false;
-			enableLogging();
-			disableDebug();
+			log = true;
+			debug = false;
 			random_engine.seed(rd());
 
 			// SETS KEYWORDS
@@ -144,13 +146,19 @@ namespace cll
 			std::sort(vars.begin(), vars.end(), [](var a, var b) { return a.name < b.name; });
 
 			start = std::chrono::high_resolution_clock::now();
-		}
+		};
 
-	public:
-		// CONSTRUCTORS //
-		Interpreter() { init(); };
-		Interpreter(const std::vector<var>& v) { init(); vars = v; }; // Constructor with already declared variables
-		Interpreter(const std::string& f) { init(); readFile(f); }; // Constructor with file execution
+		// Constructor with already declared variables
+		Interpreter(const std::vector<var>& v)
+		{
+			Interpreter(); vars = v; 
+		}; 
+
+		// Constructor with file execution
+		Interpreter(const std::string& f) 
+		{ 
+			Interpreter(); readFile(f);
+		}; 
 
 		// METHODS INTERPRETING THEIR PARAMETERS //
 		bool readLine(const std::string& l); // Interpretes only one line

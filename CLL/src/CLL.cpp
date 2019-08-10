@@ -14,7 +14,7 @@ namespace cll
 	// STATIC VARIABLES FOR METHODS AND FUNCTIONS //
 
 	// Vector of bare words
-	std::vector<std::string> barewords =
+	const std::vector<std::string> barewords =
 	{
 		"cll",
 		"new", "delete",
@@ -26,13 +26,13 @@ namespace cll
 	};
 
 	// Vector of restricted names
-	std::vector<std::string> rnames =
+	const std::vector<std::string> rnames =
 	{
 		"INVALID_VALUE", "INVALID_NAME", "UNDEFINED", "inf", "-inf"
 	};
 
 	// Vector of function names
-	std::vector<std::string> functions =
+	const std::vector<std::string> functions =
 	{
 		"len",
 		"typeof",
@@ -44,7 +44,7 @@ namespace cll
 	};
 
 	// Vector of multiple char operators
-	std::vector<std::string> multi_symbols =
+	const std::vector<std::string> multi_symbols =
 	{
 		"==", "!=", ">=", "<=", 
 		"**", "&&", "||", "<<", ">>",
@@ -53,17 +53,17 @@ namespace cll
 	};
 
 	// Vector of math operators
-	std::vector<std::string> math_symbols =
+	const std::vector<std::string> math_symbols =
 	{
 		">", "<", "+", "-", "*", "/", "%", "^", "&", "|",
 		"==", "!=", ">=", "<=", "**", "&&", "||"
 	};
 
 	// Symbols that are illegal in variable name
-	std::string symbols = "~{}/,.<>\\|&*!@#$%^&*()+-=;':\"?"; 
+	const std::string symbols = "~{}/,.<>\\|&*!@#$%^&*()+-=;':\"?";
 
 	// Symbols that create new token
-	std::string lexer_symbols = " ~{}/,<>\\|&*!@#$%^&*+-=;:\?"; 
+	const std::string lexer_symbols = " ~{}/,<>\\|&*!@#$%^&*+-=;:\?";
 
 	//// VARIABLE ABSTRACT ////
 
@@ -1199,7 +1199,7 @@ namespace cll
 				{
 					if (v[i].value == "endl") std::cout << '\n';
 					else if (v[i].type == "CHAR") std::cout << char(v[i].getInt());
-					else std::cout << v[i];
+					else std::cout << v[i].getString();
 				}
 			}			
 			else if (v[0].value == "cin")

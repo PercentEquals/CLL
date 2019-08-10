@@ -6,4 +6,4 @@
 CLL is a 'simple' programming language with c-like syntax.  
 It that can be used to create scripts or can be embedded into a c++ project.  
 
-As for now the language is still in early developmnent.
+As for now the language is still in early development.

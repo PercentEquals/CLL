@@ -103,6 +103,11 @@ namespace cll
 			else if (v.find("f") == std::string::npos) type = "INT";
 		}
 
+		if (v.find_first_not_of("x0123456789abcdefABCDEF") == std::string::npos && v.length() > 2) // Checks for hexadecimal
+		{
+			if (v.substr(0, 2) == "0x" && v.substr(2).find_first_of("x") == std::string::npos) type = "INT";
+		}
+
 		if (v.length() > 0) // Checks for string, char or array
 		{
 			if (v[0] == '"' && v[v.length() - 1] == '"') type = "STRING";
@@ -151,7 +156,12 @@ namespace cll
 		{
 			try 
 			{ 
-				if (type == "INT") value = std::to_string(std::stoll(v));
+				if (type == "INT")
+				{
+					if (v[0] == '0' && v.length() > 1 && v.find_first_of("x89") == std::string::npos) value = std::to_string(std::stoll(v.substr(1), 0, 8));
+					else if (v.substr(0, 2) == "0x" && v.length() > 2) value = std::to_string(std::stoll(v.substr(2), 0, 16));
+					else value = std::to_string(std::stoll(v));
+				}
 				else if(type == "FLOAT") value = std::to_string(std::stof(v));
 				else if (type == "DOUBLE")
 				{
@@ -1296,7 +1306,7 @@ namespace cll
 				std::string arr = "[";
 				for (size_t i = 0; i < buff.size(); i++) arr += buff[i].value;
 				arr += "]";
-				vec.push_back(arr);
+				vec.emplace_back(arr);
 			}
 			else if (v[i].type == "FUNCTION")
 			{

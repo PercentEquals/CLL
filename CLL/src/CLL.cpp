@@ -43,10 +43,11 @@ namespace cll
 		"float", "double", "str", "char", "int"
 	};
 
-	// Vector of multiple char operators
+	// Vector of multiple char operators (must be sorted by char count - from highest to lowest)
 	const std::vector<std::string> multi_symbols =
 	{
-		"==", "!=", ">=", "<=", 
+		">>=", "<<=", "!==", "===",
+		">=", "<=", "==", "!=",
 		"**", "&&", "||", "<<", ">>",
 		"+=", "-=", "/=", "*=", "%=",
 		"|=", "&=", "^="
@@ -56,7 +57,8 @@ namespace cll
 	const std::vector<std::string> math_symbols =
 	{
 		">", "<", "+", "-", "*", "/", "%", "^", "&", "|",
-		"==", "!=", ">=", "<=", "**", "&&", "||"
+		"==", "!=", ">=", "<=", "**", "&&", "||", "<<", ">>",
+		"===", "!=="
 	};
 
 	// Symbols that are illegal in variable name
@@ -199,7 +201,7 @@ namespace cll
 				}
 				else actual_element++;
 
-				if (actual_element == n && v.value == "") continue; // TODO: test deleting
+				if (actual_element == n && v.value == "") continue;
 					
 				ins += buff[i].value;
 			}
@@ -804,19 +806,30 @@ namespace cll
 						{
 							special = l[i];
 
-							// CHECKS FOR DOUBLE SPECIALS CHARS (==, !=, ...)
+							// CHECKS FOR MULTIPLE SPECIALS CHARS (==, !=, ...)
 							if (i != l.length() - 1)
 							{
-								for (size_t ii = 0; ii < multi_symbols.size(); ii++)
+								if (l[i + 1] != '\t' && l[i + 1] != ' ')
 								{
-									if (l[i] == multi_symbols[ii][0] && l[i + 1] == multi_symbols[ii][1])
+									for (size_t ii = 0; ii < multi_symbols.size(); ii++)
 									{
-										special += l[i + 1];
-										break;
+										std::string mult = "";
+
+										for (size_t iii = 0; iii < multi_symbols[ii].length(); iii++)
+										{
+											if (i + iii >= l.length()) break;
+											if (l[i + iii] == multi_symbols[ii][iii]) mult += l[i + iii];
+										}
+
+										if (mult == multi_symbols[ii]) special = mult;
+
+										if (special.length() > 1)
+										{
+											i += special.length() - 1;
+											break;
+										}
 									}
 								}
-
-								if (special.length() > 1) i++;
 							}
 						}
 					}
@@ -857,8 +870,6 @@ namespace cll
 	//// INTERPRETER ////
 
 	// Function that interpretes functions
-
-	//TODO: rework function, so that math is done in math method
 	var Interpreter::function(const std::string& fun, const std::vector<var>& args)
 	{
 		std::string ret = "UNDEFINED";
@@ -1275,6 +1286,8 @@ namespace cll
 					else if(v[1].value == "&=") setVar(v[0].name, (v[0] & v[2]).value);
 					else if(v[1].value == "|=") setVar(v[0].name, (v[0] | v[2]).value);
 					else if(v[1].value == "^=") setVar(v[0].name, (v[0] ^ v[2]).value);
+					else if(v[1].value == "<<=") setVar(v[0].name, (v[0] << v[2]).value);
+					else if(v[1].value == ">>=") setVar(v[0].name, (v[0] << v[2]).value);
 				}
 			}
 			else
@@ -1369,6 +1382,7 @@ namespace cll
 				{
 					if (vec[i - 1].type == "SYMBOL")
 					{
+						if (vec[i - 2].type == "SYMBOL" || vec[i - 2].type == "UNDEFINED") continue;
 						if (vec[i].type == "SYMBOL" || vec[i].type == "UNDEFINED") continue;
 						if (vec[i - 2].type == "SYMBOL" && vec[i - 1].value != "-") continue;
 						if (std::find(math_symbols.begin(), math_symbols.end(), vec[i - 1].value) == math_symbols.end()) continue;
@@ -1405,6 +1419,8 @@ namespace cll
 						{
 							if (vec[i - 1].value == "==") ins = vec[i - 2] == vec[i];
 							else if (vec[i - 1].value == "!=") ins = vec[i - 2] != vec[i];
+							else if (vec[i - 1].value == "===") ins = var(std::to_string((vec[i - 2] == vec[i]).getBool() && (vec[i - 2].type == vec[i].type)));
+							else if (vec[i - 1].value == "!==") ins = var(std::to_string((vec[i - 2] != vec[i]).getBool() || (vec[i - 2].type != vec[i].type)));
 						}
 						else if (step == 7 && vec[i - 1].value == "&") ins = vec[i - 2] & vec[i];
 						else if (step == 8 && vec[i - 1].value == "^") ins = vec[i - 2] ^ vec[i];

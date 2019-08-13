@@ -17,7 +17,7 @@ namespace cll
 	const std::vector<std::string> barewords =
 	{
 		"cll",
-		"new", "delete",
+		"delete",
 		"return", "pause",
 		"cin", "cout", "endl",
 		"do", "while",
@@ -56,6 +56,7 @@ namespace cll
 	// Vector of math operators
 	const std::vector<std::string> math_symbols =
 	{
+		"+=", "-=", "/=", "*=", "%=", "|=", "&=", "^=",
 		">", "<", "+", "-", "*", "/", "%", "^", "&", "|",
 		"==", "!=", ">=", "<=", "**", "&&", "||", "<<", ">>",
 		"===", "!=="
@@ -195,7 +196,7 @@ namespace cll
 				{
 					if (actual_element == n)
 					{
-						ins += v.getString(); 
+						ins += v.value;//v.getString(); 
 						continue;
 					}
 				}
@@ -337,6 +338,8 @@ namespace cll
 	{
 		if (type == "ARRAY")
 		{
+			if (value == "[]") return 0;
+
 			std::vector<var> buff = interpret(value.substr(1, value.length() - 2));
 			size_t size = 0;
 
@@ -501,10 +504,13 @@ namespace cll
 		{
 			if (val[val.length() - 1] == ']') val.pop_back();
 
-			if (v.type == "ARRAY") val += "," + v.getString().substr(1);
-			else val += "," + v.getValue() + "]";
+			if (v.getSize() != 0 && getSize() != 0) val += ",";
+
+			if (v.type == "ARRAY") val += v.getString().substr(1);
+			else val += v.getValue() + "]";
 
 			if (val[0] != '[') val = "[" + val;
+			if (val[val.length() - 1] != ']') val += "]";
 		}
 		else if (type == "STRING" || v.type == "STRING")
 		{
@@ -1051,42 +1057,20 @@ namespace cll
 	}
 
 	// Function that checks line syntax
+	// TODO: rework + instead of parsing new parse var assignment
 	bool Interpreter::parse(const std::vector<var>& v)
 	{
-		size_t undefined_check = 0; // Holds from which token to check for undefined vars
-
 		if (v.empty()) return true;
 
 		if (v[0].type == "BARE")
 		{
-			undefined_check = 1;
-
 			// CHECKS FOR MULTIPLE BARE WORDS
-			if (v[0].value == "else" && v.size() > 1)
-			{
-				if (v[1].value != "if") 
-				{ 
-					error = "Unexpected '" + v[1].value + "' after '" + v[0].value + "' statement!"; 
-					return false; 
-				}
-				else
-				{
-					undefined_check = 2;
-
-					if (v.size() < 3)
-					{
-						error = "Command 'else if' got too few arguments!";
-						return false;
-					}
-				}
-			}
-
 			for (size_t i = 0; i < v.size(); i++)
 			{
 				if (v[i].type == "BARE" && i > 0)
 				{
 					if (v[0].value == "cout" && v[i].value == "endl") continue;
-					if (v[0].value == "else" && i == 1) continue;
+					if (i == 1 && v[0].value == "else" && v[1].value == "if") continue;
 					
 					error = "Unexpected '" + v[i].value + "' after '" + v[0].value + "' statement!";
 					return false;
@@ -1102,78 +1086,49 @@ namespace cll
 				for (size_t i = 1; i < v.size(); i++)
 				{
 					if (v[i].type == "SYMBOL" && v[i].value != ",") error = "Unexpected symbol '" + v[i].value + "' after 'delete' statement!";
-					else if (v[i].name == "") error = "Undefined name '" + v[i].value + "' after 'delete' statement!";
-					else if (getVar(v[i].name).type == "UNDEFINED") error = "Undefined name '" + v[i].name + "' after 'delete' statement!";
+					else if (getVar(v[i].value).type == "UNDEFINED") error = "Undefined name '" + v[i].value + "' after 'delete' statement!";
 
 					if (error != "") break;
-				}
-			}
-			else if (v[0].value == "new")
-			{
-				if (v.size() < 2) error = "Command 'new' got too few arguments!";
-
-				bool name = true;
-				std::vector<std::string> duplicates;
-
-				for (size_t i = 1; i < v.size(); i++)
-				{
-					if (error != "") break;
-					if (v[i].value == "," && v[i].type == "SYMBOL")
-					{
-						name = true;
-						continue;
-					}
-							
-					if (v[i].value == "=" && v[i].type == "SYMBOL")
-					{
-						name = false;
-						continue;
-					}
-
-					if (name)
-					{
-						if (v[i].type == "BARE") error = "Variable name '" + v[i].value + "' is illegal!";
-						else if (v[i].name != "") error = "Variable '" + v[i].name + "' was already declared!";
-						else if (v[i].type == "FUNCTION") error = "Variable '" + v[i].value + "' is an existing function!";
-						//else if (v[i].type == "SYMBOL") error = "Unexpected symbol '" + v[i].value + "' after 'new' statement!";
-						else if (v[i].type != "UNDEFINED") error = "Variable name '" + v[i].value + "' is illegal!";
-						else if (v[i].value.find_first_of("[]") != std::string::npos) error = "Variable name '" + v[i].value + "' is illegal!";
-						else if (var(v[i].value, "").name == "INVALID_NAME") error = "Variable name '" + v[i].value + "' is illegal!";
-						else if (std::find(duplicates.begin(), duplicates.end(), v[i].value) != duplicates.end()) 
-							error = "Variable '" + v[i].value + "' cannot be declared multiple times!";
-						else duplicates.emplace_back(v[i].value);
-					}
-					else if (v[i].type == "UNDEFINED") error = "Name '" + v[i].value + "' not recognized!";
 				}
 			}
 			else if (v[0].value == "cll" && v.size() < 2) error = "Command 'cll' got too few arguments!";
-			else if (v[0].value == "system" && v.size() < 2) error = "Command 'system' got too few arguments!";
 			else if ((v[0].value == "if" || v[0].value == "while") && v.size() < 2) error = "Command '" + v[0].value + "' got too few arguments!";
+			else if (v[0].value == "else" && v.size() > 1)
+			{
+				// TODO: ADD SCOPE CHECK
+				if (v[1].value != "if") error = "Unexpected name '" + v[1].value + "' after 'else' statement!";
+				else if (v[1].value == "if" && v.size() < 3) error = "Command 'else if' got too few arguments!";
+			}
 		}
 
 		if (error != "") return false;
 
-		// Checks for undefined names
-		for (size_t i = undefined_check; i < v.size(); i++)
+		// CHECKS FOR UNDEFINED NAMES
+		for (size_t i = 0; i < v.size(); i++)
 		{
-			if (i > 0 && v[i].type == "SYMBOL")
+			if (i == 0 && v[i].type == "BARE") continue;
+			if (i == 1 && v[0].type == "BARE" && v[0].value == "else" && v[1].value == "if") continue;
+
+			if (i > 0 && v[i].type == "SYMBOL" && v[i].value != "-" && v[i].value != "!")
 			{
+				if (v[i - 1].type == "BARE")
+				{
+					error = "Unexpected symbol '" + v[i].value + "' after '" + v[i - 1].value + "' command!"; break;
+				}
+
 				if (v[i - 1].type == "SYMBOL")
 				{
-					error = "Unexpected symbol '" + v[i].value + "' after a '" + v[i - 1].value + "' symbol!";
-					break;
+					error = "Unexpected symbol '" + v[i].value + "' after '" + v[i - 1].value + "' symbol!"; break;
 				}
 
 				if (v[i].value != ";" && v[i].value != "{" && v[i].value != "}" && i + 1 >= v.size())
 				{
-					error = "Expected something after symbol '" + v[i].value + "'!";
-					break;
+					error = "Expected something after symbol '" + v[i].value + "'!"; break;
 				}
 			}
 
 			if (v[i].type == "ARRAY" || v[i].type == "PARENTHESIS" || v[i].type == "FUNCTION")
 			{
-
 				std::vector<var> buff;
 				if(v[i].type != "FUNCTION") buff = interpret(v[i].value.substr(1, v[i].value.length() - 2));
 				else buff = interpret(v[i].value.substr(v[i].value.find("("), v[i].value.length()));
@@ -1188,14 +1143,27 @@ namespace cll
 					}
 				}
 
+				if (error != "") return false;
 				if (!parse(buff)) return false;
 			}
-			else if (v[i].type == "UNDEFINED" && v[0].value != "new") 
-			{ 
+			else if (v[i].type == "UNDEFINED") 
+			{
+				if (var(v[i].value, "").getError() != "")
+				{
+					error = "Name '" + v[i].value + "' is illegal!"; break;
+				}
+
+				if (i + 1 < v.size() && v[i].value.find_first_of("[]") == std::string::npos)
+				{
+					if (v[i + 1].type == "SYMBOL" && v[i + 1].value == "=")
+					{
+						continue;
+					}
+				}
+
 				if (getVar(v[i].value).type == "UNDEFINED")
 				{
-					error = "Name '" + v[i].value + "' not recognized!";
-					break;
+					error = "Name '" + v[i].value + "' not recognized!"; break;
 				}
 			}
 		}
@@ -1242,25 +1210,6 @@ namespace cll
 			{
 				for (size_t i = 1; i < v.size(); i++) if (v[i].type != "SYMBOL") deleteVar(v[i].name);
 			}			
-			else if (v[0].value == "new")
-			{
-				std::vector<var> new_vars;
-
-				for (size_t i = 1; i < v.size(); i++)
-				{
-					if (v[i].type != "SYMBOL")
-					{
-						var buff = var(v[i].value, "UNDEFINED");
-						if(buff.name != "INVALID_NAME") new_vars.emplace_back(buff);
-					}
-					else if (v[i].value == "=") new_vars[new_vars.size() - 1] = var(new_vars[new_vars.size() - 1].name, v[i + 1]);
-				}
-
-				if (error != "") return false;
-
-				vars.insert(std::end(vars), std::begin(new_vars), std::end(new_vars));
-				std::sort(vars.begin(), vars.end(), [](var a, var b) { return a.name < b.name; });
-			}
 			else if (v[0].value == "cll") return newInterpreter(v);
 		}
 		else
@@ -1271,24 +1220,6 @@ namespace cll
 			{
 				if (scope > 0) scope = 0;
 				else error = "Unexpected symbol '}' - nothing to close!";
-			}
-			else if (v.size() >= 3)
-			{
-				// TODO: Make it in math
-				if (v[1].type == "SYMBOL")
-				{
-					if(v[1].value == "=") setVar(v[0].name, v[2].value);
-					else if(v[1].value == "+=") setVar(v[0].name, (v[0] + v[2]).value);
-					else if(v[1].value == "-=") setVar(v[0].name, (v[0] - v[2]).value);
-					else if(v[1].value == "/=") setVar(v[0].name, (v[0] / v[2]).value);
-					else if(v[1].value == "*=") setVar(v[0].name, (v[0] * v[2]).value);
-					else if(v[1].value == "%=") setVar(v[0].name, (v[0] % v[2]).value);
-					else if(v[1].value == "&=") setVar(v[0].name, (v[0] & v[2]).value);
-					else if(v[1].value == "|=") setVar(v[0].name, (v[0] | v[2]).value);
-					else if(v[1].value == "^=") setVar(v[0].name, (v[0] ^ v[2]).value);
-					else if(v[1].value == "<<=") setVar(v[0].name, (v[0] << v[2]).value);
-					else if(v[1].value == ">>=") setVar(v[0].name, (v[0] << v[2]).value);
-				}
 			}
 			else
 			{
@@ -1338,13 +1269,18 @@ namespace cll
 
 				vec.emplace_back(function(fun, args));
 			}
-			else if (getVar(v[i].value).type != "UNDEFINED") vec.emplace_back(getVar(v[i].value));
+			else if (v[i].type == "UNDEFINED")
+			{
+				var buff = getVar(v[i].value);
+				if(buff.type != "UNDEFINED") vec.emplace_back(buff);
+				else vec.emplace_back(v[i]);
+			}
 			else vec.emplace_back(v[i]);
 		}
 
 		// MATH WITH OPERATOR PRECEDENCE
 
-		for (unsigned char step = 0; step < 12; step++)
+		for (unsigned char step = 0; step < 13; step++)
 		{
 			for (size_t i = 0; i < vec.size(); i++)
 			{
@@ -1443,6 +1379,9 @@ namespace cll
 				{
 					// TERNARY OPERATOR
 
+					if (vec[i - 4].type == "SYMBOL" || vec[i - 4].type == "UNDEFINED") continue;
+					if (vec[i].type == "SYMBOL" || vec[i].type == "UNDEFINED") continue;
+
 					if (vec[i - 1].type == "SYMBOL" && vec[i - 1].value == ":")
 					{
 						if (vec[i - 3].type == "SYMBOL" && vec[i - 3].value == "?")
@@ -1457,6 +1396,43 @@ namespace cll
 							i -= 4;
 						}
 					}
+				}
+				else if (i > 1 && step == 12)
+				{
+					// ASSIGNMENT OPERATORS
+
+					var lvar = vec[(vec.size() - 1) - i + 2];
+					var symb = vec[(vec.size() - 1) - i + 1];
+					var fvar = vec[(vec.size() - 1) - i];
+					var ins("");
+
+					if (lvar.type == "SYMBOL" || lvar.type == "UNDEFINED") continue;
+					
+					if (lvar.name != "") lvar = getVar(lvar.name);
+					if (fvar.name != "") fvar = getVar(fvar.name);
+
+					if (lvar.type == "UNDEFINED" || fvar.type == "SYMBOL") continue;
+					if (fvar.type == "SYMBOL") continue;
+
+					if (symb.value == "=") ins = lvar.value;
+					else if (symb.value == "+=") ins = fvar + lvar;
+					else if (symb.value == "-=") ins = fvar - lvar;
+					else if (symb.value == "/=") ins = fvar / lvar;
+					else if (symb.value == "*=") ins = fvar * lvar;
+					else if (symb.value == "%=") ins = fvar % lvar;
+					else if (symb.value == "&=") ins = fvar & lvar;
+					else if (symb.value == "|=") ins = fvar | lvar;
+					else if (symb.value == "^=") ins = fvar ^ lvar;
+					else if (symb.value == "<<=") ins = fvar << lvar;
+					else if (symb.value == ">>=") ins = fvar >> lvar;
+					else continue;
+
+					ins.setName((fvar.name == "") ? fvar.value : fvar.name);
+					setVar(ins);
+
+					vec.erase(vec.end() - i - 1, vec.end() - i + 2);
+					vec.insert(vec.end() - (i - 2), ins);
+					i -= 2;
 				}
 			}
 		}
@@ -1550,7 +1526,7 @@ namespace cll
 		}
 
 		// CHECKS FOR PARSER ERRORS (before math)
-		//if (!parse(args)) return errorLog();
+		if (!parse(args)) return errorLog();
 
 		// APPLIES MATH TO TOKENS
 		args = math(args);
@@ -1571,7 +1547,7 @@ namespace cll
 		}
 
 		// CHECKS FOR PARSER ERRORS (after math)
-		if (!parse(args)) return errorLog();
+		//if (!parse(args)) return errorLog();
 
 		// INTERPRETS ARGUMENTS
 		if (!bare(args)) return errorLog();
@@ -1736,6 +1712,8 @@ namespace cll
 		{
 			if (n[n.length() - 1] == ']') setVar(n, "");
 
+			if (getVar(n.substr(0, n.find("["))).getSize() == 0) deleteVar(n.substr(0, n.find("[")));
+	
 			return;
 		}
 

@@ -75,10 +75,7 @@ namespace cll
 	{
 		name = n;
 
-		if (n.length() > 0)
-		{
-			if (isdigit(n[0])) name = "INVALID_NAME"; // Checks for illegal first digit
-		}
+		if (n.length() > 0 && isdigit(n[0])) name = "INVALID_NAME"; // Checks for illegal first digit
 		
 		if (n.find_first_of(symbols) != std::string::npos) name = "INVALID_NAME";
 		else if (std::find(barewords.begin(), barewords.end(), n) != barewords.end()) name = "INVALID_NAME";
@@ -130,19 +127,16 @@ namespace cll
 			if (v.find_first_of(symbols) != std::string::npos && v.length() == 1) type = "SYMBOL"; // Checks for symbols
 			else if (std::find(multi_symbols.begin(), multi_symbols.end(), v) != multi_symbols.end()) type = "SYMBOL"; // Check for multiple symbols (==, !=, ...)
 			else if (std::find(barewords.begin(), barewords.end(), v) != barewords.end()) type = "BARE"; // Checks for bare words
-			else if(v.find("(") != std::string::npos && v.find(")") != std::string::npos) // Checks for functions
+			else if (v.find("(") != std::string::npos && v.find(")") != std::string::npos) // Checks for functions
 			{
 				for (size_t i = 0; i < functions.size(); i++)
 				{
-					if (v.length() >= functions[i].length())
+					if (v.length() >= functions[i].length() && v.substr(0, functions[i].length()) == functions[i])
 					{
-						if (v.substr(0, functions[i].length()) == functions[i])
+						if (v[v.length() - 1] == ')' && v.substr(functions[i].length(), 1) == "(")
 						{
-							if (v[v.length() - 1] == ')' && v.substr(functions[i].length(), 1) == "(")
-							{
-								type = "FUNCTION";
-								break;
-							}
+							type = "FUNCTION";
+							break;
 						}
 					}
 				}
@@ -165,7 +159,7 @@ namespace cll
 					else if (v.substr(0, 2) == "0x" && v.length() > 2) value = std::to_string(std::stoll(v.substr(2), 0, 16));
 					else value = std::to_string(std::stoll(v));
 				}
-				else if(type == "FLOAT") value = std::to_string(std::stof(v));
+				else if (type == "FLOAT") value = std::to_string(std::stof(v));
 				else if (type == "DOUBLE")
 				{
 					if (v == "-nan(ind)") value = "-inf";
@@ -184,7 +178,7 @@ namespace cll
 
 		size_t actual_element = 0;
 		std::string ins = "";
-		if(value[0] == '[' || value[0] == '"' || value[0] == '\'') ins = std::string(1, value[0]);
+		if (value[0] == '[' || value[0] == '"' || value[0] == '\'') ins = std::string(1, value[0]);
 
 		if (type == "ARRAY")
 		{
@@ -196,7 +190,7 @@ namespace cll
 				{
 					if (actual_element == n)
 					{
-						ins += v.value;//v.getString(); 
+						ins += v.value;
 						continue;
 					}
 				}
@@ -315,7 +309,7 @@ namespace cll
 				else actual_element++;
 			}
 		}
-		else if(n < getSize()) return var("'" + std::string(1, value[n]) + "'");
+		else if (n < getSize()) return var("'" + std::string(1, value[n]) + "'");
 		
 		return var("");
 	}
@@ -514,13 +508,13 @@ namespace cll
 		}
 		else if (type == "STRING" || v.type == "STRING")
 		{
-			if(v.type == "CHAR") val = "\"" + getString() + v.getChar() + "\"";
+			if (v.type == "CHAR") val = "\"" + getString() + v.getChar() + "\"";
 			else val = "\"" + getString() + v.getString() + "\"";
 		}
 		else if (type == "INT" || type == "CHAR")
 		{
-			if(v.type == "DOUBLE") val = std::to_string(getFloat() + v.getDouble());
-			else if(v.type == "FLOAT") val = std::to_string(getFloat() + v.getFloat());
+			if (v.type == "DOUBLE") val = std::to_string(getFloat() + v.getDouble());
+			else if (v.type == "FLOAT") val = std::to_string(getFloat() + v.getFloat());
 			else val = std::to_string(getInt() + v.getInt());
 		}
 		else if (type == "FLOAT")
@@ -1057,7 +1051,7 @@ namespace cll
 	}
 
 	// Function that checks line syntax
-	// TODO: rework + instead of parsing new parse var assignment
+	// TODO: rework
 	bool Interpreter::parse(const std::vector<var>& v)
 	{
 		if (v.empty()) return true;
@@ -1111,6 +1105,19 @@ namespace cll
 
 			if (i > 0 && v[i].type == "SYMBOL" && v[i].value != "-" && v[i].value != "!")
 			{
+				// TERNARY CHECK
+				if (v[i].value == "?")
+				{
+					if (i + 2 < v.size() && v[i + 2].type != "SYMBOL" && v[i + 2].value != ":")
+					{
+						error = "Expected symbol ':' after '?' symbol!"; break;
+					}
+					else if (i + 2 >= v.size())
+					{
+						error = "Ternary operator got too few arguments!"; break;
+					}
+				}
+
 				if (v[i - 1].type == "BARE")
 				{
 					error = "Unexpected symbol '" + v[i].value + "' after '" + v[i - 1].value + "' command!"; break;
@@ -1123,14 +1130,14 @@ namespace cll
 
 				if (v[i].value != ";" && v[i].value != "{" && v[i].value != "}" && i + 1 >= v.size())
 				{
-					error = "Expected something after symbol '" + v[i].value + "'!"; break;
+					error = "Expected something after '" + v[i].value + "' symbol!"; break;
 				}
 			}
 
 			if (v[i].type == "ARRAY" || v[i].type == "PARENTHESIS" || v[i].type == "FUNCTION")
 			{
 				std::vector<var> buff;
-				if(v[i].type != "FUNCTION") buff = interpret(v[i].value.substr(1, v[i].value.length() - 2));
+				if (v[i].type != "FUNCTION") buff = interpret(v[i].value.substr(1, v[i].value.length() - 2));
 				else buff = interpret(v[i].value.substr(v[i].value.find("("), v[i].value.length()));
 
 				for (size_t ii = 0; ii < buff.size(); ii++)
@@ -1164,6 +1171,13 @@ namespace cll
 				if (getVar(v[i].value).type == "UNDEFINED")
 				{
 					error = "Name '" + v[i].value + "' not recognized!"; break;
+				}
+			}
+			else
+			{
+				if (i + 1 < v.size() && v[i + 1].type == "SYMBOL" && v[i + 1].value == "=")
+				{
+					error = "Can't assign to '" + v[i].value + "'!"; break;
 				}
 			}
 		}
@@ -1272,13 +1286,14 @@ namespace cll
 			else if (v[i].type == "UNDEFINED")
 			{
 				var buff = getVar(v[i].value);
-				if(buff.type != "UNDEFINED") vec.emplace_back(buff);
+				if (buff.type != "UNDEFINED") vec.emplace_back(buff);
 				else vec.emplace_back(v[i]);
 			}
 			else vec.emplace_back(v[i]);
 		}
 
 		// MATH WITH OPERATOR PRECEDENCE
+		bool assignment = false;
 
 		for (unsigned char step = 0; step < 13; step++)
 		{
@@ -1430,12 +1445,16 @@ namespace cll
 					ins.setName((fvar.name == "") ? fvar.value : fvar.name);
 					setVar(ins);
 
+					assignment = true;
+
 					vec.erase(vec.end() - i - 1, vec.end() - i + 2);
 					vec.insert(vec.end() - (i - 2), ins);
 					i -= 2;
 				}
 			}
 		}
+
+		if (assignment && vec.size() > 1) vec = math(vec);
 
 		return vec;
 	}
@@ -1698,11 +1717,11 @@ namespace cll
 			}
 		}
 
-		if (ins.name == "ILLEGAL_NAME" || ins.name == "") return;
+		if (ins.getError() != "" || ins.name == "") return;
 
 		size_t index = searchVar(ins.name, 0, vars.size() - 1);
 		if (index < vars.size()) vars[index] = ins;
-		else if(ins.name != "") vars.emplace_back(v);
+		else if (ins.name != "") vars.emplace_back(v);
 		std::sort(vars.begin(), vars.end(), [](var a, var b) { return a.name < b.name; });
 	}
 

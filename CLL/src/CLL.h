@@ -111,7 +111,6 @@ namespace cll
 		bool debug; // Determines wheter to output additional debug information about tokens
 
 		// PRIVATE METHODS //
-		//var function(const var& v);
 		var function(const std::string& fun, const std::vector<var>& args);
 		bool errorLog(); // Returns false if there is an error and prints them with std::cout (if logging is enabled)
 		bool newInterpreter(const std::vector<var>& v); // Creates new instance of interpreter - for file in file execution
@@ -151,13 +150,15 @@ namespace cll
 		// Constructor with already declared variables
 		Interpreter(const std::vector<var>& v)
 		{
-			Interpreter(); vars = v; 
+			Interpreter(); 
+			vars = v; 
 		}; 
 
 		// Constructor with file execution
 		Interpreter(const std::string& f) 
 		{ 
-			Interpreter(); readFile(f);
+			Interpreter(); 
+			readFile(f);
 		}; 
 
 		// METHODS INTERPRETING THEIR PARAMETERS //

@@ -1,9 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\CLL.cpp" />
+    <ClCompile Include="src\cll\interpreter.cpp" />
+    <ClCompile Include="src\cll\lexer.cpp" />
+    <ClCompile Include="src\cll\var.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CLL.h" />
+    <ClInclude Include="src\cll\interpreter.h" />
+    <ClInclude Include="src\cll\lexer.h" />
+    <ClInclude Include="src\cll\static.h" />
+    <ClInclude Include="src\cll\var.h" />
   </ItemGroup>
 </Project>

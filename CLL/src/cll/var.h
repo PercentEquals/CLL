@@ -7,6 +7,8 @@
 
 namespace cll
 {
+	// TODO: make short functions inline
+
 	struct var
 	{
 		std::string name; // Holds declared name of variable
@@ -14,12 +16,13 @@ namespace cll
 		std::string type; // Holds variable type - (LONG LONG) INT, FLOAT, DOUBLE, CHAR, STRING, BOOL, UNDEFINED, ARRAY, PARENTHESIS
 
 		// CONSTRUCTORS //
-		var() : name(""), value(""), type("") {}; // Empty constructor
-		var(const var& v) { name = v.name; value = v.value; type = v.type; }; // Copy constructor
-		var(const std::string& n, const var& v) { setName(n); value = v.value; type = v.type; }; // Copy constructor with custom name
-		var(const std::string& v) { setName(""); setValue(v); }; // Value only constructor
-		var(const std::string& n, const std::string& v) { setName(n); setValue(v); }; // "Safe" constructor
-		var(const std::string& n, const std::string& v, const std::string& t) { setName(n); value = v; type = t; }; // Forced value and type constructor
+
+		var() : name(""), value(""), type("") {}; 
+		var(const var& v);
+		var(const std::string& n, const var& v);
+		var(const std::string& v);
+		var(const std::string& n, const std::string& v);
+		var(const std::string& n, const std::string& v, const std::string& t);
 
 		// SET METHODS //
 		void setName(const std::string& n); // Sets variable name and checks for special symbols and bare words
@@ -28,11 +31,12 @@ namespace cll
 		void setElement(const size_t& n, const var& v);
 
 		// DELETE METHODS
-		void deleteElement(const size_t& n);
+		inline void deleteElement(const size_t& n) { setElement(n, var("")); };
 
 		// GET METHODS //
-		std::string getName() const { return name; };
-		std::string getType() const { return type; };
+		inline std::string getName() const { return name; };
+		inline std::string getType() const { return type; };
+		inline std::string getValue() const { return value; };
 
 		long long int getInt() const;
 		bool getBool() const;
@@ -41,7 +45,6 @@ namespace cll
 		double getDouble() const;
 		var getElement(const size_t& n) const;
 		std::string getString() const;
-		std::string getValue() const;
 		std::string getError() const;
 		size_t getSize() const;
 

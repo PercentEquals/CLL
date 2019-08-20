@@ -49,43 +49,9 @@ namespace cll
 	public:
 
 		// CONSTRUCTORS //
-		Interpreter()
-		{
-			error = "";
-			filename = "";
-			scope = 0;
-			line = 0;
-			returned = false;
-			log = true;
-			debug = false;
-			random_engine.seed(rd());
-
-			// SETS KEYWORDS
-			vars.emplace_back(var("and", "&&"));
-			vars.emplace_back(var("not", "!"));
-			vars.emplace_back(var("xor", "^"));
-			vars.emplace_back(var("or", "||"));
-			vars.emplace_back(var("is", "=="));
-			vars.emplace_back(var("true", "1"));
-			vars.emplace_back(var("false", "0"));
-			std::sort(vars.begin(), vars.end(), [](var a, var b) { return a.name < b.name; });
-
-			start = std::chrono::high_resolution_clock::now();
-		};
-
-		// Constructor with already declared variables
-		Interpreter(const std::vector<var>& v)
-		{
-			Interpreter();
-			vars = v;
-		};
-
-		// Constructor with file execution
-		Interpreter(const std::string& f)
-		{
-			Interpreter();
-			readFile(f);
-		};
+		Interpreter();
+		Interpreter(const std::vector<var>& v);
+		Interpreter(const std::string& f);
 
 		// METHODS INTERPRETING THEIR PARAMETERS //
 		bool readLine(const std::string& l); // Interpretes only one line
@@ -93,25 +59,25 @@ namespace cll
 
 		// INTERPRETER VARIABLES ACCESSING METHODS //
 		void setVar(const var& v); // Sets or adds variable to interpreter by var abstract
-		void setVar(const std::string& n, const var& v) { setVar(var(n, v)); }; // Sets or adds variable to interpreter by var abstract and custom name
-		void setVar(const std::string& n, const std::string& v) { setVar(var(n, v)); }; // Sets or adds variable to interpreter by 2 strings - name, value
-		void setVar(const std::string& n, const std::string& v, const std::string& t) { setVar(var(n, v, t)); }; // Sets or adds variable to interpreter by 3 strings - name, forced value, forced type
+		inline void setVar(const std::string& n, const var& v) { setVar(var(n, v)); };
+		inline void setVar(const std::string& n, const std::string& v) { setVar(var(n, v)); };
+		inline void setVar(const std::string& n, const std::string& v, const std::string& t) { setVar(var(n, v, t)); };
 		var getVar(const std::string& n); // Returns variable by its name
 		void deleteVar(const std::string& n); // Deletes variable by its name
 
 		// METHODS THAT CHANGE BEHAVIOUR OF INTERPRETER //
-		void enableLogging() { log = true; };
-		void disableLogging() { log = false; };
-		void toggleLogging() { log = !log; };
+		inline void enableLogging()  { log = true; };
+		inline void disableLogging() { log = false; };
+		inline void toggleLogging()  { log = !log; };
 
-		void enableDebug() { debug = true; };
-		void disableDebug() { debug = false; };
-		void toggleDebug() { debug = !debug; };
+		inline void enableDebug()  { debug = true; };
+		inline void disableDebug() { debug = false; };
+		inline void toggleDebug()  { debug = !debug; };
 
 		// OTHER PUBLIC METHODS //
-		void clearError() { error = ""; }; // Clears error
-		unsigned int getLine() { return line; }; // Returns actual line number
-		std::string getFilename() { return filename; }; // Returns non-empty string if interpreter interpretes a file
-		std::string getError() { return error; }; // Returns non-empty string if some error is present (useful if error logging is disabled)
+		inline void clearError() { error = ""; }; // Clears error
+		inline unsigned int getLine() { return line; }; // Returns actual line number
+		inline std::string getFilename() { return filename; }; // Returns non-empty string if interpreter interpretes a file
+		inline std::string getError() { return error; }; // Returns non-empty string if some error is present (useful if error logging is disabled)
 	};
 }

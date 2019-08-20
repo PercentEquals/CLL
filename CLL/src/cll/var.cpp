@@ -10,6 +10,46 @@
 
 namespace cll
 {
+	// CONSTRUCTORS //
+
+	// Copy constructor
+	var::var(const var& v)
+	{
+		name = v.name;
+		value = v.value;
+		type = v.type;
+	}
+
+	// Copy constructor with custom name
+	var::var(const std::string& n, const var& v)
+	{
+		setName(n);
+		value = v.value;
+		type = v.type;
+	}
+
+	// Value only constructor
+	var::var(const std::string& v)
+	{
+		setName("");
+		setValue(v);
+	}
+
+	// "Safe" constructor
+	var::var(const std::string& n, const std::string& v)
+	{
+		setName(n);
+		setValue(v);
+	}
+
+	// Constructor with forced value and type 
+	var::var(const std::string& n, const std::string& v, const std::string& t)
+	{
+		setName(n); 
+		value = v; 
+		type = t;
+	}
+
 	// SET METHODS //
 	void var::setName(const std::string& n)
 	{
@@ -69,7 +109,7 @@ namespace cll
 			else if (std::find(barewords.begin(), barewords.end(), v) != barewords.end()) type = "BARE"; // Checks for bare words
 			else if (v.find("(") != std::string::npos && v.find(")") != std::string::npos) // Checks for functions
 			{
-				for (size_t i = 0; i < functions.size(); i++)
+				for (size_t i = 0; i < functions.size(); ++i)
 				{
 					if (v.length() >= functions[i].length() && v.substr(0, functions[i].length()) == functions[i])
 					{
@@ -125,7 +165,7 @@ namespace cll
 		{
 			std::vector<var> buff = lexer(value.substr(1, value.length() - 2));
 
-			for (size_t i = 0; i < buff.size(); i++)
+			for (size_t i = 0; i < buff.size(); ++i)
 			{
 				if (buff[i].type != "SYMBOL" && buff[i].value != ",")
 				{
@@ -146,7 +186,7 @@ namespace cll
 		{
 			std::string buff = getString();
 
-			for (size_t i = 0; i < buff.length(); i++)
+			for (size_t i = 0; i < buff.length(); ++i)
 			{
 				actual_element++;
 
@@ -161,10 +201,8 @@ namespace cll
 		}
 
 		if (value[value.length() - 1] == ']' || value[value.length() - 1] == '"' || value[value.length() - 1] == '\'') ins += value[value.length() - 1];
-		value = ins;
+		setValue(ins);
 	}
-
-	void var::deleteElement(const size_t& n) { setElement(n, var("")); }
 
 	// GET METHODS //
 	long long int var::getInt() const
@@ -241,7 +279,7 @@ namespace cll
 			std::vector<var> buff = lexer(value.substr(1, value.length() - 2));
 			size_t actual_element = 0;
 
-			for (size_t i = 0; i < buff.size(); i++)
+			for (size_t i = 0; i < buff.size(); ++i)
 			{
 				if (buff[i].type != "SYMBOL" && buff[i].value != ",")
 				{
@@ -260,7 +298,6 @@ namespace cll
 		if (type == "STRING" || type == "CHAR") return value.substr(1, value.length() - 2);
 		else return value;
 	}
-	std::string var::getValue() const { return value; }
 
 	std::string var::getError() const
 	{
@@ -278,7 +315,7 @@ namespace cll
 			std::vector<var> buff = lexer(value.substr(1, value.length() - 2));
 			size_t size = 0;
 
-			for (size_t i = 0; i < buff.size(); i++)
+			for (size_t i = 0; i < buff.size(); ++i)
 			{
 				if (buff[i].type == "SYMBOL" && buff[i].value == ",") size++;
 			}
@@ -329,16 +366,11 @@ namespace cll
 
 	var var::operator!=(const var& v) const
 	{
-		std::string val = value;
-
-		val = ((var(val) == v).value == "1") ? "0" : "1";
-
-		return var(val);
+		return ((var(value) == v).value == "1") ? var("0") : var("1");
 	}
 
 	var var::operator>(const var& v) const
 	{
-		std::string val = value;
 		bool state = true;
 
 		if (type == "STRING") state = (getString() > v.getString());
@@ -361,13 +393,11 @@ namespace cll
 			else state = (getDouble() > v.getInt());
 		}
 
-		val = (state) ? "1" : "0";
-		return var(val);
+		return (state) ? var("1") : var("0");
 	}
 
 	var var::operator<(const var& v) const
 	{
-		std::string val = value;
 		bool state = true;
 
 		if (type == "STRING") state = (getString() < v.getString());
@@ -390,44 +420,27 @@ namespace cll
 			else state = (getDouble() < v.getInt());
 		}
 
-		val = (state) ? "1" : "0";
-		return var(val);
+		return (state) ? var("1") : var("0");
 	}
 
 	var var::operator>=(const var& v) const
 	{
-		std::string val = value;
-
-		val = ((var(val) > v).value == "1" || (var(val) == v).value == "1") ? "1" : "0";
-
-		return var(val);
+		return ((var(value) > v).value == "1" || (var(value) == v).value == "1") ? var("1") : var("0");
 	}
 
 	var var::operator<=(const var& v) const
 	{
-		std::string val = value;
-
-		val = ((var(val) < v).value == "1" || (var(val) == v).value == "1") ? "1" : "0";
-
-		return var(val);
+		return ((var(value) < v).value == "1" || (var(value) == v).value == "1") ? var("1") : var("0");
 	}
 
 	var var::operator&&(const var& v) const
 	{
-		std::string val = value;
-
-		val = (getBool() && v.getBool()) ? "1" : "0";
-
-		return var(val);
+		return (getBool() && v.getBool()) ? var("1") : var("0");
 	}
 
 	var var::operator||(const var& v) const
 	{
-		std::string val = value;
-
-		val = (getBool() || v.getBool()) ? "1" : "0";
-
-		return var(val);
+		return (getBool() || v.getBool()) ? var("1") : var("0");
 	}
 
 	// MATH OPERATORS //
@@ -514,7 +527,7 @@ namespace cll
 		if (type == "STRING")
 		{
 			val = '"' + getString();
-			if (v.getInt() > 0) for (int i = 0; i < v.getInt(); i++) val += getString();
+			if (v.getInt() > 0) for (int i = 0; i < v.getInt(); ++i) val += getString();
 			val += '"';
 		}
 		else if (type == "INT" || type == "CHAR" || type == "FLOAT")

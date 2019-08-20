@@ -18,7 +18,7 @@ namespace cll
 		unsigned int array = 0; // Holds wheter token is an array (helpful to ignore special chars that create new tokens)
 		std::string special = ""; // Holds sepcial char as token to be pushed (works like this: new x=10 -> new x = 10)
 
-		for (size_t i = 0; i <= l.length(); i++)
+		for (size_t i = 0; i <= l.length(); ++i)
 		{
 			if (i != l.length())
 			{
@@ -57,11 +57,11 @@ namespace cll
 							{
 								if (l[i + 1] != '\t' && l[i + 1] != ' ')
 								{
-									for (size_t ii = 0; ii < multi_symbols.size(); ii++)
+									for (size_t ii = 0; ii < multi_symbols.size(); ++ii)
 									{
 										std::string mult = "";
 
-										for (size_t iii = 0; iii < multi_symbols[ii].length(); iii++)
+										for (size_t iii = 0; iii < multi_symbols[ii].length(); ++iii)
 										{
 											if (i + iii >= l.length()) break;
 											if (l[i + iii] == multi_symbols[ii][iii]) mult += l[i + iii];

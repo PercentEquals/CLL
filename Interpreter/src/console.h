@@ -24,6 +24,5 @@ namespace console
 	void init(const std::string& title); // Initializes wrapper with console title
 	void color(const int& c); // Sets color of font
 	void reset(); // Resets color to its original state
-	void cls();
 	int getx(); // Gets x position of cursor on screen
 };

@@ -11,6 +11,46 @@
 
 namespace cll
 {
+	// CONSTRUCTORS //
+
+	Interpreter::Interpreter()
+	{
+		error = "";
+		filename = "";
+		scope = 0;
+		line = 0;
+		returned = false;
+		log = true;
+		debug = false;
+		random_engine.seed(rd());
+
+		// SETS KEYWORDS
+		vars.emplace_back(var("and", "&&"));
+		vars.emplace_back(var("not", "!"));
+		vars.emplace_back(var("xor", "^"));
+		vars.emplace_back(var("or", "||"));
+		vars.emplace_back(var("is", "=="));
+		vars.emplace_back(var("true", "1"));
+		vars.emplace_back(var("false", "0"));
+		std::sort(vars.begin(), vars.end(), [](var a, var b) { return a.name < b.name; });
+
+		start = std::chrono::high_resolution_clock::now();
+	}
+
+	// Constructor with already declared variables
+	Interpreter::Interpreter(const std::vector<var>& v)
+	{
+		Interpreter();
+		vars = v;
+	}
+
+	// Constructor with file execution
+	Interpreter::Interpreter(const std::string& f)
+	{
+		Interpreter();
+		readFile(f);
+	}
+
 	var Interpreter::function(const std::string& fun, const std::vector<var>& args)
 	{
 		std::string ret = "UNDEFINED";
@@ -145,7 +185,7 @@ namespace cll
 	bool Interpreter::newInterpreter(const std::vector<var>& v)
 	{
 		std::string params = "[";
-		for (size_t i = 1; i < v.size(); i++) params += v[i].value + ',';
+		for (size_t i = 1; i < v.size(); ++i) params += v[i].value + ',';
 		params.pop_back();
 		params += "]";
 
@@ -169,7 +209,7 @@ namespace cll
 		nested->filename = filename;
 		nested->line = (line >= l.size()) ? (line - l.size()) : 0;
 
-		for (size_t i = 0; i < l.size(); i++)
+		for (size_t i = 0; i < l.size(); ++i)
 		{
 			if (!nested->readLine(l[i]))
 			{
@@ -181,7 +221,7 @@ namespace cll
 		}
 
 		// SETTING PREVIOUS (THIS) SCOPE VARIABLES
-		for (size_t i = 0; i < nested->vars.size(); i++)
+		for (size_t i = 0; i < nested->vars.size(); ++i)
 		{
 			var buff = this->getVar(nested->vars[i].name);
 
@@ -200,7 +240,7 @@ namespace cll
 		if (v[0].type == "BARE")
 		{
 			// CHECKS FOR MULTIPLE BARE WORDS
-			for (size_t i = 0; i < v.size(); i++)
+			for (size_t i = 0; i < v.size(); ++i)
 			{
 				if (v[i].type == "BARE" && i > 0)
 				{
@@ -218,7 +258,7 @@ namespace cll
 			{
 				if (v.size() < 2) error = "Command 'delete' got too few arguments!";
 
-				for (size_t i = 1; i < v.size(); i++)
+				for (size_t i = 1; i < v.size(); ++i)
 				{
 					if (v[i].type == "SYMBOL" && v[i].value != ",") error = "Unexpected symbol '" + v[i].value + "' after 'delete' statement!";
 					else if (getVar(v[i].value).type == "UNDEFINED") error = "Undefined name '" + v[i].value + "' after 'delete' statement!";
@@ -239,7 +279,7 @@ namespace cll
 		if (error != "") return false;
 
 		// CHECKS FOR UNDEFINED NAMES
-		for (size_t i = 0; i < v.size(); i++)
+		for (size_t i = 0; i < v.size(); ++i)
 		{
 			if (i == 0 && v[i].type == "BARE") continue;
 			if (i == 1 && v[0].type == "BARE" && v[0].value == "else" && v[1].value == "if") continue;
@@ -281,7 +321,7 @@ namespace cll
 				if (v[i].type != "FUNCTION") buff = lexer(v[i].value.substr(1, v[i].value.length() - 2));
 				else buff = lexer(v[i].value.substr(v[i].value.find("("), v[i].value.length()));
 
-				for (size_t ii = 0; ii < buff.size(); ii++)
+				for (size_t ii = 0; ii < buff.size(); ++ii)
 				{
 					if (buff[ii].type == "BARE")
 					{
@@ -296,11 +336,6 @@ namespace cll
 			}
 			else if (v[i].type == "UNDEFINED")
 			{
-				if (var(v[i].value, "").getError() != "")
-				{
-					error = "Name '" + v[i].value + "' is illegal!"; break;
-				}
-
 				if (i + 1 < v.size() && v[i].value.find_first_of("[]") == std::string::npos)
 				{
 					if (v[i + 1].type == "SYMBOL" && v[i + 1].value == "=") continue;
@@ -337,7 +372,7 @@ namespace cll
 			}
 			else if (v[0].value == "cout")
 			{
-				for (size_t i = 1; i < v.size(); i++)
+				for (size_t i = 1; i < v.size(); ++i)
 				{
 					if (v[i].value == "endl") std::cout << '\n';
 					else if (v[i].type == "CHAR") std::cout << char(v[i].getInt());
@@ -346,7 +381,7 @@ namespace cll
 			}
 			else if (v[0].value == "cin")
 			{
-				for (size_t i = 1; i < v.size(); i++)
+				for (size_t i = 1; i < v.size(); ++i)
 				{
 					std::string buff;
 					std::getline(std::cin, buff);
@@ -362,7 +397,7 @@ namespace cll
 			}
 			else if (v[0].value == "delete")
 			{
-				for (size_t i = 1; i < v.size(); i++) if (v[i].type != "SYMBOL") deleteVar(v[i].name);
+				for (size_t i = 1; i < v.size(); ++i) if (v[i].type != "SYMBOL") deleteVar(v[i].name);
 			}
 			else if (v[0].value == "cll") return newInterpreter(v);
 		}
@@ -391,7 +426,7 @@ namespace cll
 	{
 		std::vector<var> vec;
 
-		for (size_t i = 0; i < v.size(); i++)
+		for (size_t i = 0; i < v.size(); ++i)
 		{
 			if (v[i].type == "PARENTHESIS")
 			{
@@ -402,7 +437,7 @@ namespace cll
 			{
 				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)));
 				std::string arr = "[";
-				for (size_t i = 0; i < buff.size(); i++) arr += buff[i].value;
+				for (size_t i = 0; i < buff.size(); ++i) arr += buff[i].value;
 				arr += "]";
 				vec.emplace_back(arr);
 			}
@@ -410,19 +445,6 @@ namespace cll
 			{
 				std::string fun = v[i].value.substr(0, v[i].value.find("("));
 				std::vector<var> args = math(lexer(v[i].value.substr(fun.length() + 1, v[i].value.length() - fun.length() - 2)));
-
-				/*
-				for (size_t ii = 0; ii < functions.size(); ii++)
-				{
-					if (v[i].value.substr(0, functions[ii].length()) == functions[ii])
-					{
-						fun = v[i].value.substr(0, functions[ii].length());
-						args = math(lexer(v[i].value.substr(functions[ii].length() + 1, v[i].value.length() - functions[ii].length() - 2)));
-						break;
-					}
-				}
-				*/
-
 				vec.emplace_back(function(fun, args));
 			}
 			else if (v[i].type == "UNDEFINED")
@@ -437,9 +459,9 @@ namespace cll
 		// MATH WITH OPERATOR PRECEDENCE
 		bool assignment = false;
 
-		for (unsigned char step = 0; step < 13; step++)
+		for (unsigned char step = 0; step < 13; ++step)
 		{
-			for (size_t i = 0; i < vec.size(); i++)
+			for (size_t i = 0; i < vec.size(); ++i)
 			{
 				if (i > 0 && step == 0)
 				{
@@ -617,7 +639,7 @@ namespace cll
 		size_t args_size = 0; // Holds unaltered size of args
 		bool skip_char = false; // Holds wheter to skip a char or not (helpfull with semicolons that should not be interpreted)
 
-		for (size_t i = 0; i < args_line.size(); i++)
+		for (size_t i = 0; i < args_line.size(); ++i)
 		{
 			if ((args_line[i].value == ";" || args_line[i].value == "{" || args_line[i].value == "}") && args_line[i].type == "SYMBOL")
 			{
@@ -638,7 +660,6 @@ namespace cll
 					skip_char = false;
 					break;
 				}
-
 			}
 
 			args.emplace_back(args_line[i]);
@@ -650,7 +671,7 @@ namespace cll
 		// SCOPING - i.e. CODE IN BRACKETS
 		if (scope)
 		{
-			for (size_t i = 0; i < args.size(); i++)
+			for (size_t i = 0; i < args.size(); ++i)
 			{
 				if (args[i].value == "{" && args[0].type == "SYMBOL") scope++;
 				if (args[i].value == "}" && args[0].type == "SYMBOL") scope--;
@@ -676,7 +697,7 @@ namespace cll
 		{
 			std::cout << "DEBUG: ";
 
-			for (size_t i = 0; i < args.size(); i++)
+			for (size_t i = 0; i < args.size(); ++i)
 			{
 				std::cout << args[i].value << " " << args[i].type;
 				if (i != args.size() - 1) std::cout << " | ";
@@ -697,7 +718,7 @@ namespace cll
 		{
 			std::cout << "DMATH: ";
 
-			for (size_t i = 0; i < args.size(); i++)
+			for (size_t i = 0; i < args.size(); ++i)
 			{
 				std::cout << args[i].value << " " << args[i].type;
 				if (i != args.size() - 1) std::cout << " | ";
@@ -716,7 +737,7 @@ namespace cll
 		if (args_line.size() != args_size && error == "")
 		{
 			std::string newline = ""; // Holds new line
-			for (size_t i = (skip_char) ? (args_size + 1) : args_size; i < args_line.size(); i++) newline += args_line[i].value + ' ';
+			for (size_t i = (skip_char) ? (args_size + 1) : args_size; i < args_line.size(); ++i) newline += args_line[i].value + ' ';
 			return readLine(newline);
 		}
 
@@ -783,7 +804,7 @@ namespace cll
 				std::string buff = n.substr(name.length());
 				std::string raw = "";
 
-				for (size_t i = 0; i < buff.length(); i++)
+				for (size_t i = 0; i < buff.length(); ++i)
 				{
 					if (buff[i] != '[' && buff[i] != ']') raw += buff[i];
 					if (buff[i] == ']') raw += ' ';
@@ -811,7 +832,7 @@ namespace cll
 				else if (!literal)
 				{
 					ret.name = name;
-					for (size_t i = 0; i < elem.size(); i++) ret.name += "[" + elem[i].getString() + "]";
+					for (size_t i = 0; i < elem.size(); ++i) ret.name += "[" + elem[i].getString() + "]";
 				}
 
 				return ret;
@@ -838,7 +859,7 @@ namespace cll
 				std::string buff = v.name.substr(name.length());
 				std::string raw = "";
 
-				for (size_t i = 0; i < buff.length(); i++)
+				for (size_t i = 0; i < buff.length(); ++i)
 				{
 					if (buff[i] != '[' && buff[i] != ']') raw += buff[i];
 					if (buff[i] == ']') raw += ' ';
@@ -873,7 +894,7 @@ namespace cll
 			if (n[n.length() - 1] == ']') setVar(n, "");
 
 			var buff = getVar(n.substr(0, n.find("[")));
-			if (buff.getSize() == 0 && buff.type == "CHAR") deleteVar(n.substr(0, n.find("[")));
+			if (buff.getSize() == 0 && buff.type != "STRING" && buff.type != "ARRAY") deleteVar(n.substr(0, n.find("[")));
 
 			return;
 		}

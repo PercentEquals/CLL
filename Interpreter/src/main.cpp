@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
 		params += path.getValue();
 		if (argc != 2) params += ",";
 
-		for (int i = 2; i < argc; i++) params += std::string(argv[i]) + ",";
+		for (int i = 2; i < argc; ++i) params += std::string(argv[i]) + ",";
 		
 		if(argc != 2) params.pop_back();
 		params += "]";
@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 		runtime->enableDebug();
 		runtime->disableLogging();
 		
-		if (!runtime->readLine("new params = " + params)) errorLog(runtime);
+		if (!runtime->readLine("params = " + params)) errorLog(runtime);
 		else if (!runtime->readFile(path.getString())) errorLog(runtime);
 	}
 

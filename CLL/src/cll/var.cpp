@@ -60,7 +60,6 @@ namespace cll
 		if (n.find_first_of(symbols) != std::string::npos) name = "INVALID_NAME";
 		else if (std::find(barewords.begin(), barewords.end(), n) != barewords.end()) name = "INVALID_NAME";
 		else if (std::find(rnames.begin(), rnames.end(), n) != rnames.end()) name = "INVALID_NAME";
-		else if (std::find(functions.begin(), functions.end(), n) != functions.end()) name = "INVALID_NAME";
 	}
 
 	void var::setType(const std::string& v)
@@ -107,20 +106,6 @@ namespace cll
 			if (v.find_first_of(symbols) != std::string::npos && v.length() == 1) type = "SYMBOL"; // Checks for symbols
 			else if (std::find(multi_symbols.begin(), multi_symbols.end(), v) != multi_symbols.end()) type = "SYMBOL"; // Check for multiple symbols (==, !=, ...)
 			else if (std::find(barewords.begin(), barewords.end(), v) != barewords.end()) type = "BARE"; // Checks for bare words
-			else if (v.find("(") != std::string::npos && v.find(")") != std::string::npos) // Checks for functions
-			{
-				for (size_t i = 0; i < functions.size(); ++i)
-				{
-					if (v.length() >= functions[i].length() && v.substr(0, functions[i].length()) == functions[i])
-					{
-						if (v[v.length() - 1] == ')' && v.substr(functions[i].length(), 1) == "(")
-						{
-							type = "FUNCTION";
-							break;
-						}
-					}
-				}
-			}
 		}
 	}
 
@@ -129,7 +114,11 @@ namespace cll
 		setType(v);
 
 		if (type == "STRING") value = v;
-		else if (type == "CHAR") value = (v.length() < 3) ? "'\\0'" : v;
+		else if (type == "CHAR")
+		{
+			// TODO: make it behave like char
+			value = (v.length() < 3) ? "'\\0'" : v;
+		}
 		else if (type == "INT" || type == "FLOAT" || type == "DOUBLE")
 		{
 			try

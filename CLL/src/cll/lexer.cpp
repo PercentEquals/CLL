@@ -23,10 +23,18 @@ namespace cll
 			if (i != l.length())
 			{
 				// CHECKS FOR STRINGS
-				if (string && l[i] == '"') string = false;
+				if (string && l[i] == '"')
+				{
+					if (i > 0 && l[i - 1] != '\\') string = false;
+					else buff.pop_back();
+				}
 				else if (!string && l[i] == '"') string = true;
 
-				if (chars && l[i] == '\'') chars = false;
+				if (chars && l[i] == '\'')
+				{
+					if(i > 0 && l[i - 1] != '\\') chars = false;
+					else buff.pop_back();
+				}
 				else if (!chars && l[i] == '\'') chars = true;
 
 				// CHECKS FOR PARENTHESIS

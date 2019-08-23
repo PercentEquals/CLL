@@ -141,12 +141,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\cll\functions.cpp" />
     <ClCompile Include="src\cll\interpreter.cpp" />
     <ClCompile Include="src\cll\lexer.cpp" />
     <ClCompile Include="src\cll\var.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CLL.h" />
+    <ClInclude Include="src\cll\functions.h" />
     <ClInclude Include="src\cll\interpreter.h" />
     <ClInclude Include="src\cll\lexer.h" />
     <ClInclude Include="src\cll\static.h" />

@@ -25,18 +25,6 @@ namespace cll
 		"INVALID_VALUE", "INVALID_NAME", "UNDEFINED", "inf", "-inf"
 	};
 
-	// Vector of function names
-	const std::vector<std::string> functions =
-	{
-		"len",
-		"typeof",
-		"sleep",
-		"fopen", "fwrite",
-		"sqrt", "abs", "floor", "ceil", "round",
-		"rand", "time",
-		"float", "double", "str", "char", "int"
-	};
-
 	// Vector of multiple char operators (must be sorted by char count - from highest to lowest)
 	const std::vector<std::string> multi_symbols =
 	{

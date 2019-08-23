@@ -7,8 +7,6 @@
 
 namespace cll
 {
-	// TODO: make short functions inline
-
 	struct var
 	{
 		std::string name; // Holds declared name of variable
@@ -16,7 +14,6 @@ namespace cll
 		std::string type; // Holds variable type - (LONG LONG) INT, FLOAT, DOUBLE, CHAR, STRING, BOOL, UNDEFINED, ARRAY, PARENTHESIS
 
 		// CONSTRUCTORS //
-
 		var() : name(""), value(""), type("") {}; 
 		var(const var& v);
 		var(const std::string& n, const var& v);

@@ -3,11 +3,10 @@
 // Author: Bartosz Niciak
 
 #include "var.h"
+#include "functions.h"
 
-#include <random>
 #include <string>
 #include <vector>
-#include <chrono>
 
 namespace cll
 {
@@ -17,12 +16,8 @@ namespace cll
 		std::string error; // Holds errors
 		std::string filename; // Holds filename
 
-		// CLOCK //
-		std::chrono::high_resolution_clock::time_point start; // Holds start point of program execution 
-
-		// RANDOM //
-		std::random_device rd;
-		std::mt19937 random_engine;
+		// FUNCTIONS
+		Functions functions;
 
 		// SCOPE SPECIFIC VARIABLES //
 		std::vector<var> previous_scope_action; // Holds previous flow managed bare word (if, while, ...)
@@ -37,7 +32,6 @@ namespace cll
 		bool debug; // Determines wheter to output additional debug information about tokens
 
 		// PRIVATE METHODS //
-		var function(const std::string& fun, const std::vector<var>& args);
 		bool errorLog(); // Returns false if there is an error and prints them with std::cout (if logging is enabled)
 		bool newInterpreter(const std::vector<var>& v); // Creates new instance of interpreter - for file in file execution
 		bool newScope(const std::vector<std::string>& l); // Creates new instance of interpreter - for scope execution
@@ -62,8 +56,15 @@ namespace cll
 		inline void setVar(const std::string& n, const var& v) { setVar(var(n, v)); };
 		inline void setVar(const std::string& n, const std::string& v) { setVar(var(n, v)); };
 		inline void setVar(const std::string& n, const std::string& v, const std::string& t) { setVar(var(n, v, t)); };
+
 		var getVar(const std::string& n); // Returns variable by its name
 		void deleteVar(const std::string& n); // Deletes variable by its name
+
+		// FUNCTIONS
+		void addFunction(const function& f) { functions.add(f); };
+		inline void addFunction(const std::string& n, var(*f)(const std::vector<var>&)) { addFunction(function(n, f)); };
+
+		void deleteFunction(const std::string& n) { functions.del(n); };
 
 		// METHODS THAT CHANGE BEHAVIOUR OF INTERPRETER //
 		inline void enableLogging()  { log = true; };

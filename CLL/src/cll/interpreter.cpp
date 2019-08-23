@@ -22,7 +22,6 @@ namespace cll
 		returned = false;
 		log = true;
 		debug = false;
-		random_engine.seed(rd());
 
 		// SETS KEYWORDS
 		vars.emplace_back(var("and", "&&"));
@@ -33,8 +32,6 @@ namespace cll
 		vars.emplace_back(var("true", "1"));
 		vars.emplace_back(var("false", "0"));
 		std::sort(vars.begin(), vars.end(), [](var a, var b) { return a.name < b.name; });
-
-		start = std::chrono::high_resolution_clock::now();
 	}
 
 	// Constructor with already declared variables
@@ -49,121 +46,6 @@ namespace cll
 	{
 		Interpreter();
 		readFile(f);
-	}
-
-	var Interpreter::function(const std::string& fun, const std::vector<var>& args)
-	{
-		std::string ret = "UNDEFINED";
-
-		if (fun == "time")
-		{
-			auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
-
-			if (args.empty())
-				duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
-			else if (args[0].type == "STRING" && (args[0].getString() == "s" || args[0].getString() == "seconds"))
-				duration = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start).count();
-			else if (args[0].type == "STRING" && (args[0].getString() == "us" || args[0].getString() == "microseconds"))
-				duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
-			else if (args[0].type == "STRING" && (args[0].getString() == "ns" || args[0].getString() == "nanoseconds"))
-				duration = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - start).count();
-
-			ret = std::to_string(duration);
-		}
-		else if (fun == "len")
-		{
-			if (args.empty()) ret = "0";
-			else ret = std::to_string(var(args[0]).getSize());
-		}
-		else if (fun == "sqrt")
-		{
-			if (args.empty()) ret = "0";
-			else ret = std::to_string(sqrt(args[0].getDouble()));
-		}
-		else if (fun == "abs")
-		{
-			if (args.empty()) ret = "0";
-			else ret = std::to_string(fabs(args[0].getDouble()));
-		}
-		else if (fun == "floor")
-		{
-			if (args.empty()) ret = "0";
-			else ret = std::to_string((int)floor(args[0].getDouble()));
-		}
-		else if (fun == "ceil")
-		{
-			if (args.empty()) ret = "0";
-			else ret = std::to_string((int)ceil(args[0].getDouble()));
-		}
-		else if (fun == "round")
-		{
-			if (args.empty()) ret = "0";
-			else ret = std::to_string((int)round(args[0].getDouble()));
-		}
-		else if (fun == "fopen")
-		{
-			std::fstream f(args[0].getString(), std::ios::in);
-			std::string l;
-
-			if (!f.good()) ret = "[]";
-			else
-			{
-				ret = "[";
-				while (std::getline(f, l)) ret += "\"" + l + "\",";
-				ret.pop_back();
-				ret += "]";
-			}
-		}
-		else if (fun == "typeof")
-		{
-			if (!args.empty()) ret = "\"" + var(args[0]).type + "\"";
-		}
-		else if (fun == "int")
-		{
-			if (args.empty()) ret = "0";
-			else ret = std::to_string(var(args[0]).getInt());
-		}
-		else if (fun == "float")
-		{
-			if (args.empty()) ret = "0.0f";
-			else ret = std::to_string(var(args[0]).getFloat());
-		}
-		else if (fun == "double")
-		{
-			if (args.empty()) ret = "0.0";
-			else ret = std::to_string(var(args[0]).getDouble());
-		}
-		else if (fun == "char")
-		{
-			if (args.empty()) ret = '\0';
-			else ret = "'" + std::string(1, var(args[0]).getChar(0)) + "'";
-		}
-		else if (fun == "str")
-		{
-			if (args.empty()) ret = "\"\"";
-			else ret = "\"" + var(args[0]).getString() + "\"";
-		}
-		else if (fun == "sleep")
-		{
-			if (!args.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(var(args[0]).getInt()));
-			ret = "";
-		}
-		else if (fun == "rand")
-		{
-			double low = 0.0, high = 1.0;
-
-			if (args.size() == 1) high = args[0].getDouble();
-			else if (args.size() >= 3)
-			{
-				low = args[0].getDouble();
-				high = args[2].getDouble();
-			}
-
-			std::uniform_real_distribution<double> dist(low, high);
-			ret = std::to_string(dist(random_engine));
-		}
-
-		return var(ret);
 	}
 
 	// Function that checks for errors and logs them on console screen
@@ -205,7 +87,6 @@ namespace cll
 		std::unique_ptr<Interpreter> nested = std::make_unique<Interpreter>(vars);
 		nested->log = log;
 		nested->debug = debug;
-		nested->start = start;
 		nested->filename = filename;
 		nested->line = (line >= l.size()) ? (line - l.size()) : 0;
 
@@ -232,7 +113,6 @@ namespace cll
 	}
 
 	// Function that checks line syntax
-	// TODO: rework
 	bool Interpreter::parse(const std::vector<var>& v)
 	{
 		if (v.empty()) return true;
@@ -315,11 +195,11 @@ namespace cll
 				}
 			}
 
-			if (v[i].type == "ARRAY" || v[i].type == "PARENTHESIS" || v[i].type == "FUNCTION")
+			if (v[i].type == "ARRAY" || v[i].type == "PARENTHESIS")
 			{
 				std::vector<var> buff;
-				if (v[i].type != "FUNCTION") buff = lexer(v[i].value.substr(1, v[i].value.length() - 2));
-				else buff = lexer(v[i].value.substr(v[i].value.find("("), v[i].value.length()));
+
+				buff = lexer(v[i].value.substr(1, v[i].value.length() - 2));
 
 				for (size_t ii = 0; ii < buff.size(); ++ii)
 				{
@@ -333,6 +213,8 @@ namespace cll
 
 				if (error != "") return false;
 				if (!parse(buff)) return false;
+
+				return true;
 			}
 			else if (v[i].type == "UNDEFINED")
 			{
@@ -341,7 +223,7 @@ namespace cll
 					if (v[i + 1].type == "SYMBOL" && v[i + 1].value == "=") continue;
 				}
 
-				if (getVar(v[i].value).type == "UNDEFINED")
+				if (v[i].value.find("(") == std::string::npos && getVar(v[i].value).type == "UNDEFINED")
 				{
 					error = "Name '" + v[i].value + "' not recognized!"; break;
 				}
@@ -392,8 +274,8 @@ namespace cll
 			}
 			else if (v[0].value == "if" || v[0].value == "while" || v[0].value == "else")
 			{
-				scope_action.emplace_back(v[0]);
-				if (v.size() > 1) scope_action.emplace_back(v[1]);
+				//scope_action.emplace_back(v[0]);
+				//if (v.size() > 1) scope_action.emplace_back(v[1]);
 			}
 			else if (v[0].value == "delete")
 			{
@@ -401,22 +283,13 @@ namespace cll
 			}
 			else if (v[0].value == "cll") return newInterpreter(v);
 		}
-		else
+		else if (v[0].value == "{" && v[0].type == "SYMBOL") scope = 1;
+		else if (v[0].value == "}" && v[0].type == "SYMBOL")
 		{
-			// INTERPRETS OTHER SPECIAL OPERATORS
-			if (v[0].value == "{" && v[0].type == "SYMBOL") scope = 1;
-			else if (v[0].value == "}" && v[0].type == "SYMBOL")
-			{
-				if (scope > 0) scope = 0;
-				else error = "Unexpected symbol '}' - nothing to close!";
-			}
-			else if (v.size() == 1)
-			{
-				var buff = getVar(v[0].name);
-				if (buff.type == "UNDEFINED") std::cout << v[0].value << " " << v[0].type;
-				else std::cout << buff.value << " " << buff.type;
-			}
+			if (scope > 0) scope = 0;
+			else error = "Unexpected symbol '}' - nothing to close!";
 		}
+		else if (v.size() == 1 && v[0].type != "UNDEFINED") std::cout << v[0].value << " " << v[0].type;
 
 		if (error != "") return false;
 		return true;
@@ -441,17 +314,25 @@ namespace cll
 				arr += "]";
 				vec.emplace_back(arr);
 			}
-			else if (v[i].type == "FUNCTION")
+			else if(v[i].type == "UNDEFINED")
 			{
-				std::string fun = v[i].value.substr(0, v[i].value.find("("));
-				std::vector<var> args = math(lexer(v[i].value.substr(fun.length() + 1, v[i].value.length() - fun.length() - 2)));
-				vec.emplace_back(function(fun, args));
-			}
-			else if (v[i].type == "UNDEFINED")
-			{
-				var buff = getVar(v[i].value);
-				if (buff.type != "UNDEFINED") vec.emplace_back(buff);
-				else vec.emplace_back(v[i]);
+				if (v[i].value.find("(") != std::string::npos && v[i].value[v[i].value.length() - 1] == ')')
+				{
+					std::string fun = v[i].value.substr(0, v[i].value.find("("));
+					std::vector<var> args = math(lexer(v[i].value.substr(fun.length() + 1, v[i].value.length() - fun.length() - 2)));
+					function buff = functions.get(fun);
+
+					if (buff.name != "" && parse({ var(v[i].value.substr(fun.length(), v[i].value.length() - fun.length())) }))
+						vec.emplace_back(buff.fun(args));
+
+					else vec.emplace_back(v[i]);
+				}
+				else
+				{
+					var buff = getVar(v[i].value);
+					if (buff.type != "UNDEFINED") vec.emplace_back(buff);
+					else vec.emplace_back(v[i]);
+				}
 			}
 			else vec.emplace_back(v[i]);
 		}
@@ -479,11 +360,7 @@ namespace cll
 							else if (vec[i - 1].value == "~") ins = ~vec[i];
 							else if (vec[i - 1].value == "-")
 							{
-								if (i > 1)
-								{
-									if (vec[i - 2].type != "SYMBOL") continue;
-								}
-
+								if (i > 1 && vec[i - 2].type != "SYMBOL") continue;
 								ins = var("0") - vec[i];
 							}
 
@@ -500,10 +377,7 @@ namespace cll
 						if (vec[i - 2].type == "SYMBOL" || vec[i - 2].type == "UNDEFINED") continue;
 						if (vec[i].type == "SYMBOL" || vec[i].type == "UNDEFINED") continue;
 						if (vec[i - 2].type == "SYMBOL" && vec[i - 1].value != "-") continue;
-
 						var ins;
-
-						//std::cout << "step " << (int)step << ": " << vec[i - 2] << vec[i - 1] << vec[i] << '\n'; // DEBUG
 
 						if (step == 1 && vec[i - 1].value == "**") ins = vec[i - 2].pow(vec[i]);
 						else if (step == 2)
@@ -533,8 +407,8 @@ namespace cll
 						{
 							if (vec[i - 1].value == "==") ins = vec[i - 2] == vec[i];
 							else if (vec[i - 1].value == "!=") ins = vec[i - 2] != vec[i];
-							else if (vec[i - 1].value == "===") ins = var(std::to_string((vec[i - 2] == vec[i]).getBool() && (vec[i - 2].type == vec[i].type)));
-							else if (vec[i - 1].value == "!==") ins = var(std::to_string((vec[i - 2] != vec[i]).getBool() || (vec[i - 2].type != vec[i].type)));
+							else if (vec[i - 1].value == "===") ins = var(std::to_string((vec[i - 2] == vec[i]).getBool() && vec[i - 2].type == vec[i].type));
+							else if (vec[i - 1].value == "!==") ins = var(std::to_string((vec[i - 2] != vec[i]).getBool() || vec[i - 2].type != vec[i].type));
 						}
 						else if (step == 7 && vec[i - 1].value == "&") ins = vec[i - 2] & vec[i];
 						else if (step == 8 && vec[i - 1].value == "^") ins = vec[i - 2] ^ vec[i];
@@ -584,13 +458,13 @@ namespace cll
 					var fvar = vec[(vec.size() - 1) - i];
 					var ins;
 
-					if (lvar.type == "SYMBOL" || lvar.type == "UNDEFINED") continue;
+					if (lvar.type == "SYMBOL" || lvar.type == "BARE") continue;
+					if (fvar.type == "SYMBOL" || fvar.type == "BARE") continue;
 
 					if (lvar.name != "") lvar = getVar(lvar.name);
 					if (fvar.name != "") fvar = getVar(fvar.name);
 
-					if (lvar.type == "UNDEFINED" || fvar.type == "SYMBOL") continue;
-					if (fvar.type == "SYMBOL") continue;
+					if (lvar.type == "UNDEFINED") continue;
 
 					if (symb.value == "=") ins = lvar.value;
 					else if (symb.value == "+=") ins = fvar + lvar;
@@ -606,6 +480,7 @@ namespace cll
 					else continue;
 
 					ins.setName((fvar.name == "") ? fvar.value : fvar.name);
+					
 					setVar(ins);
 
 					assignment = true;
@@ -633,62 +508,50 @@ namespace cll
 		std::vector<var> args_line = lexer(l); // Holds raw line tokens
 
 		// CHECKS FOR LINE BREAK (SEMICOLON) AND FOR BRACKETS
-		// TODO: Repair detecting '}' at the end of line - make it new line
-
-		std::vector<var> args; // Holds actual line tokens - everything after semicolon is treated as new line
-		size_t args_size = 0; // Holds unaltered size of args
-		bool skip_char = false; // Holds wheter to skip a char or not (helpfull with semicolons that should not be interpreted)
-
+		std::vector<var> args;
+		std::string newline = "";
+		bool multiline = false;
+			
 		for (size_t i = 0; i < args_line.size(); ++i)
-		{
-			if ((args_line[i].value == ";" || args_line[i].value == "{" || args_line[i].value == "}") && args_line[i].type == "SYMBOL")
+		{	
+			if (!multiline && (args_line[i].value == ";" || args_line[i].value == "{" || args_line[i].value == "}") && args_line[i].type == "SYMBOL")
 			{
-				if (args_line[i].value == ";")
-				{
-					skip_char = true;
-					break;
-				}
+				multiline = true;
 
-				if ((args_line[i].value == "{" || args_line[i].value == "}") && i == 0)
+				if(args_line[i].value == ";") continue;
+				else if (i == 0)
 				{
 					args.emplace_back(args_line[i]);
-					skip_char = true;
-					break;
-				}
-				else if (args_line[i].value == "{" || args_line[i].value == "}")
-				{
-					skip_char = false;
-					break;
+					continue;
 				}
 			}
 
-			args.emplace_back(args_line[i]);
+			if (multiline) newline += args_line[i].value + " ";
+			else args.emplace_back(args_line[i]);
 		}
 
 		if (args.empty()) return true;
-		args_size = args.size();
 
 		// SCOPING - i.e. CODE IN BRACKETS
 		if (scope)
 		{
-			for (size_t i = 0; i < args.size(); ++i)
-			{
-				if (args[i].value == "{" && args[0].type == "SYMBOL") scope++;
-				if (args[i].value == "}" && args[0].type == "SYMBOL") scope--;
-			}
+			if (args[0].value == "{" && args[0].type == "SYMBOL") scope++;
+			if (args[0].value == "}" && args[0].type == "SYMBOL") scope--;
 
 			if (!scope)
 			{
-				if (!newScope(scope_lines))
-				{
-					scope_lines.clear();
-					return errorLog();
-				}
-
+				bool state = newScope(scope_lines);
 				scope_lines.clear();
+				if (!state) return errorLog();
 			}
-			else scope_lines.emplace_back(l);
+			else
+			{
+				std::string buff = "";
+				for (size_t i = 0; i < args.size(); ++i) buff += args[i].value + " ";
+				scope_lines.emplace_back(buff);
+			}
 
+			if (newline != "" && !readLine(newline)) return errorLog();
 			return true;
 		}
 
@@ -706,7 +569,7 @@ namespace cll
 			if (args.size() != 0) std::cout << '\n';
 		}
 
-		// CHECKS FOR PARSER ERRORS (before math)
+		// PARSER
 		if (!parse(args)) return errorLog();
 
 		// APPLIES MATH TO TOKENS
@@ -727,21 +590,14 @@ namespace cll
 			if (args.size() != 0) std::cout << '\n';
 		}
 
-		// CHECKS FOR PARSER ERRORS (after math)
-		//if (!parse(args)) return errorLog();
+		// PARSER
+		if (!parse(args)) return errorLog();
 
 		// INTERPRETS ARGUMENTS
 		if (!bare(args)) return errorLog();
 
-		// BREAK LINE IF SEMICOLON IS PRESENT
-		if (args_line.size() != args_size && error == "")
-		{
-			std::string newline = ""; // Holds new line
-			for (size_t i = (skip_char) ? (args_size + 1) : args_size; i < args_line.size(); ++i) newline += args_line[i].value + ' ';
-			return readLine(newline);
-		}
-
-		return errorLog();
+		if (newline != "" && !readLine(newline)) return errorLog();
+		return true;
 	}
 
 	// Function that interpretes whole file line by line

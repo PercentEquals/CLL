@@ -4,6 +4,7 @@
     <ClCompile Include="src\cll\interpreter.cpp" />
     <ClCompile Include="src\cll\lexer.cpp" />
     <ClCompile Include="src\cll\var.cpp" />
+    <ClCompile Include="src\cll\functions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CLL.h" />
@@ -11,5 +12,6 @@
     <ClInclude Include="src\cll\lexer.h" />
     <ClInclude Include="src\cll\static.h" />
     <ClInclude Include="src\cll\var.h" />
+    <ClInclude Include="src\cll\functions.h" />
   </ItemGroup>
 </Project>

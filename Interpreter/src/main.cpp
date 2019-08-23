@@ -5,6 +5,13 @@
 #include "console.h"
 #include "CLL.h"
 
+// TODO in rework branch:
+// - rework char to work as an int
+// - rework lexer to detect character escaping
+// - rework parser to work after math
+// - repair parser and rework function checking
+// - check addFunction problem
+
 // This main file acts as a real-time console interpreter 
 // and can be used to type code on the fly
 // or to execute a file by passing its path by arguments with cmd or terminal
@@ -27,26 +34,22 @@ int main(int argc, char* argv[])
 	if (argc > 1)
 	{
 		// Passes parameters from terminal/cmd to interpreter
-		std::string params = "[";
+		cll::var params("[]");
 
 		// Forces path to be represented as string (cmd ignores quotation marks)
 		cll::var path = std::string(argv[1]);
 		if (path.type != "STRING") path.setValue("\"" + path.getString() + "\"");
 		
-		params += path.getValue();
-		if (argc != 2) params += ",";
+		params = params + cll::var(path.getValue());
 
-		for (int i = 2; i < argc; ++i) params += std::string(argv[i]) + ",";
-		
-		if(argc != 2) params.pop_back();
-		params += "]";
+		for (int i = 2; i < argc; ++i) params = params + cll::var(std::string(argv[i]));
 
 		// Creates runtime interpreter 
 		std::unique_ptr<cll::Interpreter> runtime = std::make_unique<cll::Interpreter>();
 		runtime->enableDebug();
 		runtime->disableLogging();
 		
-		if (!runtime->readLine("params = " + params)) errorLog(runtime);
+		if (!runtime->readLine("params = " + params.getValue())) errorLog(runtime);
 		else if (!runtime->readFile(path.getString())) errorLog(runtime);
 	}
 
@@ -59,7 +62,7 @@ int main(int argc, char* argv[])
 
 		std::string input = "";
 
-		std::cout << cll::var("CLL Interpreter [0.1.0] - Bartosz Niciak");
+		std::cout << cll::var("CLL Interpreter [0.2.0] - Bartosz Niciak");
 
 		while (input.substr(0, 6) != "return")
 		{

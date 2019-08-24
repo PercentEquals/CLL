@@ -2,6 +2,7 @@
 
 // Author: Bartosz Niciak
 
+#include "utils/search.h"
 #include "lexer.h"
 
 #include <algorithm>
@@ -20,8 +21,9 @@ namespace cll
 		scope = 0;
 		line = 0;
 		returned = false;
-		log = true;
+		log = false;
 		debug = false;
+		enabledIO = false;
 
 		// SETS KEYWORDS
 		vars.emplace_back(var("and", "&&"));
@@ -31,6 +33,7 @@ namespace cll
 		vars.emplace_back(var("is", "=="));
 		vars.emplace_back(var("true", "1"));
 		vars.emplace_back(var("false", "0"));
+		vars.emplace_back(var("endl", "'\n'"));
 		std::sort(vars.begin(), vars.end(), [](var a, var b) { return a.name < b.name; });
 	}
 
@@ -55,9 +58,9 @@ namespace cll
 
 		if (log)
 		{
-			std::cout << '\n' << "ERROR: ";
-			if (filename != "") std::cout << "Error in file '" + filename + "' on line " + std::to_string(line) + ":" << '\n';
-			std::cout << error;
+			write("\nERROR: ");
+			if (filename != "") write("Error in file '" + filename + "' on line " + std::to_string(line) + ":\n");
+			write(error);
 		}
 
 		return false;
@@ -88,6 +91,7 @@ namespace cll
 		nested->log = log;
 		nested->debug = debug;
 		nested->filename = filename;
+		nested->enabledIO = enabledIO;
 		nested->line = (line >= l.size()) ? (line - l.size()) : 0;
 
 		for (size_t i = 0; i < l.size(); ++i)
@@ -124,7 +128,7 @@ namespace cll
 			{
 				if (v[i].type == "BARE" && i > 0)
 				{
-					if (v[0].value == "cout" && v[i].value == "endl") continue;
+					if (v[0].value == "cout") continue;
 					if (i == 1 && v[0].value == "else" && v[1].value == "if") continue;
 
 					error = "Unexpected '" + v[i].value + "' after '" + v[0].value + "' statement!";
@@ -161,6 +165,11 @@ namespace cll
 		// CHECKS FOR UNDEFINED NAMES
 		for (size_t i = 0; i < v.size(); ++i)
 		{
+			if (i == 0 && v[0].type == "SYMBOL" && v[0].value == "}" && !scope)
+			{
+				error = "Unexpected symbol '}' - nothing to close!"; break;
+			}
+
 			if (i == 0 && v[i].type == "BARE") continue;
 			if (i == 1 && v[0].type == "BARE" && v[0].value == "else" && v[1].value == "if") continue;
 
@@ -256,12 +265,11 @@ namespace cll
 			{
 				for (size_t i = 1; i < v.size(); ++i)
 				{
-					if (v[i].value == "endl") std::cout << '\n';
-					else if (v[i].type == "CHAR") std::cout << char(v[i].getInt());
-					else std::cout << v[i].getString();
+					if (v[i].type == "CHAR") write(std::string(1, char(v[i].getInt())));
+					else write(v[i].getString());
 				}
 			}
-			else if (v[0].value == "cin")
+			else if (enabledIO && v[0].value == "cin")
 			{
 				for (size_t i = 1; i < v.size(); ++i)
 				{
@@ -284,12 +292,7 @@ namespace cll
 			else if (v[0].value == "cll") return newInterpreter(v);
 		}
 		else if (v[0].value == "{" && v[0].type == "SYMBOL") scope = 1;
-		else if (v[0].value == "}" && v[0].type == "SYMBOL")
-		{
-			if (scope > 0) scope = 0;
-			else error = "Unexpected symbol '}' - nothing to close!";
-		}
-		else if (v.size() == 1 && v[0].type != "UNDEFINED") std::cout << v[0].value << " " << v[0].type;
+		else if (v.size() == 1 && v[0].type != "UNDEFINED") write(v[0].value + " " + v[0].type);
 
 		if (error != "") return false;
 		return true;
@@ -538,35 +541,35 @@ namespace cll
 			if (args[0].value == "{" && args[0].type == "SYMBOL") scope++;
 			if (args[0].value == "}" && args[0].type == "SYMBOL") scope--;
 
-			if (!scope)
-			{
-				bool state = newScope(scope_lines);
-				scope_lines.clear();
-				if (!state) return errorLog();
-			}
-			else
+			if (scope)
 			{
 				std::string buff = "";
 				for (size_t i = 0; i < args.size(); ++i) buff += args[i].value + " ";
 				scope_lines.emplace_back(buff);
-			}
 
-			if (newline != "" && !readLine(newline)) return errorLog();
-			return true;
-		}
+				if (newline != "" && !readLine(newline)) return errorLog();
+				return true;
+			}
+			else
+			{
+				bool state = newScope(scope_lines);
+				scope_lines.clear();
+				return (!state) ? errorLog() : true;
+			}
+		} 
 
 		// PRINTS DEBUG MODE ADDITIONAL INFORMATION (before math)
 		if (debug)
 		{
-			std::cout << "DEBUG: ";
+			write("\nDEBUG: ");
 
 			for (size_t i = 0; i < args.size(); ++i)
 			{
-				std::cout << args[i].value << " " << args[i].type;
-				if (i != args.size() - 1) std::cout << " | ";
+				write(args[i].value + " " + args[i].type);
+				if (i != args.size() - 1) write(" | ");
 			}
 
-			if (args.size() != 0) std::cout << '\n';
+			if (args.size() != 0) write("\n");
 		}
 
 		// PARSER
@@ -579,19 +582,25 @@ namespace cll
 		// PRINTS DEBUG MODE ADDITIONAL INFORMATION (after math)
 		if (debug)
 		{
-			std::cout << "DMATH: ";
+			write("DEBUG: ");
 
 			for (size_t i = 0; i < args.size(); ++i)
 			{
-				std::cout << args[i].value << " " << args[i].type;
-				if (i != args.size() - 1) std::cout << " | ";
+				write(args[i].value + " " + args[i].type);
+				if (i != args.size() - 1) write(" | ");
 			}
 
-			if (args.size() != 0) std::cout << '\n';
+			if (args.size() != 0) write("\n");
 		}
 
-		// PARSER
-		if (!parse(args)) return errorLog();
+		for (size_t i = 0; i < args.size(); ++i)
+		{
+			if (args[i].type == "UNDEFINED")
+			{
+				error = "Name '" + args[i].value + "' not recognized!";
+				return errorLog();
+			}
+		}
 
 		// INTERPRETS ARGUMENTS
 		if (!bare(args)) return errorLog();
@@ -629,21 +638,6 @@ namespace cll
 		file.close();
 
 		return errorLog();
-	}
-
-	size_t Interpreter::searchVar(const std::string& name, const size_t& l, const size_t& r)
-	{
-		if (r >= l)
-		{
-			size_t mid = l + (r - l) / 2;
-
-			if (mid >= vars.size()) return vars.size();
-			if (vars[mid].name == name) return mid;
-			if (vars[mid].name > name) return searchVar(name, l, mid - 1);
-			return searchVar(name, mid + 1, r);
-		}
-
-		return vars.size();
 	}
 
 	// Function that returns declared var by it's name - or 'undefined' if var is not declared
@@ -695,7 +689,7 @@ namespace cll
 			}
 		}
 
-		size_t index = searchVar(n, 0, vars.size() - 1);
+		size_t index = search(vars, n, 0, vars.size() - 1);
 		if (index < vars.size()) return vars[index];
 		else return var(n, "UNDEFINED");
 	}
@@ -737,7 +731,7 @@ namespace cll
 
 		if (ins.getError() != "" || ins.name == "") return;
 
-		size_t index = searchVar(ins.name, 0, vars.size() - 1);
+		size_t index = search(vars, ins.name, 0, vars.size() - 1);
 		if (index < vars.size()) vars[index] = ins;
 		else if (ins.name != "") vars.emplace_back(v);
 		std::sort(vars.begin(), vars.end(), [](var a, var b) { return a.name < b.name; });
@@ -755,7 +749,7 @@ namespace cll
 			return;
 		}
 
-		size_t index = searchVar(n, 0, vars.size() - 1);
+		size_t index = search(vars, n, 0, vars.size() - 1);
 		if (index < vars.size()) vars.erase(vars.begin() + index);
 	}
 }

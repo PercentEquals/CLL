@@ -2,6 +2,8 @@
 
 // Author: Bartosz Niciak
 
+#include "utils/search.h"
+
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -12,21 +14,6 @@
 
 namespace cll
 {
-	size_t Functions::searchFun(const std::string& name, const size_t& l, const size_t& r)
-	{
-		if (r >= l)
-		{
-			size_t mid = l + (r - l) / 2;
-
-			if (mid >= funs.size()) return funs.size();
-			if (funs[mid].name == name) return mid;
-			if (funs[mid].name > name) return searchFun(name, l, mid - 1);
-			return searchFun(name, mid + 1, r);
-		}
-
-		return funs.size();
-	}
-	
 	Functions::Functions()
 	{
 		funs.emplace_back(function("time", time));
@@ -50,21 +37,21 @@ namespace cll
 
 	function Functions::get(const std::string& n)
 	{
-		size_t index = searchFun(n, 0, funs.size() - 1);
+		size_t index = search(funs, n, 0, funs.size() - 1);
 		if (index < funs.size()) return funs[index];
 		else return function("", nullptr);
 	}
 
 	void Functions::add(const function& f)
 	{
-		size_t index = searchFun(f.name, 0, funs.size() - 1);
+		size_t index = search(funs, f.name, 0, funs.size() - 1);
 		if (index < funs.size()) funs.emplace_back(f);
 		std::sort(funs.begin(), funs.end(), [](function a, function b) { return a.name < b.name; });
 	}
 
 	void Functions::del(const std::string& n)
 	{
-		size_t index = searchFun(n, 0, funs.size() - 1);
+		size_t index = search(funs, n, 0, funs.size() - 1);
 		if (index < funs.size()) funs.erase(funs.begin() + index);
 	}
 

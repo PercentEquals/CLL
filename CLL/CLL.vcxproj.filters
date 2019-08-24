@@ -13,5 +13,6 @@
     <ClInclude Include="src\cll\static.h" />
     <ClInclude Include="src\cll\var.h" />
     <ClInclude Include="src\cll\functions.h" />
+    <ClInclude Include="src\cll\utils\search.h" />
   </ItemGroup>
 </Project>

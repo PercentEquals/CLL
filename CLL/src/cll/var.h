@@ -76,5 +76,17 @@ namespace cll
 		var operator^(const var& v) const;
 		var operator&(const var& v) const;
 		var operator|(const var& v) const;
+
+		// INLINE ASSIGNMENT OPERATORS // 
+		inline var& operator+=(const var& v) { *this = *this + v; return *this; };
+		inline var& operator-=(const var& v) { *this = *this - v; return *this; };
+		inline var& operator*=(const var& v) { *this = *this * v; return *this; };
+		inline var& operator/=(const var& v) { *this = *this / v; return *this; };
+		inline var& operator%=(const var& v) { *this = *this % v; return *this; };
+		inline var& operator^=(const var& v) { *this = *this ^ v; return *this; };
+		inline var& operator&=(const var& v) { *this = *this & v; return *this; };
+		inline var& operator|=(const var& v) { *this = *this | v; return *this; };
+		inline var& operator<<=(const var& v) { *this = *this << v; return *this; };
+		inline var& operator>>=(const var& v) { *this = *this >> v; return *this; };
 	};
 }

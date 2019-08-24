@@ -13,7 +13,7 @@ namespace cll
 		"cll",
 		"delete",
 		"return", "pause",
-		"cin", "cout", "endl",
+		"cin", "cout",
 		"do", "while",
 		"else", "if",
 		"{", "}", ";"

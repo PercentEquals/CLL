@@ -30,15 +30,16 @@ namespace cll
 		bool returned; // If true - closes program execution (when using 'return' command)
 		bool log; // Determines wheter to output errors or not
 		bool debug; // Determines wheter to output additional debug information about tokens
+		bool enabledIO;
 
 		// PRIVATE METHODS //
+		inline void write(const std::string& s) { if (enabledIO) std::cout << s; };
 		bool errorLog(); // Returns false if there is an error and prints them with std::cout (if logging is enabled)
 		bool newInterpreter(const std::vector<var>& v); // Creates new instance of interpreter - for file in file execution
 		bool newScope(const std::vector<std::string>& l); // Creates new instance of interpreter - for scope execution
 		bool parse(const std::vector<var>& v); // Checks line syntax
 		bool bare(const std::vector<var>& v); // Procesess bare words and also some spiecial tokens
 		std::vector<var> math(const std::vector<var>& v); // Procesess math equations
-		size_t searchVar(const std::string& name, const size_t& l, const size_t& r);
 
 	public:
 
@@ -61,10 +62,9 @@ namespace cll
 		void deleteVar(const std::string& n); // Deletes variable by its name
 
 		// FUNCTIONS
-		void addFunction(const function& f) { functions.add(f); };
+		inline void addFunction(const function& f) { functions.add(f); };
 		inline void addFunction(const std::string& n, var(*f)(const std::vector<var>&)) { addFunction(function(n, f)); };
-
-		void deleteFunction(const std::string& n) { functions.del(n); };
+		inline void deleteFunction(const std::string& n) { functions.del(n); };
 
 		// METHODS THAT CHANGE BEHAVIOUR OF INTERPRETER //
 		inline void enableLogging()  { log = true; };
@@ -74,6 +74,10 @@ namespace cll
 		inline void enableDebug()  { debug = true; };
 		inline void disableDebug() { debug = false; };
 		inline void toggleDebug()  { debug = !debug; };
+
+		inline void enableIO()  { enabledIO = true; };
+		inline void disableIO() { enabledIO = false; };
+		inline void toggleIO()  { enabledIO = !enabledIO; };
 
 		// OTHER PUBLIC METHODS //
 		inline void clearError() { error = ""; }; // Clears error

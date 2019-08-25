@@ -8,9 +8,8 @@
 // TODO in rework branch:
 // - rework char to work as an int
 // - rework lexer to detect character escaping
-// - rework parser to work after math
-// - repair parser and rework function checking
 // - check addFunction problem
+// - add inline scoping to flow if scoping not present
 
 // This main file acts as a real-time console interpreter 
 // and can be used to type code on the fly
@@ -27,6 +26,9 @@ void errorLog(const std::unique_ptr<cll::Interpreter>& i)
 
 int main(int argc, char* argv[])
 {
+	std::ios_base::sync_with_stdio(false);
+	std::cin.tie(NULL);
+
 	// Initializes console with title name passed as argument, also a simple unit test
 	console::init(cll::var("CLL Interpreter").getValue()); 
 
@@ -57,21 +59,22 @@ int main(int argc, char* argv[])
 	if (argc <= 1)
 	{
 		std::unique_ptr<cll::Interpreter> local = std::make_unique<cll::Interpreter>();
-		local->enableDebug();
+		//local->enableDebug();
 		local->enableIO();
 
 		std::string input = "";
 
 		std::cout << cll::var("CLL Interpreter [0.2.0] - Bartosz Niciak");
 
-		while (input.substr(0, 6) != "return")
+		do 
 		{
 			if (console::getx() != 0) std::cout << '\n';
 			std::cout << "> ";
 			std::getline(std::cin, input);
 			if (!local->readLine(input)) errorLog(local);
 			local->clearError();
-		}
+		} 
+		while (!local->getReturned());
 	}
 
 	console::reset();

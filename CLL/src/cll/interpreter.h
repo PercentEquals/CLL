@@ -22,6 +22,7 @@ namespace cll
 		// SCOPE SPECIFIC VARIABLES //
 		std::vector<var> previous_scope_action; // Holds previous flow managed bare word (if, while, ...)
 		std::vector<var> scope_action; // Holds actual flow managed bare word (if, while, ...)
+
 		std::vector<std::string> scope_lines; // Holds actual scope - to be executed after closing bracket
 		unsigned int scope; // Holds actual scope number
 
@@ -31,6 +32,7 @@ namespace cll
 		bool log; // Determines wheter to output errors or not
 		bool debug; // Determines wheter to output additional debug information about tokens
 		bool enabledIO;
+		bool flow; // Determines wheter this interpreter is an scope with flow (usefull to know wheter to return, continue or break)
 
 		// PRIVATE METHODS //
 		inline void write(const std::string& s) { if (enabledIO) std::cout << s; };
@@ -81,6 +83,7 @@ namespace cll
 
 		// OTHER PUBLIC METHODS //
 		inline void clearError() { error = ""; }; // Clears error
+		inline bool getReturned() { return returned; }; 
 		inline unsigned int getLine() { return line; }; // Returns actual line number
 		inline std::string getFilename() { return filename; }; // Returns non-empty string if interpreter interpretes a file
 		inline std::string getError() { return error; }; // Returns non-empty string if some error is present (useful if error logging is disabled)

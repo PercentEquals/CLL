@@ -19,7 +19,6 @@ namespace cll
 	class Functions
 	{
 		std::vector<function> funs;
-		size_t searchFun(const std::string& name, const size_t& l, const size_t& r);
 
 	public:
 
@@ -40,6 +39,7 @@ namespace cll
 	var ceil(const std::vector<var>& args);
 	var round(const std::vector<var>& args);
 	var fopen(const std::vector<var>& args);
+	var fwrite(const std::vector<var>& args);
 	var typeof(const std::vector<var>& args);
 	var toint(const std::vector<var>& args);
 	var tofloat(const std::vector<var>& args);

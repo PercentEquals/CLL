@@ -25,6 +25,7 @@ namespace cll
 		funs.emplace_back(function("ceil", ceil));
 		funs.emplace_back(function("round", round));
 		funs.emplace_back(function("fopen", fopen));
+		funs.emplace_back(function("fwrite", fwrite));
 		funs.emplace_back(function("typeof", typeof));
 		funs.emplace_back(function("int", toint));
 		funs.emplace_back(function("float", tofloat));
@@ -148,6 +149,21 @@ namespace cll
 
 		return ret;
 	}	
+
+	var fwrite(const std::vector<var>& args)
+	{
+		if (args.size() < 2) return var("0");
+
+		std::fstream f(args[0].getString(), std::ios::out);
+
+		if (f.good())
+		{
+			for (size_t i = 0; i < args[2].value.length(); ++i) f << args[2].getElement(i).getString();
+		}
+		else return var("0");
+
+		return var("1");
+	}
 	
 	var typeof(const std::vector<var>& args)
 	{

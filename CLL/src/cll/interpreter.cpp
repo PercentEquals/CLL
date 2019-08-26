@@ -72,14 +72,13 @@ namespace cll
 	// Function that creates new interpreter (i.e. interpretes another file)
 	bool Interpreter::newInterpreter(const std::vector<var>& v)
 	{
-		std::string params = "[";
-		for (size_t i = 1; i < v.size(); ++i) params += v[i].value + ',';
-		params.pop_back();
-		params += "]";
+		var params("[]");
+		for (size_t i = 1; i < v.size(); ++i) params += v[i].value;
 
 		std::unique_ptr<Interpreter> nested = std::make_unique<Interpreter>();
 		nested->log = log;
 		nested->debug = debug;
+		nested->enabledIO = enabledIO;
 		nested->setVar("params", params);
 
 		bool state = nested->readFile(v[1].getString());
@@ -521,23 +520,32 @@ namespace cll
 		std::vector<var> args;
 		std::string newline = "";
 		bool multiline = false;
+		bool oneline = false;
 			
 		for (size_t i = 0; i < args_line.size(); ++i)
 		{	
-			if (!multiline && (args_line[i].value == ";" || args_line[i].value == "{" || args_line[i].value == "}") && args_line[i].type == "SYMBOL")
+			if (!multiline && args_line[i].type == "SYMBOL" && (args_line[i].value == ";" || args_line[i].value == "{" || args_line[i].value == "}" || args_line[i].value == ":"))
 			{
 				multiline = true;
 
-				if(args_line[i].value == ";") continue;
+				if (args_line[i].value == ";") continue;
+				else if (args_line[i].value == ":")
+				{
+					oneline = true;
+					continue;
+				}
 				else if (i == 0)
 				{
 					args.emplace_back(args_line[i]);
 					continue;
 				}
 			}
+
 			if (multiline) newline += args_line[i].value + " ";
 			else args.emplace_back(args_line[i]);
 		}
+
+		if (oneline) newline = "{ " + newline + " }";
 
 		if (args.empty())
 		{
@@ -601,7 +609,7 @@ namespace cll
 		if (!parse(args)) return errorLog();
 
 		// APPLIES MATH TO TOKENS
-		if (args[0].value != "while" && args[0].type != "BARE") args = math(args);
+		if (args[0].value != "while") args = math(args);
 		if (error != "") return errorLog();
 		if (args.empty()) return true;
 
@@ -619,19 +627,20 @@ namespace cll
 			if (args.size() != 0) write("\n");
 		}
 
-		if(args[0].value != "while" && args[0].type != "BARE")
-		for (size_t i = 0; i < args.size(); ++i)
+		if (args[0].value != "while")
 		{
-			if (args[i].type == "UNDEFINED")
+			for (size_t i = 0; i < args.size(); ++i)
 			{
-				error = "Name '" + args[i].value + "' not recognized!";
-				return errorLog();
+				if (args[i].type == "UNDEFINED")
+				{
+					error = "Name '" + args[i].value + "' not recognized!";
+					return errorLog();
+				}
 			}
 		}
 
 		// INTERPRETS ARGUMENTS
 		if (!bare(args)) return errorLog();
-
 
 		if (newline != "" && !readLine(newline)) return errorLog();
 		return true;

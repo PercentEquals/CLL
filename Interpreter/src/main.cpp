@@ -6,10 +6,9 @@
 #include "CLL.h"
 
 // TODO in rework branch:
-// - rework char to work as an int
+// - rework char to work as a int
 // - rework lexer to detect character escaping
 // - check addFunction problem
-// - add inline scoping to flow if scoping not present
 
 // This main file acts as a real-time console interpreter 
 // and can be used to type code on the fly

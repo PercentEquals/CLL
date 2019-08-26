@@ -45,8 +45,8 @@ namespace cll
 	};
 
 	// Symbols that are illegal in variable name
-	const std::string symbols = "~{}/,.<>\\|&*!@#$%^&*()+-=;':\"?";
+	const std::string symbols = "`~{}/,.<>\\|&*!@#$%^&*()+-=;':\"?";
 
 	// Symbols that create new token
-	const std::string lexer_symbols = " ~{}/,<>\\|&*!@#$%^&*+-=;:\?";
+	const std::string lexer_symbols = " `~{}/,<>\\|&*!@#$%^&*+-=;:\?";
 }

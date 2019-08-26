@@ -184,11 +184,22 @@ namespace cll
 				// TERNARY CHECK
 				if (v[i].value == "?")
 				{
-					if (i + 2 < v.size() && v[i + 2].type != "SYMBOL" && v[i + 2].value != ":")
+					bool tererror = true;
+					for (size_t ii = 0; ii < v.size(); ++ii)
+					{
+						if (v[ii].type == "SYMBOL" && v[ii].value == ":")
+						{
+							tererror = false;
+							break;
+						}
+					}
+
+					if (tererror)
 					{
 						error = "Expected symbol ':' after a ternary operator!"; break;
 					}
-					else if (i + 2 >= v.size())
+
+					if (i + 2 >= v.size())
 					{
 						error = "Ternary operator got too few arguments!"; break;
 					}
@@ -436,25 +447,27 @@ namespace cll
 						}
 					}
 				}
-				else if (i > 3 && step == 11)
+				else if (i > 0 && step == 11)
 				{
-					// TERNARY OPERATOR
-
-					if (vec[i - 4].type == "SYMBOL" || vec[i - 4].type == "UNDEFINED") continue;
-					if (vec[i].type == "SYMBOL" || vec[i].type == "UNDEFINED") continue;
-
-					if (vec[i - 1].type == "SYMBOL" && vec[i - 1].value == ":")
+					if (vec[i].type == "SYMBOL" && vec[i].value == "?")
 					{
-						if (vec[i - 3].type == "SYMBOL" && vec[i - 3].value == "?")
+						if (vec[i - 1].type == "SYMBOL" || vec[i - 1].type == "UNDEFINED") continue;
+						std::vector<var> ins;
+						bool state = vec[i - 1].getBool();
+						bool buff = false;
+
+						for (size_t ii = i + 1; ii < vec.size(); ++ii)
 						{
-							var ins;
+							if (vec[ii].type == "SYMBOL" && vec[ii].value == ":") buff = true;
+							else if (!buff && state) ins.push_back(vec[ii]);
+							else if (buff && !state) ins.push_back(vec[ii]);
+						}
 
-							if (vec[i - 4].getBool()) ins = vec[i - 2];
-							else ins = vec[i];
-
-							vec.erase(vec.begin() + (i - 4), vec.begin() + i + 1);
-							vec.insert(vec.begin() + (i - 4), ins);
-							i -= 4;
+						if (!ins.empty())
+						{
+							vec.erase(vec.begin() + i - 1, vec.end());
+							for (size_t ii = 0; ii < ins.size(); ++ii) vec.insert(vec.begin() + (i - 1) + ii, ins[ii]);
+							i -= 1;
 						}
 					}
 				}
@@ -520,20 +533,14 @@ namespace cll
 		std::vector<var> args;
 		std::string newline = "";
 		bool multiline = false;
-		bool oneline = false;
 			
 		for (size_t i = 0; i < args_line.size(); ++i)
 		{	
-			if (!multiline && args_line[i].type == "SYMBOL" && (args_line[i].value == ";" || args_line[i].value == "{" || args_line[i].value == "}" || args_line[i].value == ":"))
+			if (!multiline && args_line[i].type == "SYMBOL" && (args_line[i].value == ";" || args_line[i].value == "{" || args_line[i].value == "}"))
 			{
 				multiline = true;
 
 				if (args_line[i].value == ";") continue;
-				else if (args_line[i].value == ":")
-				{
-					oneline = true;
-					continue;
-				}
 				else if (i == 0)
 				{
 					args.emplace_back(args_line[i]);
@@ -545,7 +552,11 @@ namespace cll
 			else args.emplace_back(args_line[i]);
 		}
 
-		if (oneline) newline = "{ " + newline + " }";
+		if (!scope_action.empty() && !scope && args[0].value != "{")
+		{
+			scope = 1;
+			newline += "}";
+		}
 
 		if (args.empty())
 		{

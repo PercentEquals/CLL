@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 	if (argc <= 1)
 	{
 		std::unique_ptr<cll::Interpreter> local = std::make_unique<cll::Interpreter>();
-		//local->enableDebug();
+		local->enableDebug();
 		local->enableIO();
 
 		std::string input = "";
@@ -68,7 +68,10 @@ int main(int argc, char* argv[])
 		do 
 		{
 			if (console::getx() != 0) std::cout << '\n';
-			std::cout << "> ";
+			
+			if (local->getScope()) std::cout << "^ ";
+			else std::cout << "> ";
+
 			std::getline(std::cin, input);
 			if (!local->readLine(input)) errorLog(local);
 			local->clearError();

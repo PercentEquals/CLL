@@ -83,9 +83,10 @@ namespace cll
 
 		// OTHER PUBLIC METHODS //
 		inline void clearError() { error = ""; }; // Clears error
-		inline bool getReturned() { return returned; }; 
-		inline unsigned int getLine() { return line; }; // Returns actual line number
-		inline std::string getFilename() { return filename; }; // Returns non-empty string if interpreter interpretes a file
-		inline std::string getError() { return error; }; // Returns non-empty string if some error is present (useful if error logging is disabled)
+		inline bool getReturned() const { return returned; }; 
+		inline unsigned int getScope() const { return scope; };
+		inline unsigned int getLine() const { return line; }; // Returns actual line number
+		inline std::string getFilename() const { return filename; }; // Returns non-empty string if interpreter interpretes a file
+		inline std::string getError() const { return error; }; // Returns non-empty string if some error is present (useful if error logging is disabled)
 	};
 }

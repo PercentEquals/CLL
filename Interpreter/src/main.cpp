@@ -5,6 +5,11 @@
 #include "console.h"
 #include "CLL.h"
 
+// TODO in rework branch:
+// - rework char to work as a int
+// - rework lexer to detect character escaping
+// - check addFunction problem
+
 // This main file acts as a real-time console interpreter 
 // and can be used to type code on the fly
 // or to execute a file by passing its path by arguments with cmd or terminal
@@ -20,6 +25,9 @@ void errorLog(const std::unique_ptr<cll::Interpreter>& i)
 
 int main(int argc, char* argv[])
 {
+	std::ios_base::sync_with_stdio(false);
+	std::cin.tie(NULL);
+
 	// Initializes console with title name passed as argument, also a simple unit test
 	console::init(cll::var("CLL Interpreter").getValue()); 
 
@@ -27,26 +35,22 @@ int main(int argc, char* argv[])
 	if (argc > 1)
 	{
 		// Passes parameters from terminal/cmd to interpreter
-		std::string params = "[";
+		cll::var params("[]");
 
 		// Forces path to be represented as string (cmd ignores quotation marks)
 		cll::var path = std::string(argv[1]);
 		if (path.type != "STRING") path.setValue("\"" + path.getString() + "\"");
 		
-		params += path.getValue();
-		if (argc != 2) params += ",";
+		params = params + cll::var(path.getValue());
 
-		for (int i = 2; i < argc; ++i) params += std::string(argv[i]) + ",";
-		
-		if(argc != 2) params.pop_back();
-		params += "]";
+		for (int i = 2; i < argc; ++i) params = params + cll::var(std::string(argv[i]));
 
 		// Creates runtime interpreter 
 		std::unique_ptr<cll::Interpreter> runtime = std::make_unique<cll::Interpreter>();
 		runtime->enableDebug();
-		runtime->disableLogging();
+		runtime->enableIO();
 		
-		if (!runtime->readLine("params = " + params)) errorLog(runtime);
+		if (!runtime->readLine("params = " + params.getValue())) errorLog(runtime);
 		else if (!runtime->readFile(path.getString())) errorLog(runtime);
 	}
 
@@ -54,21 +58,25 @@ int main(int argc, char* argv[])
 	if (argc <= 1)
 	{
 		std::unique_ptr<cll::Interpreter> local = std::make_unique<cll::Interpreter>();
-		local->enableDebug();
-		local->disableLogging();
+		//local->enableDebug();
+		local->enableIO();
 
 		std::string input = "";
 
-		std::cout << cll::var("CLL Interpreter [0.1.0] - Bartosz Niciak");
+		std::cout << cll::var("CLL Interpreter [0.2.0] - Bartosz Niciak");
 
-		while (input.substr(0, 6) != "return")
+		do 
 		{
 			if (console::getx() != 0) std::cout << '\n';
-			std::cout << "> ";
+			
+			if (local->getScope()) std::cout << "^ ";
+			else std::cout << "> ";
+
 			std::getline(std::cin, input);
 			if (!local->readLine(input)) errorLog(local);
 			local->clearError();
-		}
+		} 
+		while (!local->getReturned());
 	}
 
 	console::reset();

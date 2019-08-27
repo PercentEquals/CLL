@@ -13,7 +13,7 @@ namespace cll
 		"cll",
 		"delete",
 		"return", "pause",
-		"cin", "cout", "endl",
+		"cin", "cout",
 		"do", "while",
 		"else", "if",
 		"{", "}", ";"
@@ -23,18 +23,6 @@ namespace cll
 	const std::vector<std::string> rnames =
 	{
 		"INVALID_VALUE", "INVALID_NAME", "UNDEFINED", "inf", "-inf"
-	};
-
-	// Vector of function names
-	const std::vector<std::string> functions =
-	{
-		"len",
-		"typeof",
-		"sleep",
-		"fopen", "fwrite",
-		"sqrt", "abs", "floor", "ceil", "round",
-		"rand", "time",
-		"float", "double", "str", "char", "int"
 	};
 
 	// Vector of multiple char operators (must be sorted by char count - from highest to lowest)
@@ -57,8 +45,8 @@ namespace cll
 	};
 
 	// Symbols that are illegal in variable name
-	const std::string symbols = "~{}/,.<>\\|&*!@#$%^&*()+-=;':\"?";
+	const std::string symbols = "`~{}/,.<>\\|&*!@#$%^&*()+-=;':\"?";
 
 	// Symbols that create new token
-	const std::string lexer_symbols = " ~{}/,<>\\|&*!@#$%^&*+-=;:\?";
+	const std::string lexer_symbols = " `~{}/,<>\\|&*!@#$%^&*+-=;:\?";
 }

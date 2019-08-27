@@ -3,11 +3,10 @@
 // Author: Bartosz Niciak
 
 #include "var.h"
+#include "functions.h"
 
-#include <random>
 #include <string>
 #include <vector>
-#include <chrono>
 
 namespace cll
 {
@@ -17,16 +16,13 @@ namespace cll
 		std::string error; // Holds errors
 		std::string filename; // Holds filename
 
-		// CLOCK //
-		std::chrono::high_resolution_clock::time_point start; // Holds start point of program execution 
-
-		// RANDOM //
-		std::random_device rd;
-		std::mt19937 random_engine;
+		// FUNCTIONS
+		Functions functions;
 
 		// SCOPE SPECIFIC VARIABLES //
 		std::vector<var> previous_scope_action; // Holds previous flow managed bare word (if, while, ...)
 		std::vector<var> scope_action; // Holds actual flow managed bare word (if, while, ...)
+
 		std::vector<std::string> scope_lines; // Holds actual scope - to be executed after closing bracket
 		unsigned int scope; // Holds actual scope number
 
@@ -35,21 +31,34 @@ namespace cll
 		bool returned; // If true - closes program execution (when using 'return' command)
 		bool log; // Determines wheter to output errors or not
 		bool debug; // Determines wheter to output additional debug information about tokens
+		bool enabledIO;
 
 		// PRIVATE METHODS //
-		var function(const std::string& fun, const std::vector<var>& args);
+		inline void write(const std::string& s) { if (enabledIO) std::cout << s; };
 		bool errorLog(); // Returns false if there is an error and prints them with std::cout (if logging is enabled)
 		bool newInterpreter(const std::vector<var>& v); // Creates new instance of interpreter - for file in file execution
 		bool newScope(const std::vector<std::string>& l); // Creates new instance of interpreter - for scope execution
 		bool parse(const std::vector<var>& v); // Checks line syntax
 		bool bare(const std::vector<var>& v); // Procesess bare words and also some spiecial tokens
 		std::vector<var> math(const std::vector<var>& v); // Procesess math equations
-		size_t searchVar(const std::string& name, const size_t& l, const size_t& r);
 
 	public:
 
 		// CONSTRUCTORS //
-		Interpreter();
+		Interpreter() : error(""), filename(""), scope(0), line(0), returned(false), log(false), debug(false), enabledIO(false) 
+		{
+			vars.reserve(1000); // TEST
+
+			vars.emplace_back(var("and", "&&"));
+			vars.emplace_back(var("endl", "'\n'"));
+			vars.emplace_back(var("false", "0"));
+			vars.emplace_back(var("is", "=="));
+			vars.emplace_back(var("not", "!"));
+			vars.emplace_back(var("or", "||"));
+			vars.emplace_back(var("true", "1"));
+			vars.emplace_back(var("xor", "^"));
+		};
+
 		Interpreter(const std::vector<var>& v);
 		Interpreter(const std::string& f);
 
@@ -62,8 +71,14 @@ namespace cll
 		inline void setVar(const std::string& n, const var& v) { setVar(var(n, v)); };
 		inline void setVar(const std::string& n, const std::string& v) { setVar(var(n, v)); };
 		inline void setVar(const std::string& n, const std::string& v, const std::string& t) { setVar(var(n, v, t)); };
+
 		var getVar(const std::string& n); // Returns variable by its name
 		void deleteVar(const std::string& n); // Deletes variable by its name
+
+		// FUNCTIONS
+		inline void addFunction(const function& f) { functions.add(f); };
+		inline void addFunction(const std::string& n, var(*f)(const std::vector<var>&)) { addFunction(function(n, f)); };
+		inline void deleteFunction(const std::string& n) { functions.del(n); };
 
 		// METHODS THAT CHANGE BEHAVIOUR OF INTERPRETER //
 		inline void enableLogging()  { log = true; };
@@ -74,10 +89,16 @@ namespace cll
 		inline void disableDebug() { debug = false; };
 		inline void toggleDebug()  { debug = !debug; };
 
+		inline void enableIO()  { enabledIO = true; };
+		inline void disableIO() { enabledIO = false; };
+		inline void toggleIO()  { enabledIO = !enabledIO; };
+
 		// OTHER PUBLIC METHODS //
 		inline void clearError() { error = ""; }; // Clears error
-		inline unsigned int getLine() { return line; }; // Returns actual line number
-		inline std::string getFilename() { return filename; }; // Returns non-empty string if interpreter interpretes a file
-		inline std::string getError() { return error; }; // Returns non-empty string if some error is present (useful if error logging is disabled)
+		inline bool getReturned() const { return returned; }; 
+		inline unsigned int getScope() const { return scope; };
+		inline unsigned int getLine() const { return line; }; // Returns actual line number
+		inline std::string getFilename() const { return filename; }; // Returns non-empty string if interpreter interpretes a file
+		inline std::string getError() const { return error; }; // Returns non-empty string if some error is present (useful if error logging is disabled)
 	};
 }

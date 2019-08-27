@@ -23,10 +23,18 @@ namespace cll
 			if (i != l.length())
 			{
 				// CHECKS FOR STRINGS
-				if (string && l[i] == '"') string = false;
+				if (string && l[i] == '"')
+				{
+					if (i > 0 && l[i - 1] != '\\') string = false;
+					else buff.pop_back();
+				}
 				else if (!string && l[i] == '"') string = true;
 
-				if (chars && l[i] == '\'') chars = false;
+				if (chars && l[i] == '\'')
+				{
+					if(i > 0 && l[i - 1] != '\\') chars = false;
+					else buff.pop_back();
+				}
 				else if (!chars && l[i] == '\'') chars = true;
 
 				// CHECKS FOR PARENTHESIS
@@ -43,8 +51,10 @@ namespace cll
 				if (string || parenthesis || array || chars) buff += l[i];
 				else
 				{
+					size_t symbols = lexer_symbols.find_first_of(l[i]);
+
 					// CHECKS FOR SPECIAL SYMBOLS
-					if (std::string(1, l[i]).find_first_of(lexer_symbols) != std::string::npos || l[i] == '\t')
+					if (symbols != std::string::npos || l[i] == '\t')
 					{
 						push = true;
 
@@ -90,7 +100,7 @@ namespace cll
 						}
 					}
 
-					if (l[i] != '\t' && std::string(1, l[i]).find_first_of(lexer_symbols) == std::string::npos && !comment) buff += l[i];
+					if (l[i] != '\t' && symbols == std::string::npos && !comment) buff += l[i];
 					else push = true;
 				}
 			}

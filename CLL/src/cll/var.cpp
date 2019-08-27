@@ -12,22 +12,6 @@ namespace cll
 {
 	// CONSTRUCTORS //
 
-	// Copy constructor
-	var::var(const var& v)
-	{
-		name = v.name;
-		value = v.value;
-		type = v.type;
-	}
-
-	// Copy constructor with custom name
-	var::var(const std::string& n, const var& v)
-	{
-		setName(n);
-		value = v.value;
-		type = v.type;
-	}
-
 	// Value only constructor
 	var::var(const std::string& v)
 	{
@@ -42,14 +26,6 @@ namespace cll
 		setValue(v);
 	}
 
-	// Constructor with forced value and type 
-	var::var(const std::string& n, const std::string& v, const std::string& t)
-	{
-		setName(n); 
-		value = v; 
-		type = t;
-	}
-
 	// SET METHODS //
 	void var::setName(const std::string& n)
 	{
@@ -57,7 +33,7 @@ namespace cll
 
 		if (n.length() > 0 && isdigit(n[0])) name = "INVALID_NAME"; // Checks for illegal first digit
 
-		if (n.find_first_of(symbols) != std::string::npos) name = "INVALID_NAME";
+		if (symbols.find_first_of(n) != std::string::npos) name = "INVALID_NAME";
 		else if (std::find(barewords.begin(), barewords.end(), n) != barewords.end()) name = "INVALID_NAME";
 		else if (std::find(rnames.begin(), rnames.end(), n) != rnames.end()) name = "INVALID_NAME";
 	}

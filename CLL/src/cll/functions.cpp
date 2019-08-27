@@ -16,24 +16,23 @@ namespace cll
 {
 	Functions::Functions()
 	{
-		funs.emplace_back(function("time", time));
-		funs.emplace_back(function("sleep", sleep));
-		funs.emplace_back(function("length", length));
-		funs.emplace_back(function("sqrt", sqrt));
 		funs.emplace_back(function("abs", abs));
-		funs.emplace_back(function("floor", floor));
 		funs.emplace_back(function("ceil", ceil));
-		funs.emplace_back(function("round", round));
+		funs.emplace_back(function("char", tochar));
+		funs.emplace_back(function("double", todouble));
+		funs.emplace_back(function("float", tofloat));
+		funs.emplace_back(function("floor", floor));
 		funs.emplace_back(function("fopen", fopen));
 		funs.emplace_back(function("fwrite", fwrite));
-		funs.emplace_back(function("typeof", typeof));
 		funs.emplace_back(function("int", toint));
-		funs.emplace_back(function("float", tofloat));
-		funs.emplace_back(function("double", todouble));
-		funs.emplace_back(function("char", tochar));
-		funs.emplace_back(function("string", tostring));
+		funs.emplace_back(function("length", length));
 		funs.emplace_back(function("rand", rand));
-		std::sort(funs.begin(), funs.end(), [](function a, function b) { return a.name < b.name; });
+		funs.emplace_back(function("round", round));
+		funs.emplace_back(function("sleep", sleep));
+		funs.emplace_back(function("sqrt", sqrt));
+		funs.emplace_back(function("string", tostring));
+		funs.emplace_back(function("time", time));
+		funs.emplace_back(function("typeof", typeof));
 	}
 
 	function Functions::get(const std::string& n)
@@ -46,8 +45,7 @@ namespace cll
 	void Functions::add(const function& f)
 	{
 		size_t index = search(funs, f.name, 0, funs.size() - 1);
-		if (index < funs.size()) funs.emplace_back(f);
-		std::sort(funs.begin(), funs.end(), [](function a, function b) { return a.name < b.name; });
+		if (index < funs.size()) funs.insert(std::upper_bound(funs.begin(), funs.end(), f, [](function a, function b) { return a.name < b.name; }), f);
 	}
 
 	void Functions::del(const std::string& n)

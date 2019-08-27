@@ -32,7 +32,6 @@ namespace cll
 		bool log; // Determines wheter to output errors or not
 		bool debug; // Determines wheter to output additional debug information about tokens
 		bool enabledIO;
-		bool flow; // Determines wheter this interpreter is an scope with flow (usefull to know wheter to return, continue or break)
 
 		// PRIVATE METHODS //
 		inline void write(const std::string& s) { if (enabledIO) std::cout << s; };
@@ -46,7 +45,20 @@ namespace cll
 	public:
 
 		// CONSTRUCTORS //
-		Interpreter();
+		Interpreter() : error(""), filename(""), scope(0), line(0), returned(false), log(false), debug(false), enabledIO(false) 
+		{
+			vars.reserve(1000); // TEST
+
+			vars.emplace_back(var("and", "&&"));
+			vars.emplace_back(var("endl", "'\n'"));
+			vars.emplace_back(var("false", "0"));
+			vars.emplace_back(var("is", "=="));
+			vars.emplace_back(var("not", "!"));
+			vars.emplace_back(var("or", "||"));
+			vars.emplace_back(var("true", "1"));
+			vars.emplace_back(var("xor", "^"));
+		};
+
 		Interpreter(const std::vector<var>& v);
 		Interpreter(const std::string& f);
 

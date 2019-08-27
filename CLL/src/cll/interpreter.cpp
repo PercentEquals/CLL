@@ -12,31 +12,6 @@
 
 namespace cll
 {
-	// CONSTRUCTORS //
-
-	Interpreter::Interpreter()
-	{
-		error = "";
-		filename = "";
-		scope = 0;
-		line = 0;
-		returned = false;
-		log = false;
-		debug = false;
-		enabledIO = false;
-
-		// SETS KEYWORDS
-		vars.emplace_back(var("and", "&&"));
-		vars.emplace_back(var("not", "!"));
-		vars.emplace_back(var("xor", "^"));
-		vars.emplace_back(var("or", "||"));
-		vars.emplace_back(var("is", "=="));
-		vars.emplace_back(var("true", "1"));
-		vars.emplace_back(var("false", "0"));
-		vars.emplace_back(var("endl", "'\n'"));
-		std::sort(vars.begin(), vars.end(), [](var a, var b) { return a.name < b.name; });
-	}
-
 	// Constructor with already declared variables
 	Interpreter::Interpreter(const std::vector<var>& v)
 	{
@@ -126,21 +101,23 @@ namespace cll
 		if (v[0].type == "SYMBOL" && v[0].value == "}" && !scope) error = "Unexpected symbol '}' - nothing to close!";
 		if (error != "") return false;
 
+		// CHECKS FOR MULTIPLE BARE WORDS
+		for (size_t i = 0; i < v.size(); ++i)
+		{
+			if (v[i].type == "BARE" && i > 0)
+			{
+				if (v[0].value == "cout") continue;
+				if (i == 1 && v[0].value == "else" && v[1].value == "if") continue;
+
+				error = "Unexpected '" + v[i].value + "' after '" + v[0].value + "' statement!";
+				return false;
+			}
+		}
+
+		if (error != "") return false;
+
 		if (v[0].type == "BARE")
 		{
-			// CHECKS FOR MULTIPLE BARE WORDS
-			for (size_t i = 0; i < v.size(); ++i)
-			{
-				if (v[i].type == "BARE" && i > 0)
-				{
-					if (v[0].value == "cout") continue;
-					if (i == 1 && v[0].value == "else" && v[1].value == "if") continue;
-
-					error = "Unexpected '" + v[i].value + "' after '" + v[0].value + "' statement!";
-					return false;
-				}
-			}
-
 			// CHECKS FOR BARE WORD UNIQUE SYNTAX
 			if (v[0].value == "cout" && v.size() < 2) error = "Command 'cout' got too few arguments!";
 			else if (v[0].value == "delete")
@@ -173,7 +150,6 @@ namespace cll
 
 		if (error != "") return false;
 
-		// CHECKS FOR UNDEFINED NAMES
 		for (size_t i = 0; i < v.size(); ++i)
 		{
 			if (i == 0 && v[i].type == "BARE") continue;
@@ -223,9 +199,7 @@ namespace cll
 
 			if (v[i].type == "ARRAY" || v[i].type == "PARENTHESIS")
 			{
-				std::vector<var> buff;
-
-				buff = lexer(v[i].value.substr(1, v[i].value.length() - 2));
+				std::vector<var> buff = lexer(v[i].value.substr(1, v[i].value.length() - 2));
 
 				for (size_t ii = 0; ii < buff.size(); ++ii)
 				{
@@ -309,7 +283,7 @@ namespace cll
 			else if (v[0].value == "cll") return newInterpreter(v);
 		}
 		else if (v[0].value == "{" && v[0].type == "SYMBOL") scope = 1;
-		else if (v.size() == 1 && v[0].type != "UNDEFINED") write(v[0].value + " " + v[0].type);
+		//else if (v.size() == 1 && v[0].type != "UNDEFINED") write(v[0].value + " " + v[0].type);
 
 		if (error != "") return false;
 		return true;
@@ -453,6 +427,7 @@ namespace cll
 					{
 						if (vec[i - 1].type == "SYMBOL" || vec[i - 1].type == "UNDEFINED") continue;
 						std::vector<var> ins;
+						ins.reserve(10); // TEST
 						bool state = vec[i - 1].getBool();
 						bool buff = false;
 
@@ -531,6 +506,7 @@ namespace cll
 
 		// CHECKS FOR LINE BREAK (SEMICOLON) AND FOR BRACKETS
 		std::vector<var> args;
+		args.reserve(args_line.size()); // TEST
 		std::string newline = "";
 		bool multiline = false;
 			
@@ -781,8 +757,7 @@ namespace cll
 
 		size_t index = search(vars, ins.name, 0, vars.size() - 1);
 		if (index < vars.size()) vars[index] = ins;
-		else if (ins.name != "") vars.emplace_back(v);
-		std::sort(vars.begin(), vars.end(), [](var a, var b) { return a.name < b.name; });
+		else if (ins.name != "") vars.insert(std::upper_bound(vars.begin(), vars.end(), ins, [](var a, var b) { return a.name < b.name; }), ins);
 	}
 
 	void Interpreter::deleteVar(const std::string& n)

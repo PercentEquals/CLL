@@ -51,8 +51,10 @@ namespace cll
 				if (string || parenthesis || array || chars) buff += l[i];
 				else
 				{
+					size_t symbols = lexer_symbols.find_first_of(l[i]);
+
 					// CHECKS FOR SPECIAL SYMBOLS
-					if (std::string(1, l[i]).find_first_of(lexer_symbols) != std::string::npos || l[i] == '\t')
+					if (symbols != std::string::npos || l[i] == '\t')
 					{
 						push = true;
 
@@ -98,7 +100,7 @@ namespace cll
 						}
 					}
 
-					if (l[i] != '\t' && std::string(1, l[i]).find_first_of(lexer_symbols) == std::string::npos && !comment) buff += l[i];
+					if (l[i] != '\t' && symbols == std::string::npos && !comment) buff += l[i];
 					else push = true;
 				}
 			}

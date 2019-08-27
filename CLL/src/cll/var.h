@@ -11,15 +11,15 @@ namespace cll
 	{
 		std::string name; // Holds declared name of variable
 		std::string value; // Holds non-raw value of variable - meaning its value representation depends on detected type
-		std::string type; // Holds variable type - (LONG LONG) INT, FLOAT, DOUBLE, CHAR, STRING, BOOL, UNDEFINED, ARRAY, PARENTHESIS
+		std::string type; // Holds variable type - (LONG LONG) INT, FLOAT, DOUBLE, CHAR, STRING, UNDEFINED, ARRAY, PARENTHESIS
 
 		// CONSTRUCTORS //
-		var() : name(""), value(""), type("") {}; 
-		var(const var& v);
-		var(const std::string& n, const var& v);
+		var() : name(""), value(""), type("") {};
+		var(const var& v) : name(v.name), value(v.value), type(v.type) {};
+		var(const std::string& n, const var& v) : value(v.value), type(v.type) { setName(n); };
 		var(const std::string& v);
 		var(const std::string& n, const std::string& v);
-		var(const std::string& n, const std::string& v, const std::string& t);
+		var(const std::string& n, const std::string& v, const std::string& t) : value(v), type(t) { setName(n); };
 
 		// SET METHODS //
 		void setName(const std::string& n); // Sets variable name and checks for special symbols and bare words

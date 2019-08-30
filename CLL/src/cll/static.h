@@ -10,19 +10,22 @@ namespace cll
 	// Vector of bare words
 	const std::vector<std::string> barewords =
 	{
+		"cin",		
 		"cll",
+		"cout",
 		"delete",
-		"return", "pause",
-		"cin", "cout",
-		"do", "while",
-		"else", "if",
-		"{", "}", ";"
+		"do",
+		"else",
+		"if",
+		"pause",
+		"return",
+		"while"
 	};
 
 	// Vector of restricted names
 	const std::vector<std::string> rnames =
 	{
-		"INVALID_VALUE", "INVALID_NAME", "UNDEFINED", "inf", "-inf"
+		"-inf", "inf", "INVALID_NAME", "INVALID_VALUE", "UNDEFINED"
 	};
 
 	// Vector of multiple char operators (must be sorted by char count - from highest to lowest)
@@ -32,21 +35,21 @@ namespace cll
 		">=", "<=", "==", "!=",
 		"**", "&&", "||", "<<", ">>",
 		"+=", "-=", "/=", "*=", "%=",
-		"|=", "&=", "^="
+		"|=", "&=", "^=", "//"
 	};
 
 	// Vector of math operators
 	const std::vector<std::string> math_symbols =
 	{
-		"+=", "-=", "/=", "*=", "%=", "|=", "&=", "^=",
-		">", "<", "+", "-", "*", "/", "%", "^", "&", "|",
-		"==", "!=", ">=", "<=", "**", "&&", "||", "<<", ">>",
-		"===", "!=="
+		"+=", "==", "===", ">", "!=", "!==", "%", 
+		"%=", "&", "&&", "&=", "*", "**", "*=",
+		"+", "-", "-=", "/", "/=", "<", "<<", "<=", 
+		">=", ">>", "^", "^=", "|", "|=", "||"
 	};
 
 	// Symbols that are illegal in variable name
-	const std::string symbols = "`~{}/,.<>\\|&*!@#$%^&*()+-=;':\"?";
+	const std::string symbols = "`~{}/,.<>\\|&*!@#$%^&()+-=;':\"?";
 
 	// Symbols that create new token
-	const std::string lexer_symbols = " `~{}/,<>\\|&*!@#$%^&*+-=;:\?";
+	const std::string lexer_symbols = " `~{}/,<>\\|&*!@#$%^&+-=;:\?";
 }

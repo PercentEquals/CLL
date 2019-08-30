@@ -14,7 +14,7 @@ namespace cll
 		std::string type; // Holds variable type - (LONG LONG) INT, FLOAT, DOUBLE, CHAR, STRING, UNDEFINED, ARRAY, PARENTHESIS
 
 		// CONSTRUCTORS //
-		var() : name(""), value(""), type("") {};
+		var() : name(""), value(""), type("UNDEFINED") { value.reserve(100); };
 		var(const var& v) : name(v.name), value(v.value), type(v.type) {};
 		var(const std::string& n, const var& v) : value(v.value), type(v.type) { setName(n); };
 		var(const std::string& v);

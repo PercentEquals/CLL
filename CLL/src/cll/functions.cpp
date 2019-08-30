@@ -16,23 +16,26 @@ namespace cll
 {
 	Functions::Functions()
 	{
-		funs.emplace_back(function("abs", abs));
-		funs.emplace_back(function("ceil", ceil));
-		funs.emplace_back(function("char", tochar));
-		funs.emplace_back(function("double", todouble));
-		funs.emplace_back(function("float", tofloat));
-		funs.emplace_back(function("floor", floor));
-		funs.emplace_back(function("fopen", fopen));
-		funs.emplace_back(function("fwrite", fwrite));
-		funs.emplace_back(function("int", toint));
-		funs.emplace_back(function("length", length));
-		funs.emplace_back(function("rand", rand));
-		funs.emplace_back(function("round", round));
-		funs.emplace_back(function("sleep", sleep));
-		funs.emplace_back(function("sqrt", sqrt));
-		funs.emplace_back(function("string", tostring));
-		funs.emplace_back(function("time", time));
-		funs.emplace_back(function("typeof", typeof));
+		funs =
+		{
+			function("abs", abs),
+			function("ceil", ceil),
+			function("char", tochar),
+			function("double", todouble),
+			function("float", tofloat),
+			function("floor", floor),
+			function("fopen", fopen),
+			function("fwrite", fwrite),
+			function("int", toint),
+			function("length", length),
+			function("rand", rand),
+			function("round", round),
+			function("sleep", sleep),
+			function("sqrt", sqrt),
+			function("string", tostring),
+			function("time", time),
+			function("typeof", typeof)
+		};
 	}
 
 	function Functions::get(const std::string& n)
@@ -64,25 +67,25 @@ namespace cll
 		{
 			auto point = std::chrono::time_point_cast<std::chrono::seconds>(clock);
 			auto epoch = point.time_since_epoch();
-			return var(std::to_string(epoch.count()));
+			return std::to_string(epoch.count());
 		}
 		else if (!args.empty() && (args[0].getString() == "us" || args[0].getString() == "microseconds"))
 		{
 			auto point = std::chrono::time_point_cast<std::chrono::microseconds>(clock);
 			auto epoch = point.time_since_epoch();
-			return var(std::to_string(epoch.count()));
+			return std::to_string(epoch.count());
 		}
 		else if (!args.empty() && (args[0].getString() == "ns" || args[0].getString() == "nanoseconds"))
 		{
 			auto point = std::chrono::time_point_cast<std::chrono::nanoseconds>(clock);
 			auto epoch = point.time_since_epoch();
-			return var(std::to_string(epoch.count()));
+			return std::to_string(epoch.count());
 		}
 		else
 		{
 			auto point = std::chrono::time_point_cast<std::chrono::milliseconds>(clock);
 			auto epoch = point.time_since_epoch();
-			return var(std::to_string(epoch.count()));
+			return std::to_string(epoch.count());
 		}
 	}
 
@@ -90,7 +93,7 @@ namespace cll
 	{
 		if (!args.empty())
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(var(args[0]).getInt()));
+			std::this_thread::sleep_for(std::chrono::milliseconds(args[0].getInt()));
 			return args[0];
 		}
 
@@ -100,49 +103,49 @@ namespace cll
 	var length(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("0");
-		return var(std::to_string(args[0].getSize()));
+		return std::to_string(args[0].getSize());
 	}	
 	
 	var sqrt(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("0");
-		return var(std::to_string(std::sqrt(args[0].getDouble())));
+		return std::to_string(std::sqrt(args[0].getDouble()));
 	}	
 	
 	var abs(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("0");
-		return var(std::to_string(std::fabs(args[0].getDouble())));
+		return std::to_string(std::fabs(args[0].getDouble()));
 	}	
 	
 	var floor(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("0");
-		return var(std::to_string(std::floor(args[0].getDouble())));
+		return std::to_string(std::floor(args[0].getDouble()));
 	}	
 	
 	var ceil(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("0");
-		return var(std::to_string(std::ceil(args[0].getDouble())));
+		return std::to_string(std::ceil(args[0].getDouble()));
 	}	
 	
 	var round(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("0");
-		return var(std::to_string(std::round(args[0].getDouble())));
+		return std::to_string(std::round(args[0].getDouble()));
 	}	
 	
 	var fopen(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("[]");
-		std::fstream f(args[0].getString(), std::ios::in);
+		std::fstream f(args[0].getString(), std::ios::in, std::ios::binary);
 		std::string l;
 		var ret("[]");
 
 		if (f.good())
 		{
-			while (std::getline(f, l)) ret = ret + var("\"" + l + "\"");
+			while (std::getline(f, l)) ret += var("\"" + l + "\"");
 		}
 
 		return ret;
@@ -166,37 +169,37 @@ namespace cll
 	var typeof(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("\"UNDEFINED\"");
-		return var("\"" + var(args[0]).type + "\"");
+		return ("\"" + args[0].type + "\"");
 	}	
 	
 	var toint(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("0");
-		return var(std::to_string(var(args[0]).getInt()));
+		return (args[0].type == "INT") ? args[0] : std::to_string(args[0].getInt());
 	}
 
 	var tofloat(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("0.0f");
-		return var(std::to_string(var(args[0]).getFloat()));
+		return (args[0].type == "INT") ? args[0] : std::to_string(args[0].getInt());
 	}	
 	
 	var todouble(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("0.0");
-		return var(std::to_string(var(args[0]).getDouble()));
+		return (args[0].type == "INT") ? args[0] : std::to_string(args[0].getInt());
 	}	
 	
 	var tochar(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("'\0'");
-		return var("'" + std::string(1, var(args[0]).getChar(0)) + "'");
+		return var("'" + std::string(1, args[0].getChar(0)) + "'");
 	}	
 	
 	var tostring(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("\"\"");
-		return var("\"" + var(args[0]).getString() + "\"");
+		return "\"" + args[0].getString() + "\"";
 	}	
 	
 	var rand(const std::vector<var>& args)
@@ -215,6 +218,6 @@ namespace cll
 		}
 
 		std::uniform_real_distribution<double> dist(low, high);
-		return var(std::to_string(dist(random_engine)));
+		return std::to_string(dist(random_engine));
 	}
 }

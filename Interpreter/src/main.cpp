@@ -5,11 +5,6 @@
 #include "console.h"
 #include "CLL.h"
 
-// TODO in rework branch:
-// - rework char to work as a int
-// - rework lexer to detect character escaping
-// - check addFunction problem
-
 // This main file acts as a real-time console interpreter 
 // and can be used to type code on the fly
 // or to execute a file by passing its path by arguments with cmd or terminal
@@ -41,9 +36,9 @@ int main(int argc, char* argv[])
 		cll::var path = std::string(argv[1]);
 		if (path.type != "STRING") path.setValue("\"" + path.getString() + "\"");
 		
-		params = params + cll::var(path.getValue());
+		params += path;
 
-		for (int i = 2; i < argc; ++i) params = params + cll::var(std::string(argv[i]));
+		for (int i = 2; i < argc; ++i) params += std::string(argv[i]);
 
 		// Creates runtime interpreter 
 		std::unique_ptr<cll::Interpreter> runtime = std::make_unique<cll::Interpreter>();

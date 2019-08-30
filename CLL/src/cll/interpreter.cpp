@@ -292,6 +292,7 @@ namespace cll
 	std::vector<var> Interpreter::math(const std::vector<var>& v)
 	{
 		std::vector<var> vec;
+		vec.reserve(v.size());
 
 		for (size_t i = 0; i < v.size(); ++i)
 		{
@@ -316,7 +317,7 @@ namespace cll
 					std::vector<var> args = math(lexer(v[i].value.substr(fun.length() + 1, v[i].value.length() - fun.length() - 2)));
 					function buff = functions.get(fun);
 
-					if (buff.name != "" && parse({ var(v[i].value.substr(fun.length(), v[i].value.length() - fun.length())) }))
+					if (buff.name != "" && parse({ v[i].value.substr(fun.length(), v[i].value.length() - fun.length()) }))
 						vec.emplace_back(buff.fun(args));
 
 					else vec.emplace_back(v[i]);
@@ -401,8 +402,8 @@ namespace cll
 						{
 							if (vec[i - 1].value == "==") ins = vec[i - 2] == vec[i];
 							else if (vec[i - 1].value == "!=") ins = vec[i - 2] != vec[i];
-							else if (vec[i - 1].value == "===") ins = var(std::to_string((vec[i - 2] == vec[i]).getBool() && vec[i - 2].type == vec[i].type));
-							else if (vec[i - 1].value == "!==") ins = var(std::to_string((vec[i - 2] != vec[i]).getBool() || vec[i - 2].type != vec[i].type));
+							else if (vec[i - 1].value == "===") ins = std::to_string((vec[i - 2] == vec[i]).getBool() && vec[i - 2].type == vec[i].type);
+							else if (vec[i - 1].value == "!==") ins = std::to_string((vec[i - 2] != vec[i]).getBool() || vec[i - 2].type != vec[i].type);
 						}
 						else if (step == 7 && vec[i - 1].value == "&") ins = vec[i - 2] & vec[i];
 						else if (step == 8 && vec[i - 1].value == "^") ins = vec[i - 2] ^ vec[i];
@@ -562,7 +563,11 @@ namespace cll
 				else if (scope_action[0].value == "if" && scope_action[1].getBool()) state = newScope(scope_lines);
 				else if (scope_action[0].value == "while")
 				{
-					while (math(scope_action)[1].getBool()) state = newScope(scope_lines);
+					while (math(scope_action)[1].getBool())
+					{
+						state = newScope(scope_lines);
+						if (!state) break;
+					}
 				}
 				else if (scope_action[0].value == "else")
 				{
@@ -573,8 +578,9 @@ namespace cll
 				previous_scope_action = scope_action;
 				scope_action.clear();
 				scope_lines.clear();
+				if (!state) return errorLog();
 				if (newline != "" && !readLine(newline)) return errorLog();
-				return (!state) ? errorLog() : true;
+				return true;
 			}
 		} 
 
@@ -667,7 +673,7 @@ namespace cll
 	// Function that returns declared var by it's name - or 'undefined' if var is not declared
 	var Interpreter::getVar(const std::string& n)
 	{
-		if (n.find_first_of("[]") != std::string::npos && n.length() > 1)
+		if (n.length() > 1 && n.find_first_of("[]") != std::string::npos)
 		{
 			if (n[n.length() - 1] == ']')
 			{
@@ -723,7 +729,7 @@ namespace cll
 	{
 		var ins = v;
 
-		if (v.name.find_first_of("[]") != std::string::npos && v.name.length() > 1)
+		if (v.name.length() > 1 && v.name.find_first_of("[]") != std::string::npos)
 		{
 			if (v.name[v.name.length() - 1] == ']')
 			{
@@ -762,7 +768,7 @@ namespace cll
 
 	void Interpreter::deleteVar(const std::string& n)
 	{
-		if (n.find_first_of("[]") != std::string::npos && n.length() > 1)
+		if (n.length() > 1 && n.find_first_of("[]") != std::string::npos)
 		{
 			if (n[n.length() - 1] == ']') setVar(n, "");
 

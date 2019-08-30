@@ -18,107 +18,108 @@ namespace cll
 		unsigned int array = 0; // Holds wheter token is an array (helpful to ignore special chars that create new tokens)
 		std::string special = ""; // Holds sepcial char as token to be pushed (works like this: new x=10 -> new x = 10)
 
-		for (size_t i = 0; i <= l.length(); ++i)
+		args.reserve(50);
+		special.reserve(3);
+		buff.reserve(25);
+
+		for (auto it = l.begin(), end = l.end(); it < end; ++it)
 		{
-			if (i != l.length())
+			// CHECKS FOR STRINGS
+			if (string && *it == '"')
 			{
-				// CHECKS FOR STRINGS
-				if (string && l[i] == '"')
+				if (it != l.begin() && *(it - 1) != '\\') string = false;
+				else buff.pop_back();
+			}
+			else if (!string && *it == '"') string = true;
+
+			if (chars && *it == '\'')
+			{
+				if(it != l.begin() && *(it - 1) != '\\') chars = false;
+				else buff.pop_back();
+			}
+			else if (!chars && *it == '\'') chars = true;
+
+			// CHECKS FOR PARENTHESIS
+			if (!string)
+			{
+				if (parenthesis && *it == ')') parenthesis--;
+				else if (*it == '(') parenthesis++;
+
+				if (array && *it == ']') array--;
+				else if (*it == '[') array++;
+			}
+
+			// PUSHES TO BUFFOR
+			if (string || parenthesis || array || chars) buff += *it;
+			else
+			{
+				size_t symbols = lexer_symbols.find_first_of(*it);
+
+				// CHECKS FOR SPECIAL SYMBOLS
+				if (symbols != std::string::npos || *it == '\t')
 				{
-					if (i > 0 && l[i - 1] != '\\') string = false;
-					else buff.pop_back();
-				}
-				else if (!string && l[i] == '"') string = true;
+					push = true;
 
-				if (chars && l[i] == '\'')
-				{
-					if(i > 0 && l[i - 1] != '\\') chars = false;
-					else buff.pop_back();
-				}
-				else if (!chars && l[i] == '\'') chars = true;
-
-				// CHECKS FOR PARENTHESIS
-				if (!string)
-				{
-					if (parenthesis && l[i] == ')') parenthesis--;
-					else if (l[i] == '(') parenthesis++;
-
-					if (array && l[i] == ']') array--;
-					else if (l[i] == '[') array++;
-				}
-
-				// PUSHES TO BUFFOR
-				if (string || parenthesis || array || chars) buff += l[i];
-				else
-				{
-					size_t symbols = lexer_symbols.find_first_of(l[i]);
-
-					// CHECKS FOR SPECIAL SYMBOLS
-					if (symbols != std::string::npos || l[i] == '\t')
+					if (*it != '\t' && *it != ' ')
 					{
-						push = true;
+						special = *it;
 
-						if (l[i] != '\t' && l[i] != ' ')
+						// CHECKS FOR MULTIPLE SPECIALS CHARS (==, !=, ...)
+						if (it + 1 != end)
 						{
-							special = l[i];
-
-							// CHECKS FOR MULTIPLE SPECIALS CHARS (==, !=, ...)
-							if (i != l.length() - 1)
+							if (*(it + 1) != '\t' && *(it + 1) != ' ')
 							{
-								if (l[i + 1] != '\t' && l[i + 1] != ' ')
+								for (size_t i = 0; i < multi_symbols.size(); ++i)
 								{
-									for (size_t ii = 0; ii < multi_symbols.size(); ++ii)
+									std::string mult = "";
+									mult.reserve(3);
+
+									for (size_t ii = 0; ii < multi_symbols[i].length(); ++ii)
 									{
-										std::string mult = "";
+										if (it + ii >= end) break;
+										if (*(it + ii) == multi_symbols[i][ii]) mult += *(it + ii);
+									}
 
-										for (size_t iii = 0; iii < multi_symbols[ii].length(); ++iii)
-										{
-											if (i + iii >= l.length()) break;
-											if (l[i + iii] == multi_symbols[ii][iii]) mult += l[i + iii];
-										}
+									if (mult == multi_symbols[i]) special = mult;
 
-										if (mult == multi_symbols[ii]) special = mult;
-
-										if (special.length() > 1)
-										{
-											i += special.length() - 1;
-											break;
-										}
+									if (special.length() > 1)
+									{
+										it += special.length() - 1;
+										break;
 									}
 								}
 							}
 						}
 					}
+				}
 
-					// CHECKS FOR COMMENTS
-					if (i + 1 != l.length())
-					{
-						if (l[i] == '/' && l[i + 1] == '/')
-						{
-							push = true;
-							comment = true;
-						}
-					}
+				// CHECKS FOR COMMENTS
+				if (special == "//")
+				{
+					special = "";
+					push = true;
+					comment = true;
+				}
 
-					if (l[i] != '\t' && symbols == std::string::npos && !comment) buff += l[i];
-					else push = true;
+				if (*it != '\t' && symbols == std::string::npos && !comment) buff += *it;
+				else push = true;
+
+				if (push)
+				{
+					if (buff != "") args.emplace_back(buff);
+					push = false;
+					buff = "";
+
+					// PUSHES SPECIAL CHARS TO THEIR OWN TOKEN
+					if (comment) break;
+					if (special != "") args.emplace_back(special);
+					special = "";
 				}
 			}
-			else push = true;
-
-			// PUSHES ARGUMENTS TO TOKEN
-			if (push)
-			{
-				if (buff != "") args.emplace_back(var(buff));
-				push = false;
-				buff = "";
-
-				// PUSHES SPECIAL CHARS TO THEIR OWN TOKEN
-				if (comment) break;
-				if (special != "") args.emplace_back(var(special));
-				special = "";
-			}
 		}
+
+		if (buff != "") args.emplace_back(buff);
+		if (special != "") args.emplace_back(special);
 
 		return args;
 	}

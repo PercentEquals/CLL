@@ -6,6 +6,7 @@
 #include "static.h"
 
 #include <stdexcept>
+#include <algorithm>
 #include <cmath>
 
 namespace cll
@@ -31,11 +32,12 @@ namespace cll
 	{
 		name = n;
 
-		if (n.length() > 0 && isdigit(n[0])) name = "INVALID_NAME"; // Checks for illegal first digit
+		if (name == "") return;
 
-		if (symbols.find_first_of(n) != std::string::npos) name = "INVALID_NAME";
-		else if (std::find(barewords.begin(), barewords.end(), n) != barewords.end()) name = "INVALID_NAME";
-		else if (std::find(rnames.begin(), rnames.end(), n) != rnames.end()) name = "INVALID_NAME";
+		if (n.length() > 0 && isdigit(n[0])) name = "INVALID_NAME"; // Checks for illegal first digit
+		else if (symbols.find_first_of(n) != std::string::npos) name = "INVALID_NAME";
+		else if (std::binary_search(barewords.begin(), barewords.end(), n)) name = "INVALID_NAME";
+		else if (std::binary_search(rnames.begin(), rnames.end(), n)) name = "INVALID_NAME";
 	}
 
 	void var::setType(const std::string& v)
@@ -43,9 +45,13 @@ namespace cll
 		type = "UNDEFINED";
 		if (v == "") return;
 
-		if (v == "inf" || v == "-inf" || v == "-nan(ind)") type = "DOUBLE";
+		if (v == "inf" || v == "-inf" || v == "-nan(ind)")
+		{
+			type = "DOUBLE";
+			return;
+		}
 
-		if (v.find_first_not_of("-.0123456789f") == std::string::npos) // Checks for numerical
+		if (strspn(v.c_str(), "-.0123456789f") == v.length()) // Checks for numerical
 		{
 			if (v == "-" || v == "-=") type = "SYMBOL";
 			else if (v.find('.') != std::string::npos)
@@ -56,11 +62,17 @@ namespace cll
 				if (v == ".") type = "SYMBOL";
 			}
 			else if (v.find("f") == std::string::npos) type = "INT";
+
+			return;
 		}
 
-		if (v.find_first_not_of("x0123456789abcdefABCDEF") == std::string::npos && v.length() > 2) // Checks for hexadecimal
+		if (v.length() > 2 && strspn(v.c_str(), "x0123456789abcdefABCDEF") == v.length()) // Checks for hexadecimal
 		{
-			if (v.substr(0, 2) == "0x" && v.substr(2).find_first_of("x") == std::string::npos) type = "INT";
+			if (v.substr(0, 2) == "0x" && v.substr(2).find_first_of("x") == std::string::npos)
+			{
+				type = "INT";
+				return;
+			}
 		}
 
 		if (v.length() > 0) // Checks for string, char or array
@@ -75,13 +87,14 @@ namespace cll
 			{
 				if (v.find(")(") == std::string::npos) type = "PARENTHESIS";
 			}
+
+			if (type != "UNDEFINED") return;
 		}
 
 		if (type == "UNDEFINED")
 		{
-			if (v.find_first_of(symbols) != std::string::npos && v.length() == 1) type = "SYMBOL"; // Checks for symbols
-			else if (std::find(multi_symbols.begin(), multi_symbols.end(), v) != multi_symbols.end()) type = "SYMBOL"; // Check for multiple symbols (==, !=, ...)
-			else if (std::find(barewords.begin(), barewords.end(), v) != barewords.end()) type = "BARE"; // Checks for bare words
+			if (std::all_of(v.begin(), v.end(), ::ispunct)) type = "SYMBOL";
+			else if (std::binary_search(barewords.begin(), barewords.end(), v)) type = "BARE";
 		}
 	}
 
@@ -103,7 +116,7 @@ namespace cll
 				{
 					if (v[0] == '0' && v.length() > 1 && v.find_first_of("x89") == std::string::npos) value = std::to_string(std::stoll(v.substr(1), 0, 8));
 					else if (v.substr(0, 2) == "0x" && v.length() > 2) value = std::to_string(std::stoll(v.substr(2), 0, 16));
-					else value = std::to_string(std::stoll(v));
+					else value = v;
 				}
 				else if (type == "FLOAT") value = std::to_string(std::stof(v));
 				else if (type == "DOUBLE")
@@ -151,7 +164,7 @@ namespace cll
 		{
 			std::string buff = getString();
 
-			for (size_t i = 0; i < buff.length(); ++i)
+			for (auto it = buff.begin(), end = buff.end(); it != end; ++it) 
 			{
 				actual_element++;
 
@@ -161,7 +174,7 @@ namespace cll
 					continue;
 				}
 
-				ins += buff[i];
+				ins += *it;
 			}
 		}
 
@@ -321,9 +334,9 @@ namespace cll
 		std::string val = value;
 
 		if (getValue() == v.getValue()) val = "1";
-		else if (getInt() == v.getInt() || getInt() == v.getFloat() || getInt() == v.getDouble()) val = "1";
-		else if (getFloat() == v.getInt() || getFloat() == v.getFloat() || getFloat() == v.getDouble()) val = "1";
-		else if (getDouble() == v.getInt() || getDouble() == v.getFloat() || getDouble() == v.getDouble()) val = "1";
+		else if (getInt() == v.getInt()) val = "1";
+		else if (getFloat() == v.getFloat()) val = "1";
+		else if (getDouble() == v.getDouble()) val = "1";
 		else val = "0";
 
 		return var(val);
@@ -415,9 +428,12 @@ namespace cll
 
 		if (type == "ARRAY" || v.type == "ARRAY")
 		{
+			val.reserve(val.size() + v.value.size());
+
 			if (val[val.length() - 1] == ']') val.pop_back();
 
 			if (v.getSize() != 0 && getSize() != 0) val += ",";
+			else if (v.type == "STRING" && getSize() != 0) val += ",";
 
 			if (v.type == "ARRAY") val += v.getString().substr(1);
 			else val += v.getValue() + "]";

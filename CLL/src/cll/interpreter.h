@@ -47,16 +47,19 @@ namespace cll
 		// CONSTRUCTORS //
 		Interpreter() : error(""), filename(""), scope(0), line(0), returned(false), log(false), debug(false), enabledIO(false) 
 		{
-			vars.reserve(1000); // TEST
+			vars.reserve(1000);
 
-			vars.emplace_back(var("and", "&&"));
-			vars.emplace_back(var("endl", "'\n'"));
-			vars.emplace_back(var("false", "0"));
-			vars.emplace_back(var("is", "=="));
-			vars.emplace_back(var("not", "!"));
-			vars.emplace_back(var("or", "||"));
-			vars.emplace_back(var("true", "1"));
-			vars.emplace_back(var("xor", "^"));
+			vars =
+			{
+				var("and", "&&"),
+				var("endl", "'\n'"),
+				var("false", "0"),
+				var("is", "=="),
+				var("not", "!"),
+				var("or", "||"),
+				var("true", "1"),
+				var("xor", "^")
+			};
 		};
 
 		Interpreter(const std::vector<var>& v);

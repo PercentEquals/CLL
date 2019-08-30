@@ -87,7 +87,7 @@ namespace cll
 		{
 			var buff = this->getVar(nested->vars[i].name);
 
-			if (buff.type != "UNDEFINED") this->setVar(nested->vars[i]);
+			if (buff.type != UNDEFINED) this->setVar(nested->vars[i]);
 		}
 
 		return true;
@@ -98,13 +98,13 @@ namespace cll
 	{
 		if (v.empty()) return true;
 
-		if (v[0].type == "SYMBOL" && v[0].value == "}" && !scope) error = "Unexpected symbol '}' - nothing to close!";
+		if (v[0].type == SYMBOL && v[0].value == "}" && !scope) error = "Unexpected symbol '}' - nothing to close!";
 		if (error != "") return false;
 
 		// CHECKS FOR MULTIPLE BARE WORDS
 		for (size_t i = 0; i < v.size(); ++i)
 		{
-			if (v[i].type == "BARE" && i > 0)
+			if (v[i].type == BARE && i > 0)
 			{
 				if (v[0].value == "cout") continue;
 				if (i == 1 && v[0].value == "else" && v[1].value == "if") continue;
@@ -116,7 +116,7 @@ namespace cll
 
 		if (error != "") return false;
 
-		if (v[0].type == "BARE")
+		if (v[0].type == BARE)
 		{
 			// CHECKS FOR BARE WORD UNIQUE SYNTAX
 			if (v[0].value == "cout" && v.size() < 2) error = "Command 'cout' got too few arguments!";
@@ -126,8 +126,8 @@ namespace cll
 
 				for (size_t i = 1; i < v.size(); ++i)
 				{
-					if (v[i].type == "SYMBOL" && v[i].value != ",") error = "Unexpected symbol '" + v[i].value + "' after 'delete' statement!";
-					else if (getVar(v[i].value).type == "UNDEFINED") error = "Undefined name '" + v[i].value + "' after 'delete' statement!";
+					if (v[i].type == SYMBOL && v[i].value != ",") error = "Unexpected symbol '" + v[i].value + "' after 'delete' statement!";
+					else if (getVar(v[i].value).type == UNDEFINED) error = "Undefined name '" + v[i].value + "' after 'delete' statement!";
 
 					if (error != "") break;
 				}
@@ -152,10 +152,10 @@ namespace cll
 
 		for (size_t i = 0; i < v.size(); ++i)
 		{
-			if (i == 0 && v[i].type == "BARE") continue;
-			if (i == 1 && v[0].type == "BARE" && v[0].value == "else" && v[1].value == "if") continue;
+			if (i == 0 && v[i].type == BARE) continue;
+			if (i == 1 && v[0].type == BARE && v[0].value == "else" && v[1].value == "if") continue;
 
-			if (i > 0 && v[i].type == "SYMBOL" && v[i].value != "-" && v[i].value != "!")
+			if (i > 0 && v[i].type == SYMBOL && v[i].value != "-" && v[i].value != "!")
 			{
 				// TERNARY CHECK
 				if (v[i].value == "?")
@@ -163,7 +163,7 @@ namespace cll
 					bool tererror = true;
 					for (size_t ii = 0; ii < v.size(); ++ii)
 					{
-						if (v[ii].type == "SYMBOL" && v[ii].value == ":")
+						if (v[ii].type == SYMBOL && v[ii].value == ":")
 						{
 							tererror = false;
 							break;
@@ -181,12 +181,12 @@ namespace cll
 					}
 				}
 
-				if (v[i - 1].type == "BARE")
+				if (v[i - 1].type == BARE)
 				{
 					error = "Unexpected symbol '" + v[i].value + "' after '" + v[i - 1].value + "' command!"; break;
 				}
 
-				if (v[i - 1].type == "SYMBOL")
+				if (v[i - 1].type == SYMBOL)
 				{
 					error = "Unexpected symbol '" + v[i].value + "' after '" + v[i - 1].value + "' symbol!"; break;
 				}
@@ -197,17 +197,17 @@ namespace cll
 				}
 			}
 
-			if (v[i].type == "ARRAY" || v[i].type == "PARENTHESIS")
+			if (v[i].type == ARRAY || v[i].type == PARENTHESIS)
 			{
 				std::vector<var> buff = lexer(v[i].value.substr(1, v[i].value.length() - 2));
 
 				for (size_t ii = 0; ii < buff.size(); ++ii)
 				{
-					if (buff[ii].type == "BARE" || (buff[ii].type == "SYMBOL" && (buff[ii].value == "{" || buff[ii].value == "}")))
+					if (buff[ii].type == BARE || (buff[ii].type == SYMBOL && (buff[ii].value == "{" || buff[ii].value == "}")))
 					{
-						error = (buff[ii].type == "BARE") ? "Unexpected name '" : "Unexpected symbol '";
+						error = (buff[ii].type == BARE) ? "Unexpected name '" : "Unexpected symbol '";
 						error += buff[ii].value + "' in ";
-						error += (v[i].type == "ARRAY") ? "array!" : "parenthesis!";
+						error += (v[i].type == ARRAY) ? "array!" : "parenthesis!";
 						break;
 					}
 				}
@@ -217,19 +217,19 @@ namespace cll
 
 				return true;
 			}
-			else if (v[i].type == "UNDEFINED")
+			else if (v[i].type == UNDEFINED)
 			{
 				if (i + 1 < v.size() && v[i].value.find_first_of("[]") == std::string::npos)
 				{
-					if (v[i + 1].type == "SYMBOL" && v[i + 1].value == "=") continue;
+					if (v[i + 1].type == SYMBOL && v[i + 1].value == "=") continue;
 				}
 
-				if (v[i].value.find("(") == std::string::npos && getVar(v[i].value).type == "UNDEFINED")
+				if (v[i].value.find("(") == std::string::npos && getVar(v[i].value).type == UNDEFINED)
 				{
 					error = "Name '" + v[i].value + "' not recognized!"; break;
 				}
 			}
-			else if (i + 1 < v.size() && v[i + 1].type == "SYMBOL" && v[i + 1].value == "=")
+			else if (i + 1 < v.size() && v[i + 1].type == SYMBOL && v[i + 1].value == "=")
 			{
 				error = "Unexpected symbol '=' after '" + v[i].value + "'!"; break;
 			}
@@ -241,7 +241,7 @@ namespace cll
 
 	bool Interpreter::bare(const std::vector<var>& v)
 	{
-		if (v[0].type == "BARE")
+		if (v[0].type == BARE)
 		{
 			if (v[0].value == "return")
 			{
@@ -257,7 +257,7 @@ namespace cll
 			{
 				for (size_t i = 1; i < v.size(); ++i)
 				{
-					if (v[i].type == "CHAR") write(std::string(1, char(v[i].getInt())));
+					if (v[i].type == CHAR) write(std::string(1, char(v[i].getInt())));
 					else write(v[i].getString());
 				}
 			}
@@ -268,7 +268,7 @@ namespace cll
 					std::string buff;
 					std::getline(std::cin, buff);
 					var test(buff);
-					if (test.type == "UNDEFINED" || test.type == "BARE" || test.type == "FUNCTION") buff = "\"" + buff + "\"";
+					if (test.type == UNDEFINED || test.type == BARE || test.type == FUNCTION) buff = "\"" + buff + "\"";
 					setVar(v[i].name, buff);
 				}
 			}
@@ -278,12 +278,12 @@ namespace cll
 			}
 			else if (v[0].value == "delete")
 			{
-				for (size_t i = 1; i < v.size(); ++i) if (v[i].type != "SYMBOL") deleteVar(v[i].name);
+				for (size_t i = 1; i < v.size(); ++i) if (v[i].type != SYMBOL) deleteVar(v[i].name);
 			}
 			else if (v[0].value == "cll") return newInterpreter(v);
 		}
-		else if (v[0].value == "{" && v[0].type == "SYMBOL") scope = 1;
-		//else if (v.size() == 1 && v[0].type != "UNDEFINED") write(v[0].value + " " + v[0].type);
+		else if (v[0].value == "{" && v[0].type == SYMBOL) scope = 1;
+		//else if (v.size() == 1 && v[0].type != UNDEFINED) write(v[0].value + " " + v[0].type);
 
 		if (error != "") return false;
 		return true;
@@ -296,12 +296,12 @@ namespace cll
 
 		for (size_t i = 0; i < v.size(); ++i)
 		{
-			if (v[i].type == "PARENTHESIS")
+			if (v[i].type == PARENTHESIS)
 			{
 				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)));
 				vec.insert(std::end(vec), std::begin(buff), std::end(buff));
 			}
-			else if (v[i].type == "ARRAY")
+			else if (v[i].type == ARRAY)
 			{
 				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)));
 				std::string arr = "[";
@@ -309,7 +309,7 @@ namespace cll
 				arr += "]";
 				vec.emplace_back(arr);
 			}
-			else if(v[i].type == "UNDEFINED")
+			else if(v[i].type == UNDEFINED)
 			{
 				if (v[i].value.find("(") != std::string::npos && v[i].value[v[i].value.length() - 1] == ')')
 				{
@@ -325,7 +325,7 @@ namespace cll
 				else
 				{
 					var buff = getVar(v[i].value);
-					if (buff.type != "UNDEFINED") vec.emplace_back(buff);
+					if (buff.type != UNDEFINED) vec.emplace_back(buff);
 					else vec.emplace_back(v[i]);
 				}
 			}
@@ -343,11 +343,11 @@ namespace cll
 				{
 					// PREFIX OPERATORS
 
-					if (vec[i - 1].type == "SYMBOL")
+					if (vec[i - 1].type == SYMBOL)
 					{
 						if (vec[i - 1].value == "!" || vec[i - 1].value == "~" || vec[i - 1].value == "-")
 						{
-							if (vec[i].type == "SYMBOL" || vec[i].type == "UNDEFINED") continue;
+							if (vec[i].type == SYMBOL || vec[i].type == UNDEFINED) continue;
 
 							var ins;
 
@@ -355,7 +355,7 @@ namespace cll
 							else if (vec[i - 1].value == "~") ins = ~vec[i];
 							else if (vec[i - 1].value == "-")
 							{
-								if (i > 1 && vec[i - 2].type != "SYMBOL") continue;
+								if (i > 1 && vec[i - 2].type != SYMBOL) continue;
 								ins = var("0") - vec[i];
 							}
 
@@ -367,11 +367,11 @@ namespace cll
 				}
 				else if (i > 1 && step < 11)
 				{
-					if (vec[i - 1].type == "SYMBOL")
+					if (vec[i - 1].type == SYMBOL)
 					{
-						if (vec[i - 2].type == "SYMBOL" || vec[i - 2].type == "UNDEFINED") continue;
-						if (vec[i].type == "SYMBOL" || vec[i].type == "UNDEFINED") continue;
-						if (vec[i - 2].type == "SYMBOL" && vec[i - 1].value != "-") continue;
+						if (vec[i - 2].type == SYMBOL || vec[i - 2].type == UNDEFINED) continue;
+						if (vec[i].type == SYMBOL || vec[i].type == UNDEFINED) continue;
+						if (vec[i - 2].type == SYMBOL && vec[i - 1].value != "-") continue;
 						var ins;
 
 						if (step == 1 && vec[i - 1].value == "**") ins = vec[i - 2].pow(vec[i]);
@@ -424,9 +424,9 @@ namespace cll
 				}
 				else if (i > 0 && step == 11)
 				{
-					if (vec[i].type == "SYMBOL" && vec[i].value == "?")
+					if (vec[i].type == SYMBOL && vec[i].value == "?")
 					{
-						if (vec[i - 1].type == "SYMBOL" || vec[i - 1].type == "UNDEFINED") continue;
+						if (vec[i - 1].type == SYMBOL || vec[i - 1].type == UNDEFINED) continue;
 						std::vector<var> ins;
 						ins.reserve(10); // TEST
 						bool state = vec[i - 1].getBool();
@@ -434,7 +434,7 @@ namespace cll
 
 						for (size_t ii = i + 1; ii < vec.size(); ++ii)
 						{
-							if (vec[ii].type == "SYMBOL" && vec[ii].value == ":") buff = true;
+							if (vec[ii].type == SYMBOL && vec[ii].value == ":") buff = true;
 							else if (!buff && state) ins.push_back(vec[ii]);
 							else if (buff && !state) ins.push_back(vec[ii]);
 						}
@@ -456,13 +456,13 @@ namespace cll
 					var fvar = vec[(vec.size() - 1) - i];
 					var ins;
 
-					if (lvar.type == "SYMBOL" || lvar.type == "BARE") continue;
-					if (fvar.type == "SYMBOL" || fvar.type == "BARE") continue;
+					if (lvar.type == SYMBOL || lvar.type == BARE) continue;
+					if (fvar.type == SYMBOL || fvar.type == BARE) continue;
 
 					if (lvar.name != "") lvar = getVar(lvar.name);
 					if (fvar.name != "") fvar = getVar(fvar.name);
 
-					if (lvar.type == "UNDEFINED") continue;
+					if (lvar.type == UNDEFINED) continue;
 
 					if (symb.value == "=") ins = lvar.value;
 					else if (symb.value == "+=") ins = fvar + lvar;
@@ -513,7 +513,7 @@ namespace cll
 			
 		for (size_t i = 0; i < args_line.size(); ++i)
 		{	
-			if (!multiline && args_line[i].type == "SYMBOL" && (args_line[i].value == ";" || args_line[i].value == "{" || args_line[i].value == "}"))
+			if (!multiline && args_line[i].type == SYMBOL && (args_line[i].value == ";" || args_line[i].value == "{" || args_line[i].value == "}"))
 			{
 				multiline = true;
 
@@ -544,8 +544,8 @@ namespace cll
 		// SCOPING - i.e. CODE IN BRACKETS
 		if (scope)
 		{
-			if (args[0].value == "{" && args[0].type == "SYMBOL") scope++;
-			if (args[0].value == "}" && args[0].type == "SYMBOL") scope--;
+			if (args[0].value == "{" && args[0].type == SYMBOL) scope++;
+			if (args[0].value == "}" && args[0].type == SYMBOL) scope--;
 
 			if (scope)
 			{
@@ -591,7 +591,7 @@ namespace cll
 
 			for (size_t i = 0; i < args.size(); ++i)
 			{
-				write(args[i].value + " " + args[i].type);
+				write(args[i].value + " " + args[i].getType());
 				if (i != args.size() - 1) write(" | ");
 			}
 
@@ -613,7 +613,7 @@ namespace cll
 
 			for (size_t i = 0; i < args.size(); ++i)
 			{
-				write(args[i].value + " " + args[i].type);
+				write(args[i].value + " " + args[i].getType());
 				if (i != args.size() - 1) write(" | ");
 			}
 
@@ -624,7 +624,7 @@ namespace cll
 		{
 			for (size_t i = 0; i < args.size(); ++i)
 			{
-				if (args[i].type == "UNDEFINED")
+				if (args[i].type == UNDEFINED)
 				{
 					error = "Name '" + args[i].value + "' not recognized!";
 					return errorLog();
@@ -695,11 +695,11 @@ namespace cll
 
 				var ret = getVar(name);
 
-				if (ret.type == "UNDEFINED")
+				if (ret.type == UNDEFINED)
 				{
 					var test(name);
 
-					if (test.type != "BARE" && test.type != "UNDEFINED")
+					if (test.type != BARE && test.type != UNDEFINED)
 					{
 						ret = math(lexer(name))[0].getElement((size_t)elem[0].getInt()); // String literals, arrays and parenthesis
 						literal = true;
@@ -707,7 +707,7 @@ namespace cll
 				}
 				else ret = ret.getElement((size_t)elem[0].getInt());
 
-				if (ret.type == "CHAR" && ret.getInt() == 0) return var(n, "UNDEFINED");
+				if (ret.type == CHAR && ret.getInt() == 0) return var(n, "UNDEFINED");
 				else if (ret.value == "") return var(n, "UNDEFINED");
 				else if (!literal)
 				{
@@ -750,7 +750,7 @@ namespace cll
 
 				var ret = getVar(name);
 
-				if (ret.type == "UNDEFINED") return;
+				if (ret.type == UNDEFINED) return;
 				ret.setElement((size_t)elem[0].getInt(), v.value);
 
 				setVar(ret);
@@ -773,7 +773,7 @@ namespace cll
 			if (n[n.length() - 1] == ']') setVar(n, "");
 
 			var buff = getVar(n.substr(0, n.find("[")));
-			if (buff.getSize() == 0 && buff.type != "STRING" && buff.type != "ARRAY") deleteVar(n.substr(0, n.find("[")));
+			if (buff.getSize() == 0 && buff.type != STRING && buff.type != ARRAY) deleteVar(n.substr(0, n.find("[")));
 
 			return;
 		}

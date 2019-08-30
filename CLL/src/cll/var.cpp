@@ -42,26 +42,26 @@ namespace cll
 
 	void var::setType(const std::string& v)
 	{
-		type = "UNDEFINED";
+		type = UNDEFINED;
 		if (v == "") return;
 
 		if (v == "inf" || v == "-inf" || v == "-nan(ind)")
 		{
-			type = "DOUBLE";
+			type = DOUBLE;
 			return;
 		}
 
 		if (strspn(v.c_str(), "-.0123456789f") == v.length()) // Checks for numerical
 		{
-			if (v == "-" || v == "-=") type = "SYMBOL";
+			if (v == "-" || v == "-=") type = SYMBOL;
 			else if (v.find('.') != std::string::npos)
 			{
-				if (v[v.length() - 1] == 'f') type = "FLOAT";
-				else type = "DOUBLE";
+				if (v[v.length() - 1] == 'f') type = FLOAT;
+				else type = DOUBLE;
 
-				if (v == ".") type = "SYMBOL";
+				if (v == ".") type = SYMBOL;
 			}
-			else if (v.find("f") == std::string::npos) type = "INT";
+			else if (v.find("f") == std::string::npos) type = INT;
 
 			return;
 		}
@@ -70,31 +70,31 @@ namespace cll
 		{
 			if (v.substr(0, 2) == "0x" && v.substr(2).find_first_of("x") == std::string::npos)
 			{
-				type = "INT";
+				type = INT;
 				return;
 			}
 		}
 
 		if (v.length() > 0) // Checks for string, char or array
 		{
-			if (v[0] == '"' && v[v.length() - 1] == '"') type = "STRING";
-			else if (v[0] == '\'' && v[v.length() - 1] == '\'') type = "CHAR";
+			if (v[0] == '"' && v[v.length() - 1] == '"') type = STRING;
+			else if (v[0] == '\'' && v[v.length() - 1] == '\'') type = CHAR;
 			else if (v[0] == '[' && v[v.length() - 1] == ']')
 			{
-				if (v.find("][") == std::string::npos) type = "ARRAY";
+				if (v.find("][") == std::string::npos) type = ARRAY;
 			}
 			else if (v[0] == '(' && v[v.length() - 1] == ')')
 			{
-				if (v.find(")(") == std::string::npos) type = "PARENTHESIS";
+				if (v.find(")(") == std::string::npos) type = PARENTHESIS;
 			}
 
-			if (type != "UNDEFINED") return;
+			if (type != UNDEFINED) return;
 		}
 
-		if (type == "UNDEFINED")
+		if (type == UNDEFINED)
 		{
-			if (std::all_of(v.begin(), v.end(), ::ispunct)) type = "SYMBOL";
-			else if (std::binary_search(barewords.begin(), barewords.end(), v)) type = "BARE";
+			if (std::all_of(v.begin(), v.end(), ::ispunct)) type = SYMBOL;
+			else if (std::binary_search(barewords.begin(), barewords.end(), v)) type = BARE;
 		}
 	}
 
@@ -102,31 +102,31 @@ namespace cll
 	{
 		setType(v);
 
-		if (type == "STRING") value = v;
-		else if (type == "CHAR")
+		if (type == STRING) value = v;
+		else if (type == CHAR)
 		{
 			// TODO: make it behave like char
 			value = (v.length() < 3) ? "'\\0'" : v;
 		}
-		else if (type == "INT" || type == "FLOAT" || type == "DOUBLE")
+		else if (type == INT || type == FLOAT || type == DOUBLE)
 		{
 			try
 			{
-				if (type == "INT")
+				if (type == INT)
 				{
 					if (v[0] == '0' && v.length() > 1 && v.find_first_of("x89") == std::string::npos) value = std::to_string(std::stoll(v.substr(1), 0, 8));
 					else if (v.substr(0, 2) == "0x" && v.length() > 2) value = std::to_string(std::stoll(v.substr(2), 0, 16));
 					else value = v;
 				}
-				else if (type == "FLOAT") value = std::to_string(std::stof(v));
-				else if (type == "DOUBLE")
+				else if (type == FLOAT) value = std::to_string(std::stof(v));
+				else if (type == DOUBLE)
 				{
 					if (v == "-nan(ind)") value = "-inf";
 					else value = std::to_string(std::stod(v));
 				}
 			}
-			catch (const std::invalid_argument&) { value = "INVALID_VALUE"; type = "UNDEFINED"; }
-			catch (const std::out_of_range&) { value = "inf"; type = "DOUBLE"; }
+			catch (const std::invalid_argument&) { value = "INVALID_VALUE"; type = UNDEFINED; }
+			catch (const std::out_of_range&) { value = "inf"; type = DOUBLE; }
 		}
 		else value = v;
 	}
@@ -139,13 +139,13 @@ namespace cll
 		std::string ins = "";
 		if (value[0] == '[' || value[0] == '"' || value[0] == '\'') ins = std::string(1, value[0]);
 
-		if (type == "ARRAY")
+		if (type == ARRAY)
 		{
 			std::vector<var> buff = lexer(value.substr(1, value.length() - 2));
 
 			for (size_t i = 0; i < buff.size(); ++i)
 			{
-				if (buff[i].type != "SYMBOL" && buff[i].value != ",")
+				if (buff[i].type != SYMBOL && buff[i].value != ",")
 				{
 					if (actual_element == n)
 					{
@@ -185,8 +185,8 @@ namespace cll
 	// GET METHODS //
 	long long int var::getInt() const
 	{
-		if (type == "STRING" || type == "ARRAY") return getSize();
-		else if (type == "CHAR")
+		if (type == STRING || type == ARRAY) return getSize();
+		else if (type == CHAR)
 		{
 			if (value.length() == 3) return int(value[1]);
 			else
@@ -221,14 +221,14 @@ namespace cll
 
 	char var::getChar(const size_t& n) const
 	{
-		if (type == "CHAR" || type == "INT") return char((getInt() != 27) ? getInt() : ' ');
-		else if (type == "STRING") return (n < value.length() - 2) ? value[n + 1] : '\0';
+		if (type == CHAR || type == INT) return char((getInt() != 27) ? getInt() : ' ');
+		else if (type == STRING) return (n < value.length() - 2) ? value[n + 1] : '\0';
 		else return '\0';
 	}
 
 	float var::getFloat() const
 	{
-		if (type == "STRING" || type == "ARRAY") return 0;
+		if (type == STRING || type == ARRAY) return 0;
 		else
 		{
 			try { return std::stof(value); }
@@ -239,7 +239,7 @@ namespace cll
 
 	double var::getDouble() const
 	{
-		if (type == "STRING" || type == "ARRAY") return 0;
+		if (type == STRING || type == ARRAY) return 0;
 		else
 		{
 			try { return std::stod(value); }
@@ -250,16 +250,16 @@ namespace cll
 
 	var var::getElement(const size_t& n) const
 	{
-		if (type == "STRING") return var("'" + std::string(1, getChar(n)) + "'");
-		else if (type == "CHAR" && n < getSize()) return var("'" + std::string(1, getChar(n)) + "'");
-		else if (type == "ARRAY")
+		if (type == STRING) return var("'" + std::string(1, getChar(n)) + "'");
+		else if (type == CHAR && n < getSize()) return var("'" + std::string(1, getChar(n)) + "'");
+		else if (type == ARRAY)
 		{
 			std::vector<var> buff = lexer(value.substr(1, value.length() - 2));
 			size_t actual_element = 0;
 
 			for (size_t i = 0; i < buff.size(); ++i)
 			{
-				if (buff[i].type != "SYMBOL" && buff[i].value != ",")
+				if (buff[i].type != SYMBOL && buff[i].value != ",")
 				{
 					if (actual_element == n) return buff[i];
 				}
@@ -273,7 +273,7 @@ namespace cll
 
 	std::string var::getString() const
 	{
-		if (type == "STRING" || type == "CHAR") return value.substr(1, value.length() - 2);
+		if (type == STRING || type == CHAR) return value.substr(1, value.length() - 2);
 		else return value;
 	}
 
@@ -286,7 +286,7 @@ namespace cll
 
 	size_t var::getSize() const
 	{
-		if (type == "ARRAY")
+		if (type == ARRAY)
 		{
 			if (value == "[]") return 0;
 
@@ -295,12 +295,12 @@ namespace cll
 
 			for (size_t i = 0; i < buff.size(); ++i)
 			{
-				if (buff[i].type == "SYMBOL" && buff[i].value == ",") size++;
+				if (buff[i].type == SYMBOL && buff[i].value == ",") size++;
 			}
 
 			return (size + 1);
 		}
-		if (type == "STRING" || type == "CHAR") return (value.length() - 2);
+		if (type == STRING || type == CHAR) return (value.length() - 2);
 		return value.length();
 	}
 
@@ -351,23 +351,23 @@ namespace cll
 	{
 		bool state = true;
 
-		if (type == "STRING") state = (getString() > v.getString());
-		else if (type == "INT" || type == "CHAR")
+		if (type == STRING) state = (getString() > v.getString());
+		else if (type == INT || type == CHAR)
 		{
-			if (v.type == "DOUBLE") state = (getFloat() > v.getDouble());
-			else if (v.type == "FLOAT") state = (getFloat() > v.getFloat());
+			if (v.type == DOUBLE) state = (getFloat() > v.getDouble());
+			else if (v.type == FLOAT) state = (getFloat() > v.getFloat());
 			else state = (getInt() > v.getInt());
 		}
-		else if (type == "FLOAT")
+		else if (type == FLOAT)
 		{
-			if (v.type == "DOUBLE") state = (getFloat() > v.getDouble());
-			else if (v.type == "FLOAT") state = (getFloat() > v.getFloat());
+			if (v.type == DOUBLE) state = (getFloat() > v.getDouble());
+			else if (v.type == FLOAT) state = (getFloat() > v.getFloat());
 			else state = (getFloat() > v.getInt());
 		}
-		else if (type == "DOUBLE")
+		else if (type == DOUBLE)
 		{
-			if (v.type == "DOUBLE") state = (getDouble() > v.getDouble());
-			else if (v.type == "FLOAT") state = (getDouble() > v.getFloat());
+			if (v.type == DOUBLE) state = (getDouble() > v.getDouble());
+			else if (v.type == FLOAT) state = (getDouble() > v.getFloat());
 			else state = (getDouble() > v.getInt());
 		}
 
@@ -378,23 +378,23 @@ namespace cll
 	{
 		bool state = true;
 
-		if (type == "STRING") state = (getString() < v.getString());
-		else if (type == "INT" || type == "CHAR")
+		if (type == STRING) state = (getString() < v.getString());
+		else if (type == INT || type == CHAR)
 		{
-			if (v.type == "DOUBLE") state = (getFloat() < v.getDouble());
-			else if (v.type == "FLOAT") state = (getFloat() < v.getFloat());
+			if (v.type == DOUBLE) state = (getFloat() < v.getDouble());
+			else if (v.type == FLOAT) state = (getFloat() < v.getFloat());
 			else state = (getInt() < v.getInt());
 		}
-		else if (type == "FLOAT")
+		else if (type == FLOAT)
 		{
-			if (v.type == "DOUBLE") state = (getFloat() < v.getDouble());
-			else if (v.type == "FLOAT") state = (getFloat() < v.getFloat());
+			if (v.type == DOUBLE) state = (getFloat() < v.getDouble());
+			else if (v.type == FLOAT) state = (getFloat() < v.getFloat());
 			else state = (getFloat() < v.getInt());
 		}
-		else if (type == "DOUBLE")
+		else if (type == DOUBLE)
 		{
-			if (v.type == "DOUBLE") state = (getDouble() < v.getDouble());
-			else if (v.type == "FLOAT") state = (getDouble() < v.getFloat());
+			if (v.type == DOUBLE) state = (getDouble() < v.getDouble());
+			else if (v.type == FLOAT) state = (getDouble() < v.getFloat());
 			else state = (getDouble() < v.getInt());
 		}
 
@@ -426,45 +426,45 @@ namespace cll
 	{
 		std::string val = value;
 
-		if (type == "ARRAY" || v.type == "ARRAY")
+		if (type == ARRAY || v.type == ARRAY)
 		{
 			val.reserve(val.size() + v.value.size());
 
 			if (val[val.length() - 1] == ']') val.pop_back();
 
 			if (v.getSize() != 0 && getSize() != 0) val += ",";
-			else if (v.type == "STRING" && getSize() != 0) val += ",";
+			else if (v.type == STRING && getSize() != 0) val += ",";
 
-			if (v.type == "ARRAY") val += v.getString().substr(1);
+			if (v.type == ARRAY) val += v.getString().substr(1);
 			else val += v.getValue() + "]";
 
 			if (val[0] != '[') val = "[" + val;
 			if (val[val.length() - 1] != ']') val += "]";
 		}
-		else if (type == "STRING" || v.type == "STRING")
+		else if (type == STRING || v.type == STRING)
 		{
-			if (v.type == "CHAR") val = "\"" + getString() + v.getChar(0) + "\"";
+			if (v.type == CHAR) val = "\"" + getString() + v.getChar(0) + "\"";
 			else val = "\"" + getString() + v.getString() + "\"";
 		}
-		else if (type == "INT" || type == "CHAR")
+		else if (type == INT || type == CHAR)
 		{
-			if (v.type == "DOUBLE") val = std::to_string(getFloat() + v.getDouble());
-			else if (v.type == "FLOAT") val = std::to_string(getFloat() + v.getFloat());
+			if (v.type == DOUBLE) val = std::to_string(getFloat() + v.getDouble());
+			else if (v.type == FLOAT) val = std::to_string(getFloat() + v.getFloat());
 			else val = std::to_string(getInt() + v.getInt());
 		}
-		else if (type == "FLOAT")
+		else if (type == FLOAT)
 		{
-			if (v.type == "DOUBLE") val = std::to_string(getFloat() + v.getDouble());
-			else if (v.type == "FLOAT") val = std::to_string(getFloat() + v.getFloat());
+			if (v.type == DOUBLE) val = std::to_string(getFloat() + v.getDouble());
+			else if (v.type == FLOAT) val = std::to_string(getFloat() + v.getFloat());
 			else val = std::to_string(getFloat() + v.getInt());
 
 			if (val.find('.') == std::string::npos) val += ".0f";
 			else val += "f";
 		}
-		else if (type == "DOUBLE")
+		else if (type == DOUBLE)
 		{
-			if (v.type == "DOUBLE") val = std::to_string(getDouble() + v.getDouble());
-			else if (v.type == "FLOAT") val = std::to_string(getDouble() + v.getFloat());
+			if (v.type == DOUBLE) val = std::to_string(getDouble() + v.getDouble());
+			else if (v.type == FLOAT) val = std::to_string(getDouble() + v.getFloat());
 			else val = std::to_string(getDouble() + v.getInt());
 		}
 
@@ -475,26 +475,26 @@ namespace cll
 	{
 		std::string val = value;
 
-		if (type == "STRING") val = getString();
-		else if (type == "INT" || type == "CHAR")
+		if (type == STRING) val = getString();
+		else if (type == INT || type == CHAR)
 		{
-			if (v.type == "DOUBLE") val = std::to_string(getFloat() - v.getDouble());
-			else if (v.type == "FLOAT") val = std::to_string(getFloat() - v.getFloat());
+			if (v.type == DOUBLE) val = std::to_string(getFloat() - v.getDouble());
+			else if (v.type == FLOAT) val = std::to_string(getFloat() - v.getFloat());
 			else val = std::to_string(getInt() - v.getInt());
 		}
-		else if (type == "FLOAT")
+		else if (type == FLOAT)
 		{
-			if (v.type == "DOUBLE") val = std::to_string(getFloat() - v.getDouble());
-			else if (v.type == "FLOAT") val = std::to_string(getFloat() - v.getFloat());
+			if (v.type == DOUBLE) val = std::to_string(getFloat() - v.getDouble());
+			else if (v.type == FLOAT) val = std::to_string(getFloat() - v.getFloat());
 			else val = std::to_string(getFloat() - v.getInt());
 
 			if (val.find('.') == std::string::npos) val += ".0f";
 			else val += "f";
 		}
-		else if (type == "DOUBLE")
+		else if (type == DOUBLE)
 		{
-			if (v.type == "DOUBLE") val = std::to_string(getDouble() - v.getDouble());
-			else if (v.type == "FLOAT") val = std::to_string(getDouble() - v.getFloat());
+			if (v.type == DOUBLE) val = std::to_string(getDouble() - v.getDouble());
+			else if (v.type == FLOAT) val = std::to_string(getDouble() - v.getFloat());
 			else val = std::to_string(getDouble() - v.getInt());
 		}
 
@@ -505,25 +505,25 @@ namespace cll
 	{
 		std::string val = value;
 
-		if (type == "STRING")
+		if (type == STRING)
 		{
 			val = '"' + getString();
 			if (v.getInt() > 0) for (int i = 0; i < v.getInt(); ++i) val += getString();
 			val += '"';
 		}
-		else if (type == "INT" || type == "CHAR" || type == "FLOAT")
+		else if (type == INT || type == CHAR || type == FLOAT)
 		{
-			if (v.type == "DOUBLE") val = std::to_string(getFloat() * v.getDouble());
-			else if (v.type == "FLOAT") val = std::to_string(getFloat() * v.getFloat());
+			if (v.type == DOUBLE) val = std::to_string(getFloat() * v.getDouble());
+			else if (v.type == FLOAT) val = std::to_string(getFloat() * v.getFloat());
 			else val = std::to_string(getFloat() * v.getInt());
 
 			if (val.find('.') == std::string::npos) val += ".0f";
 			else val += "f";
 		}
-		else if (type == "DOUBLE")
+		else if (type == DOUBLE)
 		{
-			if (v.type == "DOUBLE") val = std::to_string(getDouble() * v.getDouble());
-			else if (v.type == "FLOAT") val = std::to_string(getDouble() * v.getFloat());
+			if (v.type == DOUBLE) val = std::to_string(getDouble() * v.getDouble());
+			else if (v.type == FLOAT) val = std::to_string(getDouble() * v.getFloat());
 			else val = std::to_string(getDouble() * v.getInt());
 		}
 
@@ -534,11 +534,11 @@ namespace cll
 	{
 		std::string val = value;
 
-		if (type == "STRING") val = getString();
-		else if (type == "INT" || type == "CHAR" || type == "FLOAT")
+		if (type == STRING) val = getString();
+		else if (type == INT || type == CHAR || type == FLOAT)
 		{
-			if (v.type == "DOUBLE" && v.getDouble() != 0) val = std::to_string(getFloat() / v.getDouble());
-			else if (v.type == "FLOAT" && v.getFloat() != 0) val = std::to_string(getFloat() / v.getFloat());
+			if (v.type == DOUBLE && v.getDouble() != 0) val = std::to_string(getFloat() / v.getDouble());
+			else if (v.type == FLOAT && v.getFloat() != 0) val = std::to_string(getFloat() / v.getFloat());
 			else if (v.getFloat() != 0) val = std::to_string(getFloat() / v.getInt());
 			else val = "inf";
 
@@ -548,10 +548,10 @@ namespace cll
 				else val += "f";
 			}
 		}
-		else if (type == "DOUBLE")
+		else if (type == DOUBLE)
 		{
-			if (v.type == "DOUBLE" && v.getDouble() != 0) val = std::to_string(getDouble() / v.getDouble());
-			else if (v.type == "FLOAT" && v.getFloat() != 0) val = std::to_string(getDouble() / v.getFloat());
+			if (v.type == DOUBLE && v.getDouble() != 0) val = std::to_string(getDouble() / v.getDouble());
+			else if (v.type == FLOAT && v.getFloat() != 0) val = std::to_string(getDouble() / v.getFloat());
 			else if (v.getInt() != 0) val = std::to_string(getDouble() / v.getInt());
 			else val = "inf";
 		}
@@ -563,9 +563,9 @@ namespace cll
 	{
 		std::string val = value;
 
-		if (type == "INT" || type == "FLOAT" || type == "DOUBLE" || type == "CHAR")
+		if (type == INT || type == FLOAT || type == DOUBLE || type == CHAR)
 		{
-			if ((v.type == "INT" || v.type == "FLOAT" || v.type == "DOUBLE" || v.type == "CHAR") && v.getInt() != 0)
+			if ((v.type == INT || v.type == FLOAT || v.type == DOUBLE || v.type == CHAR) && v.getInt() != 0)
 			{
 				val = std::to_string(getInt() % v.getInt());
 			}
@@ -580,25 +580,25 @@ namespace cll
 	{
 		std::string val = value;
 
-		if (type == "STRING") val = getString();
-		else if (type == "INT" || type == "CHAR")
+		if (type == STRING) val = getString();
+		else if (type == INT || type == CHAR)
 		{
-			if (v.type == "DOUBLE") val = std::to_string(std::pow(getFloat(), v.getDouble()));
-			else if (v.type == "FLOAT") val = std::to_string(std::powf(getFloat(), v.getFloat()));
+			if (v.type == DOUBLE) val = std::to_string(std::pow(getFloat(), v.getDouble()));
+			else if (v.type == FLOAT) val = std::to_string(std::powf(getFloat(), v.getFloat()));
 			else val = std::to_string(std::pow(getInt(), v.getInt()));
 		}
-		else if (type == "FLOAT")
+		else if (type == FLOAT)
 		{
-			if (v.type == "DOUBLE") val = std::to_string(std::pow(getFloat(), v.getDouble()));
+			if (v.type == DOUBLE) val = std::to_string(std::pow(getFloat(), v.getDouble()));
 			else val = std::to_string(std::powf(getFloat(), v.getFloat()));
 
 			if (val.find('.') == std::string::npos) val += ".0f";
 			else val += "f";
 		}
-		else if (type == "DOUBLE")
+		else if (type == DOUBLE)
 		{
-			if (v.type == "DOUBLE") val = std::to_string(std::pow(getDouble(), v.getDouble()));
-			else if (v.type == "FLOAT") val = std::to_string(std::pow(getDouble(), v.getFloat()));
+			if (v.type == DOUBLE) val = std::to_string(std::pow(getDouble(), v.getDouble()));
+			else if (v.type == FLOAT) val = std::to_string(std::pow(getDouble(), v.getFloat()));
 			else val = std::to_string(std::pow(getDouble(), v.getInt()));
 		}
 
@@ -611,9 +611,9 @@ namespace cll
 	{
 		std::string val = value;
 
-		if (type == "INT" || type == "FLOAT" || type == "DOUBLE" || type == "CHAR")
+		if (type == INT || type == FLOAT || type == DOUBLE || type == CHAR)
 		{
-			if (v.type == "INT" || v.type == "FLOAT" || v.type == "DOUBLE" || v.type == "CHAR")
+			if (v.type == INT || v.type == FLOAT || v.type == DOUBLE || v.type == CHAR)
 			{
 				val = std::to_string(getInt() ^ v.getInt());
 			}
@@ -628,9 +628,9 @@ namespace cll
 	{
 		std::string val = value;
 
-		if (type == "INT" || type == "FLOAT" || type == "DOUBLE" || type == "CHAR")
+		if (type == INT || type == FLOAT || type == DOUBLE || type == CHAR)
 		{
-			if (v.type == "INT" || v.type == "FLOAT" || v.type == "DOUBLE" || v.type == "CHAR")
+			if (v.type == INT || v.type == FLOAT || v.type == DOUBLE || v.type == CHAR)
 			{
 				val = std::to_string(getInt() & v.getInt());
 			}
@@ -645,9 +645,9 @@ namespace cll
 	{
 		std::string val = value;
 
-		if (type == "INT" || type == "FLOAT" || type == "DOUBLE" || type == "CHAR")
+		if (type == INT || type == FLOAT || type == DOUBLE || type == CHAR)
 		{
-			if (v.type == "INT" || v.type == "FLOAT" || v.type == "DOUBLE" || v.type == "CHAR")
+			if (v.type == INT || v.type == FLOAT || v.type == DOUBLE || v.type == CHAR)
 			{
 				val = std::to_string(getInt() | v.getInt());
 			}
@@ -662,9 +662,9 @@ namespace cll
 	{
 		std::string val = value;
 
-		if (type == "INT" || type == "FLOAT" || type == "DOUBLE" || type == "CHAR")
+		if (type == INT || type == FLOAT || type == DOUBLE || type == CHAR)
 		{
-			if (v.type == "INT" || v.type == "FLOAT" || v.type == "DOUBLE" || v.type == "CHAR")
+			if (v.type == INT || v.type == FLOAT || v.type == DOUBLE || v.type == CHAR)
 			{
 				val = std::to_string(getInt() << v.getInt());
 			}
@@ -679,9 +679,9 @@ namespace cll
 	{
 		std::string val = value;
 
-		if (type == "INT" || type == "FLOAT" || type == "DOUBLE" || type == "CHAR")
+		if (type == INT || type == FLOAT || type == DOUBLE || type == CHAR)
 		{
-			if (v.type == "INT" || v.type == "FLOAT" || v.type == "DOUBLE" || v.type == "CHAR")
+			if (v.type == INT || v.type == FLOAT || v.type == DOUBLE || v.type == CHAR)
 			{
 				val = std::to_string(getInt() >> v.getInt());
 			}

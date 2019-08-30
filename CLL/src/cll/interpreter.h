@@ -73,7 +73,7 @@ namespace cll
 		void setVar(const var& v); // Sets or adds variable to interpreter by var abstract
 		inline void setVar(const std::string& n, const var& v) { setVar(var(n, v)); };
 		inline void setVar(const std::string& n, const std::string& v) { setVar(var(n, v)); };
-		inline void setVar(const std::string& n, const std::string& v, const std::string& t) { setVar(var(n, v, t)); };
+		inline void setVar(const std::string& n, const std::string& v, const Type& t) { setVar(var(n, v, t)); };
 
 		var getVar(const std::string& n); // Returns variable by its name
 		void deleteVar(const std::string& n); // Deletes variable by its name

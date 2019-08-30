@@ -7,19 +7,24 @@
 
 namespace cll
 {
+	enum Type
+	{
+		UNDEFINED, INT, FLOAT, DOUBLE, CHAR, STRING, ARRAY, PARENTHESIS, SYMBOL, BARE, FUNCTION
+	};
+
 	struct var
 	{
 		std::string name; // Holds declared name of variable
 		std::string value; // Holds non-raw value of variable - meaning its value representation depends on detected type
-		std::string type; // Holds variable type - (LONG LONG) INT, FLOAT, DOUBLE, CHAR, STRING, UNDEFINED, ARRAY, PARENTHESIS
+		Type type; // Holds variable type - (LONG LONG) INT, FLOAT, DOUBLE, CHAR, STRING, UNDEFINED, ARRAY, PARENTHESIS
 
 		// CONSTRUCTORS //
-		var() : name(""), value(""), type("UNDEFINED") { value.reserve(100); };
+		var() : name(""), value(""), type(UNDEFINED) { value.reserve(100); };
 		var(const var& v) : name(v.name), value(v.value), type(v.type) {};
 		var(const std::string& n, const var& v) : value(v.value), type(v.type) { setName(n); };
 		var(const std::string& v);
 		var(const std::string& n, const std::string& v);
-		var(const std::string& n, const std::string& v, const std::string& t) : value(v), type(t) { setName(n); };
+		var(const std::string& n, const std::string& v, const Type& t) : value(v), type(t) { setName(n); };
 
 		// SET METHODS //
 		void setName(const std::string& n); // Sets variable name and checks for special symbols and bare words
@@ -32,8 +37,22 @@ namespace cll
 
 		// GET METHODS //
 		inline std::string getName() const { return name; };
-		inline std::string getType() const { return type; };
 		inline std::string getValue() const { return value; };
+		inline std::string getType() const 
+		{
+			if (type == UNDEFINED) return "UNDEFINED";
+			if (type == INT) return "INT";
+			if (type == FLOAT) return "FLOAT";
+			if (type == DOUBLE) return "DOUBLE";
+			if (type == CHAR) return "CHAR";
+			if (type == STRING) return "STRING";
+			if (type == ARRAY) return "ARRAY";
+			if (type == PARENTHESIS) return "PARENTHESIS";
+			if (type == SYMBOL) return "SYMBOL";
+			if (type == BARE) return "BARE";
+			if (type == FUNCTION) return "FUNCTION";
+			return "UNDEFINED";
+		};
 
 		long long int getInt() const;
 		bool getBool() const;

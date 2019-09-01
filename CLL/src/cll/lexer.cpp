@@ -17,10 +17,12 @@ namespace cll
 		unsigned int parenthesis = 0; // Holds wheter token is a parenthesis (helpful to ignore special chars that create new tokens)
 		unsigned int array = 0; // Holds wheter token is an array (helpful to ignore special chars that create new tokens)
 		std::string special = ""; // Holds sepcial char as token to be pushed (works like this: new x=10 -> new x = 10)
+		std::string mult = "";
 
 		args.reserve(50);
 		special.reserve(3);
 		buff.reserve(25);
+		mult.reserve(3);
 
 		for (auto it = l.begin(), end = l.end(); it < end; ++it)
 		{
@@ -71,8 +73,7 @@ namespace cll
 							{
 								for (size_t i = 0; i < multi_symbols.size(); ++i)
 								{
-									std::string mult = "";
-									mult.reserve(3);
+									mult = "";
 
 									for (size_t ii = 0; ii < multi_symbols[i].length(); ++ii)
 									{

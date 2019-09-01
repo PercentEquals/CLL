@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 
 		// Forces path to be represented as string (cmd ignores quotation marks)
 		cll::var path = std::string(argv[1]);
-		if (path.type != "STRING") path.setValue("\"" + path.getString() + "\"");
+		if (path.type != cll::Type::STRING) path.setValue("\"" + path.getString() + "\"");
 		
 		params += path;
 

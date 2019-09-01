@@ -40,6 +40,7 @@ namespace cll
 		bool newScope(const std::vector<std::string>& l); // Creates new instance of interpreter - for scope execution
 		bool parse(const std::vector<var>& v); // Checks line syntax
 		bool bare(const std::vector<var>& v); // Procesess bare words and also some spiecial tokens
+		bool readScope(const std::vector<var>& v);
 		std::vector<var> math(const std::vector<var>& v); // Procesess math equations
 
 	public:

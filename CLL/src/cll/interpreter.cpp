@@ -69,7 +69,7 @@ namespace cll
 		nested->debug = debug;
 		nested->filename = filename;
 		nested->enabledIO = enabledIO;
-		nested->line = (line >= l.size()) ? (line - l.size()) : 0;
+		nested->line = (line >= (unsigned int)l.size()) ? (line - (unsigned int)l.size()) : 0;
 
 		for (size_t i = 0; i < l.size(); ++i)
 		{
@@ -86,7 +86,6 @@ namespace cll
 		for (size_t i = 0; i < nested->vars.size(); ++i)
 		{
 			var buff = this->getVar(nested->vars[i].name);
-
 			if (buff.type != UNDEFINED) this->setVar(nested->vars[i]);
 		}
 
@@ -99,6 +98,7 @@ namespace cll
 		if (v.empty()) return true;
 
 		if (v[0].type == SYMBOL && v[0].value == "}" && !scope) error = "Unexpected symbol '}' - nothing to close!";
+		if (v[0].type == SYMBOL && v.size() == 1) error = "Unexpected symbol '" + v[0].value + "'!";
 		if (error != "") return false;
 
 		// CHECKS FOR MULTIPLE BARE WORDS
@@ -108,6 +108,7 @@ namespace cll
 			{
 				if (v[0].value == "cout") continue;
 				if (i == 1 && v[0].value == "else" && v[1].value == "if") continue;
+				if (i == 1 && v[0].value == "do" && v[1].value == "while") continue;
 
 				error = "Unexpected '" + v[i].value + "' after '" + v[0].value + "' statement!";
 				return false;
@@ -134,11 +135,20 @@ namespace cll
 			}
 			else if (v[0].value == "cll" && v.size() < 2) error = "Command 'cll' got too few arguments!";
 			else if ((v[0].value == "if" || v[0].value == "while") && v.size() < 2) error = "Command '" + v[0].value + "' got too few arguments!";
+			else if (v[0].value == "do" && v.size() < 3) error = "Command 'do while' got too few arguments!";
+			else if (v[0].value == "for")
+			{
+				unsigned char commas = 0;
+				for (size_t i = 1; i < v.size(); ++i) if (v[i].type == SYMBOL && v[i].value == ",") commas++;
+
+				if (commas < 2) error = "Command 'for' got too few arguments!";
+				else if (commas > 2) error = "Command 'for' got too much arguments!";
+			}
 			else if (v[0].value == "else")
 			{
-				if (previous_scope_action.empty()) error = "Unexpected command 'else'!";
-				else if (previous_scope_action[0].value != "if" && previous_scope_action[0].value != "else") error = "Unexpected command 'else'!";
-				else if (previous_scope_action[0].value == "else" && previous_scope_action.size() == 1) error = "Unexpected command 'else'!";
+				if (previous_scope_action.empty()) error = "Unexpected statement 'else'!";
+				else if (previous_scope_action[0].value != "if" && previous_scope_action[0].value != "else") error = "Unexpected statement 'else'!";
+				else if (previous_scope_action[0].value == "else" && previous_scope_action.size() == 1) error = "Unexpected statement 'else'!";
 
 				if (v.size() > 1)
 				{
@@ -149,6 +159,8 @@ namespace cll
 		}
 
 		if (error != "") return false;
+
+		std::vector<std::string> defined;
 
 		for (size_t i = 0; i < v.size(); ++i)
 		{
@@ -183,7 +195,7 @@ namespace cll
 
 				if (v[i - 1].type == BARE)
 				{
-					error = "Unexpected symbol '" + v[i].value + "' after '" + v[i - 1].value + "' command!"; break;
+					error = "Unexpected symbol '" + v[i].value + "' after '" + v[i - 1].value + "' statement!"; break;
 				}
 
 				if (v[i - 1].type == SYMBOL)
@@ -221,12 +233,19 @@ namespace cll
 			{
 				if (i + 1 < v.size() && v[i].value.find_first_of("[]") == std::string::npos)
 				{
-					if (v[i + 1].type == SYMBOL && v[i + 1].value == "=") continue;
+					if (v[i + 1].type == SYMBOL && v[i + 1].value == "=")
+					{
+						defined.emplace_back(v[i].value);
+						continue;
+					}
 				}
 
 				if (v[i].value.find("(") == std::string::npos && getVar(v[i].value).type == UNDEFINED)
 				{
-					error = "Name '" + v[i].value + "' not recognized!"; break;
+					if (std::find(defined.begin(), defined.end(), v[i].value) == defined.end())
+					{
+						error = "Name '" + v[i].value + "' not recognized!"; break;
+					}
 				}
 			}
 			else if (i + 1 < v.size() && v[i + 1].type == SYMBOL && v[i + 1].value == "=")
@@ -272,7 +291,7 @@ namespace cll
 					setVar(v[i].name, buff);
 				}
 			}
-			else if (v[0].value == "if" || v[0].value == "while" || v[0].value == "else")
+			else if (v[0].value == "if" || v[0].value == "while" || v[0].value == "else" || v[0].value == "do" || v[0].value == "for")
 			{
 				for(size_t i = 0; i < v.size(); ++i) scope_action.emplace_back(v[i]);
 			}
@@ -428,7 +447,7 @@ namespace cll
 					{
 						if (vec[i - 1].type == SYMBOL || vec[i - 1].type == UNDEFINED) continue;
 						std::vector<var> ins;
-						ins.reserve(10); // TEST
+						ins.reserve(10);
 						bool state = vec[i - 1].getBool();
 						bool buff = false;
 
@@ -495,6 +514,89 @@ namespace cll
 		return vec;
 	}
 
+	bool Interpreter::readScope(const std::vector<var>& v)
+	{
+		if (v[0].value == "{" && v[0].type == SYMBOL) scope++;
+		if (v[0].value == "}" && v[0].type == SYMBOL) scope--;
+
+		if (scope)
+		{
+			std::string buff = "";
+			for (size_t i = 0; i < v.size(); ++i) buff += v[i].value + " ";
+			scope_lines.emplace_back(buff);
+			return true;
+		}
+		else
+		{
+			bool state = true;
+
+			if (scope_action.empty()) state = newScope(scope_lines);
+			else if (scope_action[0].value == "if" && scope_action[1].getBool()) state = newScope(scope_lines);
+			else if (scope_action[0].value == "else")
+			{
+				if (scope_action.size() <= 1 && !previous_scope_action[previous_scope_action.size() - 1].getBool()) state = newScope(scope_lines);
+				else if (!previous_scope_action[previous_scope_action.size() - 1].getBool() && scope_action[2].getBool()) state = newScope(scope_lines);
+			}
+			else if (scope_action[0].value == "while")
+			{
+				while (math(scope_action)[1].getBool())
+				{
+					state = newScope(scope_lines);
+					if (!state) break;
+				}
+			}
+			else if (scope_action[0].value == "for")
+			{
+				std::vector<var> name;
+				std::vector<var> loop;
+				std::vector<var> incr;
+				unsigned char commas = 0;
+
+				for (size_t i = 1; i < scope_action.size(); ++i)
+				{
+					if (scope_action[i].type == SYMBOL && scope_action[i].value == ",")
+					{
+						++commas;
+						continue;
+					}
+					
+					if (commas == 0) name.emplace_back(scope_action[i]);
+					else if (commas == 1) loop.emplace_back(scope_action[i]);
+					else if (commas == 2) incr.emplace_back(scope_action[i]);
+				}
+
+				std::string buff = (name.size() > 1) ? math(name)[0].name : "";
+
+				while (math(loop)[0].getBool())
+				{
+					state = newScope(scope_lines);
+					if (!state) break;
+					math(incr);
+				}
+
+				if (name.size() > 1) deleteVar(buff);
+			}
+			else if (scope_action[0].value == "do")
+			{
+				state = newScope(scope_lines);
+				if (state)
+				{
+					while (math(scope_action)[2].getBool())
+					{
+						state = newScope(scope_lines);
+						if (!state) break;
+					}
+				}
+			}
+
+			previous_scope_action = scope_action;
+			scope_action.clear();
+			scope_lines.clear();
+			if (!state) return errorLog();
+			return true;
+		}
+	}
+
 	// Function that interpretes one line
 	bool Interpreter::readLine(const std::string& l)
 	{
@@ -507,7 +609,7 @@ namespace cll
 
 		// CHECKS FOR LINE BREAK (SEMICOLON) AND FOR BRACKETS
 		std::vector<var> args;
-		args.reserve(args_line.size()); // TEST
+		args.reserve(args_line.size());
 		std::string newline = "";
 		bool multiline = false;
 			
@@ -544,44 +646,9 @@ namespace cll
 		// SCOPING - i.e. CODE IN BRACKETS
 		if (scope)
 		{
-			if (args[0].value == "{" && args[0].type == SYMBOL) scope++;
-			if (args[0].value == "}" && args[0].type == SYMBOL) scope--;
-
-			if (scope)
-			{
-				std::string buff = "";
-				for (size_t i = 0; i < args.size(); ++i) buff += args[i].value + " ";
-				scope_lines.emplace_back(buff);
-				if (newline != "" && !readLine(newline)) return errorLog();
-				return true;
-			}
-			else
-			{
-				bool state = true;
-
-				if (scope_action.empty()) state = newScope(scope_lines);
-				else if (scope_action[0].value == "if" && scope_action[1].getBool()) state = newScope(scope_lines);
-				else if (scope_action[0].value == "while")
-				{
-					while (math(scope_action)[1].getBool())
-					{
-						state = newScope(scope_lines);
-						if (!state) break;
-					}
-				}
-				else if (scope_action[0].value == "else")
-				{
-					if (scope_action.size() <= 1 && !previous_scope_action[previous_scope_action.size() - 1].getBool()) state = newScope(scope_lines);
-					else if (!previous_scope_action[previous_scope_action.size() - 1].getBool() && scope_action[2].getBool()) state = newScope(scope_lines);
-				}
-
-				previous_scope_action = scope_action;
-				scope_action.clear();
-				scope_lines.clear();
-				if (!state) return errorLog();
-				if (newline != "" && !readLine(newline)) return errorLog();
-				return true;
-			}
+			if (!readScope(args)) return errorLog();
+			if (newline != "" && !readLine(newline)) return errorLog();
+			return true;
 		} 
 
 		// PRINTS DEBUG MODE ADDITIONAL INFORMATION (before math)
@@ -602,7 +669,7 @@ namespace cll
 		if (!parse(args)) return errorLog();
 
 		// APPLIES MATH TO TOKENS
-		if (args[0].value != "while") args = math(args);
+		if (args[0].value != "while" && args[0].value != "for") args = math(args);
 		if (error != "") return errorLog();
 		if (args.empty()) return true;
 
@@ -620,7 +687,7 @@ namespace cll
 			if (args.size() != 0) write("\n");
 		}
 
-		if (args[0].value != "while")
+		if (args[0].value != "while" && args[0].value != "for")
 		{
 			for (size_t i = 0; i < args.size(); ++i)
 			{

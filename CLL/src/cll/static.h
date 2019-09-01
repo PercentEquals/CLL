@@ -16,6 +16,7 @@ namespace cll
 		"delete",
 		"do",
 		"else",
+		"for",
 		"if",
 		"pause",
 		"return",

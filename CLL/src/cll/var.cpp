@@ -205,7 +205,7 @@ namespace cll
 				else if (value == "'\\\\'")	return int('\\');
 				else if (value == "'\\?'")	return int('\?');
 				else if (value == "'\\''")	return int('\'');
-				else if (value == "'\\\"'") return int('\"');
+				else if (value == "'\\\"'")	return int('\"');
 				else return 0;
 			}
 		}

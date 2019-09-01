@@ -181,13 +181,13 @@ namespace cll
 	var tofloat(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("0.0f");
-		return (args[0].type == INT) ? args[0] : std::to_string(args[0].getInt());
+		return (args[0].type == FLOAT) ? args[0] : std::to_string(args[0].getInt());
 	}	
 	
 	var todouble(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("0.0");
-		return (args[0].type == INT) ? args[0] : std::to_string(args[0].getInt());
+		return (args[0].type == DOUBLE) ? args[0] : std::to_string(args[0].getInt());
 	}	
 	
 	var tochar(const std::vector<var>& args)

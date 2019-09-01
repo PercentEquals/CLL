@@ -283,7 +283,7 @@ namespace cll
 			else if (v[0].value == "cll") return newInterpreter(v);
 		}
 		else if (v[0].value == "{" && v[0].type == SYMBOL) scope = 1;
-		//else if (v.size() == 1 && v[0].type != UNDEFINED) write(v[0].value + " " + v[0].type);
+		//else if (v.size() == 1 && v[0].type != UNDEFINED) write(v[0].value + " " + v[0].getType());
 
 		if (error != "") return false;
 		return true;
@@ -679,7 +679,7 @@ namespace cll
 			{
 				bool literal = false;
 				std::string name = n.substr(0, n.rfind("["));
-				if (name == "" || name == "()" || name == "[]") return var(n, "UNDEFINED");
+				if (name == "" || name == "()" || name == "[]") return var(n, "");
 
 				std::string buff = n.substr(name.length());
 				std::string raw = "";
@@ -691,7 +691,7 @@ namespace cll
 				}
 
 				std::vector<var> elem = math(lexer(raw));
-				if (elem.empty()) return var(n, "UNDEFINED");
+				if (elem.empty()) return var(n, "");
 
 				var ret = getVar(name);
 
@@ -707,8 +707,8 @@ namespace cll
 				}
 				else ret = ret.getElement((size_t)elem[0].getInt());
 
-				if (ret.type == CHAR && ret.getInt() == 0) return var(n, "UNDEFINED");
-				else if (ret.value == "") return var(n, "UNDEFINED");
+				if (ret.type == CHAR && ret.getInt() == 0) return var(n, "");
+				else if (ret.value == "") return var(n, "");
 				else if (!literal)
 				{
 					ret.name = name;
@@ -721,7 +721,7 @@ namespace cll
 
 		size_t index = search(vars, n, 0, vars.size() - 1);
 		if (index < vars.size()) return vars[index];
-		else return var(n, "UNDEFINED");
+		else return var(n, "");
 	}
 
 	// Function that changes defined var value or creates new var if one does not exist

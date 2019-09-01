@@ -2,6 +2,8 @@
 
 // Author: Bartosz Niciak
 
+#include "utils/strspn.h"
+
 #include "lexer.h"
 #include "static.h"
 
@@ -116,6 +118,7 @@ namespace cll
 				{
 					if (v[0] == '0' && v.length() > 1 && v.find_first_of("x89") == std::string::npos) value = std::to_string(std::stoll(v.substr(1), 0, 8));
 					else if (v.substr(0, 2) == "0x" && v.length() > 2) value = std::to_string(std::stoll(v.substr(2), 0, 16));
+					else if (v[0] == '0' && v.length() > 1 && v.find_first_of("89") != std::string::npos) value = std::to_string(std::stoll(v));
 					else value = v;
 				}
 				else if (type == FLOAT) value = std::to_string(std::stof(v));

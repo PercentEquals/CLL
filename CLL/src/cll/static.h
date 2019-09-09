@@ -17,6 +17,7 @@ namespace cll
 		"do",
 		"else",
 		"for",
+		"function",
 		"if",
 		"pause",
 		"return",

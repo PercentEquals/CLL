@@ -3,6 +3,7 @@
 // Author: Bartosz Niciak
 
 #include "utils/search.h"
+#include "interpreter.h"
 
 #include <algorithm>
 #include <iostream>
@@ -48,7 +49,7 @@ namespace cll
 	void Functions::add(const function& f)
 	{
 		size_t index = search(funs, f.name, 0, funs.size() - 1);
-		if (index < funs.size()) funs.insert(std::upper_bound(funs.begin(), funs.end(), f, [](function a, function b) { return a.name < b.name; }), f);
+		if (index >= funs.size()) funs.insert(std::upper_bound(funs.begin(), funs.end(), f, [](function a, function b) { return a.name < b.name; }), f);
 	}
 
 	void Functions::del(const std::string& n)

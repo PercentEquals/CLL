@@ -89,6 +89,7 @@ namespace cll
 			if (buff.type != UNDEFINED) this->setVar(nested->vars[i]);
 		}
 
+		returned = nested->returned;
 		return true;
 	}
 
@@ -98,7 +99,7 @@ namespace cll
 		if (v.empty()) return true;
 
 		if (v[0].type == SYMBOL && v[0].value == "}" && !scope) error = "Unexpected symbol '}' - nothing to close!";
-		if (v[0].type == SYMBOL && v.size() == 1) error = "Unexpected symbol '" + v[0].value + "'!";
+		if (v[0].type == SYMBOL && v[0].value != "{" && v.size() == 1) error = "Unexpected symbol '" + v[0].value + "'!";
 		if (error != "") return false;
 
 		// CHECKS FOR MULTIPLE BARE WORDS
@@ -120,10 +121,10 @@ namespace cll
 		if (v[0].type == BARE)
 		{
 			// CHECKS FOR BARE WORD UNIQUE SYNTAX
-			if (v[0].value == "cout" && v.size() < 2) error = "Command 'cout' got too few arguments!";
+			if (v[0].value == "cout" && v.size() < 2) error = "Statement 'cout' got too few arguments!";
 			else if (v[0].value == "delete")
 			{
-				if (v.size() < 2) error = "Command 'delete' got too few arguments!";
+				if (v.size() < 2) error = "Statement 'delete' got too few arguments!";
 
 				for (size_t i = 1; i < v.size(); ++i)
 				{
@@ -133,16 +134,25 @@ namespace cll
 					if (error != "") break;
 				}
 			}
-			else if (v[0].value == "cll" && v.size() < 2) error = "Command 'cll' got too few arguments!";
-			else if ((v[0].value == "if" || v[0].value == "while") && v.size() < 2) error = "Command '" + v[0].value + "' got too few arguments!";
-			else if (v[0].value == "do" && v.size() < 3) error = "Command 'do while' got too few arguments!";
+			else if (v[0].value == "cll" && v.size() < 2) error = "Statement 'cll' got too few arguments!";
+			else if ((v[0].value == "if" || v[0].value == "while") && v.size() < 2) error = "Statement '" + v[0].value + "' got too few arguments!";
+			else if (v[0].value == "do" && v.size() < 3) error = "Statement 'do while' got too few arguments!";
 			else if (v[0].value == "for")
 			{
 				unsigned char commas = 0;
 				for (size_t i = 1; i < v.size(); ++i) if (v[i].type == SYMBOL && v[i].value == ",") commas++;
 
-				if (commas < 2) error = "Command 'for' got too few arguments!";
-				else if (commas > 2) error = "Command 'for' got too much arguments!";
+				if (commas < 2) error = "Statement 'for' got too few arguments!";
+				else if (commas > 2) error = "Statement 'for' got too many arguments!";
+			}
+			else if (v[0].value == "function")
+			{
+				if (v.size() < 2) error = "Statement 'function' got too few arguments!";
+				else if (v.size() > 2) error = "Statement 'function' got too many arguments!";
+				else if (v[1].type != UNDEFINED) error = "Illegal name '" + v[1].value + "' after 'function' statement!";
+				else if (var(v[1].value, "").getError() != "") error = "Illegal name '" + v[1].value + "' after 'function' statement!";
+				else if (getVar(v[1].value).type != UNDEFINED) error = "Name '" + v[1].value + "' is already declared!";
+				else if (functions.get(v[1].value).name != "") error = "Name '" + v[1].value + "' is already declared!";
 			}
 			else if (v[0].value == "else")
 			{
@@ -153,7 +163,7 @@ namespace cll
 				if (v.size() > 1)
 				{
 					if (v[1].value != "if") error = "Unexpected name '" + v[1].value + "' after 'else' statement!";
-					else if (v[1].value == "if" && v.size() < 3) error = "Command 'else if' got too few arguments!";
+					else if (v[1].value == "if" && v.size() < 3) error = "Statement 'else if' got too few arguments!";
 				}
 			}
 		}
@@ -229,7 +239,7 @@ namespace cll
 
 				return true;
 			}
-			else if (v[i].type == UNDEFINED)
+			else if (v[i].type == UNDEFINED && v[0].value != "function")
 			{
 				if (i + 1 < v.size() && v[i].value.find_first_of("[]") == std::string::npos)
 				{
@@ -291,7 +301,7 @@ namespace cll
 					setVar(v[i].name, buff);
 				}
 			}
-			else if (v[0].value == "if" || v[0].value == "while" || v[0].value == "else" || v[0].value == "do" || v[0].value == "for")
+			else if (v[0].value == "if" || v[0].value == "while" || v[0].value == "else" || v[0].value == "do" || v[0].value == "for" || v[0].value == "function")
 			{
 				for(size_t i = 0; i < v.size(); ++i) scope_action.emplace_back(v[i]);
 			}
@@ -531,6 +541,12 @@ namespace cll
 			bool state = true;
 
 			if (scope_action.empty()) state = newScope(scope_lines);
+			else if (scope_action[0].value == "function")
+			{
+				//TODO
+				//customFunction f(scope_action[1].value, nullptr);
+				//addFunction(f);
+			}
 			else if (scope_action[0].value == "if" && scope_action[1].getBool()) state = newScope(scope_lines);
 			else if (scope_action[0].value == "else")
 			{
@@ -687,7 +703,7 @@ namespace cll
 			if (args.size() != 0) write("\n");
 		}
 
-		if (args[0].value != "while" && args[0].value != "for")
+		if (args[0].value != "while" && args[0].value != "for" && args[0].value != "function")
 		{
 			for (size_t i = 0; i < args.size(); ++i)
 			{

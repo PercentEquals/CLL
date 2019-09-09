@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
 
 		// Creates runtime interpreter 
 		std::unique_ptr<cll::Interpreter> runtime = std::make_unique<cll::Interpreter>();
-		runtime->enableDebug();
+		//runtime->enableDebug();
 		runtime->enableIO();
 		
 		if (!runtime->readLine("params = " + params.getValue())) errorLog(runtime);

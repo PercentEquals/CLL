@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
 			if (!local->readLine(input)) errorLog(local);
 			local->clearError();
 		} 
-		while (!local->getReturned());
+		while (local->getReturned().getValue() == "");
 	}
 
 	console::reset();

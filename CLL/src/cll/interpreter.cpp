@@ -64,7 +64,7 @@ namespace cll
 	var Interpreter::newFunction(const std::vector<var>& args, const std::vector<std::string>& l)
 	{
 		var params("[]");
-		for (size_t i = 1; i < args.size(); ++i)
+		for (size_t i = 0; i < args.size(); ++i)
 		{
 			if (args[i].getValue() != ",") params += args[i];
 		}
@@ -84,6 +84,8 @@ namespace cll
 				error = nested->error;
 				return var("0");
 			}
+
+			if (nested->returned.value != "") return nested->returned;
 		}
 
 		return var("1");
@@ -120,6 +122,7 @@ namespace cll
 		}
 
 		returned = nested->returned;
+		if (returned.value != "") return false;
 		return true;
 	}
 
@@ -303,7 +306,8 @@ namespace cll
 		{
 			if (v[0].value == "return")
 			{
-				returned = true;
+				if (v.size() < 2) returned = var("1");
+				else returned = v[1];
 				return false;
 			}
 			else if (v[0].value == "pause")
@@ -786,7 +790,7 @@ namespace cll
 				{
 					file.close();
 
-					if (returned) return true;
+					if (returned.getBool()) return true;
 					else return false;
 				}
 			}

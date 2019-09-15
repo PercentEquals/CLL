@@ -10,8 +10,10 @@ namespace cll
 	// Vector of bare words
 	const std::vector<std::string> barewords =
 	{
+		"break",
 		"cin",		
 		"cll",
+		"continue",
 		"cout",
 		"delete",
 		"do",

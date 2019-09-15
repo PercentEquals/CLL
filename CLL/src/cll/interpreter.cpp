@@ -167,6 +167,8 @@ namespace cll
 					if (error != "") break;
 				}
 			}
+			else if (v[0].value == "continue" && v.size() > 1) error = "Statement 'continue' got too much arguments!";
+			else if (v[0].value == "break" && v.size() > 1) error = "Statement 'break' got too much arguments!";
 			else if (v[0].value == "cll" && v.size() < 2) error = "Statement 'cll' got too few arguments!";
 			else if (v[0].value == "include" && v.size() < 2) error = "Statement 'include' got too few arguments!";
 			else if ((v[0].value == "if" || v[0].value == "while") && v.size() < 2) error = "Statement '" + v[0].value + "' got too few arguments!";
@@ -336,13 +338,15 @@ namespace cll
 			}
 			else if (v[0].value == "if" || v[0].value == "while" || v[0].value == "else" || v[0].value == "do" || v[0].value == "for" || v[0].value == "function")
 			{
-				for(size_t i = 0; i < v.size(); ++i) scope_action.emplace_back(v[i]);
+				for (size_t i = 0; i < v.size(); ++i) scope_action.emplace_back(v[i]);
 			}
 			else if (v[0].value == "delete")
 			{
 				for (size_t i = 1; i < v.size(); ++i) if (v[i].type != SYMBOL) deleteVar(v[i].name);
 			}
 			else if (v[0].value == "cll") return newInterpreter(v);
+			else if (v[0].value == "continue") continued = true;
+			else if (v[0].value == "break") broke = true;
 			else if (v[0].value == "include")
 			{
 				std::fstream buff(v[1].getString(), std::ios::in, std::ios::binary);
@@ -609,7 +613,6 @@ namespace cll
 				while (math(scope_action)[1].getBool())
 				{
 					state = newScope(scope_lines);
-					if (!state) break;
 				}
 			}
 			else if (scope_action[0].value == "for")
@@ -790,7 +793,7 @@ namespace cll
 				{
 					file.close();
 
-					if (returned.getBool()) return true;
+					if (returned.value == "") return true;
 					else return false;
 				}
 			}

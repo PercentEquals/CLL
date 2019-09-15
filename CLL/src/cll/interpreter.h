@@ -30,7 +30,9 @@ namespace cll
 
 		// OTHER VARIABLES
 		unsigned int line; // Actual line number of file - to show where error took place
-		var returned; // If true - closes program execution (when using 'return' command)
+		var returned;
+		bool continued;
+		bool broke;
 		bool log; // Determines wheter to output errors or not
 		bool debug; // Determines wheter to output additional debug information about tokens
 		bool enabledIO;
@@ -49,7 +51,7 @@ namespace cll
 	public:
 
 		// CONSTRUCTORS //
-		Interpreter() : error(""), filename(""), scope(0), line(0), returned(""), log(false), debug(false), enabledIO(false) 
+		Interpreter() : error(""), filename(""), scope(0), line(0), returned(""), continued(false), broke(false), log(false), debug(false), enabledIO(false) 
 		{
 			vars.reserve(1000);
 

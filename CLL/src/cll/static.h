@@ -19,6 +19,7 @@ namespace cll
 		"for",
 		"function",
 		"if",
+		"include",
 		"pause",
 		"return",
 		"while"

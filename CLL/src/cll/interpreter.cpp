@@ -165,6 +165,7 @@ namespace cll
 				}
 			}
 			else if (v[0].value == "cll" && v.size() < 2) error = "Statement 'cll' got too few arguments!";
+			else if (v[0].value == "include" && v.size() < 2) error = "Statement 'include' got too few arguments!";
 			else if ((v[0].value == "if" || v[0].value == "while") && v.size() < 2) error = "Statement '" + v[0].value + "' got too few arguments!";
 			else if (v[0].value == "do" && v.size() < 3) error = "Statement 'do while' got too few arguments!";
 			else if (v[0].value == "for")
@@ -338,6 +339,20 @@ namespace cll
 				for (size_t i = 1; i < v.size(); ++i) if (v[i].type != SYMBOL) deleteVar(v[i].name);
 			}
 			else if (v[0].value == "cll") return newInterpreter(v);
+			else if (v[0].value == "include")
+			{
+				std::fstream buff(v[1].getString(), std::ios::in, std::ios::binary);
+				std::string l;
+
+				if (buff.good())
+				{
+					while (getline(buff, l))
+					{
+						if (!readLine(l)) return errorLog();
+					}
+				}
+				else error = "File '" + v[1].getString() + "' could not be included!";
+			}
 		}
 		else if (v[0].value == "{" && v[0].type == SYMBOL) scope = 1;
 		//else if (v.size() == 1 && v[0].type != UNDEFINED) write(v[0].value + " " + v[0].getType());

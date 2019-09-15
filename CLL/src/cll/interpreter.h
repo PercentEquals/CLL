@@ -4,6 +4,7 @@
 
 #include "var.h"
 #include "functions.h"
+#include "defined.h"
 
 #include <string>
 #include <vector>
@@ -18,6 +19,7 @@ namespace cll
 
 		// FUNCTIONS
 		Functions functions;
+		Defined dfunctions;
 
 		// SCOPE SPECIFIC VARIABLES //
 		std::vector<var> previous_scope_action; // Holds previous flow managed bare word (if, while, ...)
@@ -37,6 +39,7 @@ namespace cll
 		inline void write(const std::string& s) { if (enabledIO) std::cout << s; };
 		bool errorLog(); // Returns false if there is an error and prints them with std::cout (if logging is enabled)
 		bool newInterpreter(const std::vector<var>& v); // Creates new instance of interpreter - for file in file execution
+		var newFunction(const std::vector<var>& args, const std::vector<std::string>& l);
 		bool newScope(const std::vector<std::string>& l); // Creates new instance of interpreter - for scope execution
 		bool parse(const std::vector<var>& v); // Checks line syntax
 		bool bare(const std::vector<var>& v); // Procesess bare words and also some spiecial tokens

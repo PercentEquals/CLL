@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\cll\defined.cpp" />
     <ClCompile Include="src\cll\functions.cpp" />
     <ClCompile Include="src\cll\interpreter.cpp" />
     <ClCompile Include="src\cll\lexer.cpp" />
@@ -152,7 +153,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CLL.h" />
+    <ClInclude Include="src\cll\defined.h" />
     <ClInclude Include="src\cll\functions.h" />
+    <ClInclude Include="src\cll\functions\file.h" />
+    <ClInclude Include="src\cll\functions\header.h" />
+    <ClInclude Include="src\cll\functions\math.h" />
+    <ClInclude Include="src\cll\functions\rand.h" />
+    <ClInclude Include="src\cll\functions\time.h" />
+    <ClInclude Include="src\cll\functions\type.h" />
     <ClInclude Include="src\cll\interpreter.h" />
     <ClInclude Include="src\cll\lexer.h" />
     <ClInclude Include="src\cll\static.h" />

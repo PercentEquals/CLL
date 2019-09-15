@@ -48,7 +48,7 @@ namespace cll
 	bool Interpreter::newInterpreter(const std::vector<var>& v)
 	{
 		var params("[]");
-		for (size_t i = 1; i < v.size(); ++i) params += v[i].value;
+		for (size_t i = 1; i < v.size(); ++i) params += v[i];
 
 		std::unique_ptr<Interpreter> nested = std::make_unique<Interpreter>();
 		nested->log = log;
@@ -61,6 +61,34 @@ namespace cll
 		return state;
 	}
 
+	var Interpreter::newFunction(const std::vector<var>& args, const std::vector<std::string>& l)
+	{
+		var params("[]");
+		for (size_t i = 1; i < args.size(); ++i)
+		{
+			if (args[i].getValue() != ",") params += args[i];
+		}
+
+		std::unique_ptr<Interpreter> nested = std::make_unique<Interpreter>();
+		nested->log = log;
+		nested->debug = debug;
+		nested->enabledIO = enabledIO;
+		nested->functions = functions;
+		nested->dfunctions = dfunctions;
+		nested->setVar("params", params);
+
+		for (size_t i = 0; i < l.size(); ++i)
+		{
+			if (!nested->readLine(l[i]))
+			{
+				error = nested->error;
+				return var("0");
+			}
+		}
+
+		return var("1");
+	}
+
 	// Function that creates new scope that haves its own variables and also variables from one scope higher
 	bool Interpreter::newScope(const std::vector<std::string>& l)
 	{
@@ -69,6 +97,8 @@ namespace cll
 		nested->debug = debug;
 		nested->filename = filename;
 		nested->enabledIO = enabledIO;
+		nested->functions = functions;
+		nested->dfunctions = dfunctions;
 		nested->line = (line >= (unsigned int)l.size()) ? (line - (unsigned int)l.size()) : 0;
 
 		for (size_t i = 0; i < l.size(); ++i)
@@ -151,8 +181,6 @@ namespace cll
 				else if (v.size() > 2) error = "Statement 'function' got too many arguments!";
 				else if (v[1].type != UNDEFINED) error = "Illegal name '" + v[1].value + "' after 'function' statement!";
 				else if (var(v[1].value, "").getError() != "") error = "Illegal name '" + v[1].value + "' after 'function' statement!";
-				else if (getVar(v[1].value).type != UNDEFINED) error = "Name '" + v[1].value + "' is already declared!";
-				else if (functions.get(v[1].value).name != "") error = "Name '" + v[1].value + "' is already declared!";
 			}
 			else if (v[0].value == "else")
 			{
@@ -345,10 +373,16 @@ namespace cll
 					std::string fun = v[i].value.substr(0, v[i].value.find("("));
 					std::vector<var> args = math(lexer(v[i].value.substr(fun.length() + 1, v[i].value.length() - fun.length() - 2)));
 					function buff = functions.get(fun);
+					defined dbuff = dfunctions.get(fun);
 
-					if (buff.name != "" && parse({ v[i].value.substr(fun.length(), v[i].value.length() - fun.length()) }))
-						vec.emplace_back(buff.fun(args));
-
+					if (dbuff.name != "" && parse({ v[i].value.substr(fun.length(), v[i].value.length() - fun.length()) }))
+					{
+						vec.emplace_back(newFunction(args, dbuff.lines));
+					}
+					else if (buff.name != "" && parse({ v[i].value.substr(fun.length(), v[i].value.length() - fun.length()) }))
+					{
+						vec.emplace_back(buff.exec(args));
+					}
 					else vec.emplace_back(v[i]);
 				}
 				else
@@ -543,9 +577,7 @@ namespace cll
 			if (scope_action.empty()) state = newScope(scope_lines);
 			else if (scope_action[0].value == "function")
 			{
-				//TODO
-				//customFunction f(scope_action[1].value, nullptr);
-				//addFunction(f);
+				dfunctions.add(defined(scope_action[1].value, scope_lines));
 			}
 			else if (scope_action[0].value == "if" && scope_action[1].getBool()) state = newScope(scope_lines);
 			else if (scope_action[0].value == "else")

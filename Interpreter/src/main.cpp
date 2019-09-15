@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 		//local->enableDebug();
 		local->enableIO();
 
-		std::string input = "";
+		std::string input("");
 
 		std::cout << cll::var("CLL Interpreter [0.2.0] - Bartosz Niciak");
 

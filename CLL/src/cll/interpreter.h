@@ -101,7 +101,7 @@ namespace cll
 		inline void toggleIO()  { enabledIO = !enabledIO; };
 
 		// OTHER PUBLIC METHODS //
-		inline void clearError() { error = ""; }; // Clears error
+		inline void clearError() { error.clear(); }; // Clears error
 		inline bool getReturned() const { return returned; }; 
 		inline unsigned int getScope() const { return scope; };
 		inline unsigned int getLine() const { return line; }; // Returns actual line number

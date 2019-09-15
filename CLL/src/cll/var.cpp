@@ -139,7 +139,7 @@ namespace cll
 		if (value.length() < 1) return;
 
 		size_t actual_element = 0;
-		std::string ins = "";
+		std::string ins("");
 		if (value[0] == '[' || value[0] == '"' || value[0] == '\'') ins = std::string(1, value[0]);
 
 		if (type == ARRAY)

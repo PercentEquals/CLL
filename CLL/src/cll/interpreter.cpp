@@ -565,7 +565,7 @@ namespace cll
 
 		if (scope)
 		{
-			std::string buff = "";
+			std::string buff("");
 			for (size_t i = 0; i < v.size(); ++i) buff += v[i].value + " ";
 			scope_lines.emplace_back(buff);
 			return true;
@@ -658,7 +658,7 @@ namespace cll
 		// CHECKS FOR LINE BREAK (SEMICOLON) AND FOR BRACKETS
 		std::vector<var> args;
 		args.reserve(args_line.size());
-		std::string newline = "";
+		std::string newline("");
 		bool multiline = false;
 			
 		for (size_t i = 0; i < args_line.size(); ++i)
@@ -760,7 +760,7 @@ namespace cll
 		filename = f;
 
 		std::fstream file(filename, std::ios::in);
-		std::string l = "";
+		std::string l("");
 
 		if (file.good())
 		{
@@ -779,7 +779,7 @@ namespace cll
 		else error = "File '" + f + "' could not be opened!";
 
 		line = 0;
-		filename = "";
+		filename.clear();
 		file.close();
 
 		return errorLog();
@@ -797,7 +797,7 @@ namespace cll
 				if (name == "" || name == "()" || name == "[]") return var(n, "");
 
 				std::string buff = n.substr(name.length());
-				std::string raw = "";
+				std::string raw("");
 
 				for (size_t i = 0; i < buff.length(); ++i)
 				{
@@ -852,7 +852,7 @@ namespace cll
 				if (name == "" || name == "()" || name == "[]") return;
 
 				std::string buff = v.name.substr(name.length());
-				std::string raw = "";
+				std::string raw("");
 
 				for (size_t i = 0; i < buff.length(); ++i)
 				{

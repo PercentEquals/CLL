@@ -16,7 +16,7 @@ namespace cll
 	{
 		std::string name; // Holds declared name of variable
 		std::string value; // Holds non-raw value of variable - meaning its value representation depends on detected type
-		Type type; // Holds variable type - (LONG LONG) INT, FLOAT, DOUBLE, CHAR, STRING, UNDEFINED, ARRAY, PARENTHESIS
+		Type type;
 
 		// CONSTRUCTORS //
 		var() : name(""), value(""), type(UNDEFINED) { value.reserve(100); };

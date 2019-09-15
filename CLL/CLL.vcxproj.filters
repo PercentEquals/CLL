@@ -5,6 +5,7 @@
     <ClCompile Include="src\cll\lexer.cpp" />
     <ClCompile Include="src\cll\var.cpp" />
     <ClCompile Include="src\cll\functions.cpp" />
+    <ClCompile Include="src\cll\defined.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CLL.h" />
@@ -15,5 +16,12 @@
     <ClInclude Include="src\cll\functions.h" />
     <ClInclude Include="src\cll\utils\search.h" />
     <ClInclude Include="src\cll\utils\strspn.h" />
+    <ClInclude Include="src\cll\functions\file.h" />
+    <ClInclude Include="src\cll\functions\time.h" />
+    <ClInclude Include="src\cll\functions\header.h" />
+    <ClInclude Include="src\cll\functions\math.h" />
+    <ClInclude Include="src\cll\functions\rand.h" />
+    <ClInclude Include="src\cll\functions\type.h" />
+    <ClInclude Include="src\cll\defined.h" />
   </ItemGroup>
 </Project>

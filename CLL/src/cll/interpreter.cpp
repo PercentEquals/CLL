@@ -431,7 +431,7 @@ namespace cll
 		// MATH WITH OPERATOR PRECEDENCE
 		bool assignment = false;
 
-		for (unsigned char step = 0; step < 13; ++step)
+		for (unsigned char step = 0; step < 14; ++step)
 		{
 			for (size_t i = 0; i < vec.size(); ++i)
 			{
@@ -461,7 +461,7 @@ namespace cll
 						}
 					}
 				}
-				else if (i > 1 && step < 11)
+				else if (i > 1 && step < 12)
 				{
 					if (vec[i - 1].type == SYMBOL)
 					{
@@ -504,11 +504,8 @@ namespace cll
 						else if (step == 7 && vec[i - 1].value == "&") ins = vec[i - 2] & vec[i];
 						else if (step == 8 && vec[i - 1].value == "^") ins = vec[i - 2] ^ vec[i];
 						else if (step == 9 && vec[i - 1].value == "|") ins = vec[i - 2] | vec[i];
-						else if (step == 10)
-						{
-							if (vec[i - 1].value == "&&") ins = vec[i - 2] && vec[i];
-							else if (vec[i - 1].value == "||") ins = vec[i - 2] || vec[i];
-						}
+						else if (step == 10 && vec[i - 1].value == "&&") ins = vec[i - 2] && vec[i];
+						else if (step == 11 && vec[i - 1].value == "||") ins = vec[i - 2] || vec[i];
 
 						if (ins.value != "")
 						{
@@ -518,7 +515,7 @@ namespace cll
 						}
 					}
 				}
-				else if (i > 0 && step == 11)
+				else if (i > 0 && step == 12)
 				{
 					if (vec[i].type == SYMBOL && vec[i].value == "?")
 					{
@@ -543,7 +540,7 @@ namespace cll
 						}
 					}
 				}
-				else if (i > 1 && step == 12)
+				else if (i > 1 && step == 13)
 				{
 					// ASSIGNMENT OPERATORS
 

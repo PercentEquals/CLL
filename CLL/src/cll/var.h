@@ -9,14 +9,14 @@ namespace cll
 {
 	enum Type
 	{
-		UNDEFINED, INT, FLOAT, DOUBLE, CHAR, STRING, ARRAY, PARENTHESIS, SYMBOL, BARE, FUNCTION
+		UNDEFINED, INT, FLOAT, DOUBLE, CHAR, STRING, ARRAY, PARENTHESIS, SYMBOL, BARE
 	};
 
 	struct var
 	{
 		std::string name; // Holds declared name of variable
 		std::string value; // Holds non-raw value of variable - meaning its value representation depends on detected type
-		Type type; // Holds variable type - (LONG LONG) INT, FLOAT, DOUBLE, CHAR, STRING, UNDEFINED, ARRAY, PARENTHESIS
+		Type type;
 
 		// CONSTRUCTORS //
 		var() : name(""), value(""), type(UNDEFINED) { value.reserve(100); };
@@ -50,7 +50,6 @@ namespace cll
 			if (type == PARENTHESIS) return "PARENTHESIS";
 			if (type == SYMBOL) return "SYMBOL";
 			if (type == BARE) return "BARE";
-			if (type == FUNCTION) return "FUNCTION";
 			return "UNDEFINED";
 		};
 

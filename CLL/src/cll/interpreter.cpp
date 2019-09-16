@@ -5,6 +5,7 @@
 #include "utils/search.h"
 #include "lexer.h"
 
+#include <conio.h>
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -64,7 +65,7 @@ namespace cll
 	var Interpreter::newFunction(const std::vector<var>& args, const std::vector<std::string>& l)
 	{
 		var params("[]");
-		for (size_t i = 1; i < args.size(); ++i)
+		for (size_t i = 0; i < args.size(); ++i)
 		{
 			if (args[i].getValue() != ",") params += args[i];
 		}
@@ -84,6 +85,8 @@ namespace cll
 				error = nested->error;
 				return var("0");
 			}
+
+			if (nested->returned.value != "") return nested->returned;
 		}
 
 		return var("1");
@@ -103,6 +106,8 @@ namespace cll
 
 		for (size_t i = 0; i < l.size(); ++i)
 		{
+			nested->continued = false;
+
 			if (!nested->readLine(l[i]))
 			{
 				error = nested->error;
@@ -110,8 +115,12 @@ namespace cll
 			}
 
 			if (filename != "") nested->line++;
+			if (nested->continued || nested->broke) break;
 		}
 	
+		continued = nested->continued;
+		broke = nested->broke;
+
 		// SETTING PREVIOUS (THIS) SCOPE VARIABLES
 		for (size_t i = 0; i < nested->vars.size(); ++i)
 		{
@@ -120,6 +129,7 @@ namespace cll
 		}
 
 		returned = nested->returned;
+		if (returned.value != "") return false;
 		return true;
 	}
 
@@ -130,6 +140,7 @@ namespace cll
 
 		if (v[0].type == SYMBOL && v[0].value == "}" && !scope) error = "Unexpected symbol '}' - nothing to close!";
 		if (v[0].type == SYMBOL && v[0].value != "{" && v.size() == 1) error = "Unexpected symbol '" + v[0].value + "'!";
+		if (v[0].type == SYMBOL && v[0].value != "-" && v[0].value != "~" && v.size() > 1) error = "Unexpected symbol '" + v[0].value + "'!";
 		if (error != "") return false;
 
 		// CHECKS FOR MULTIPLE BARE WORDS
@@ -164,7 +175,10 @@ namespace cll
 					if (error != "") break;
 				}
 			}
+			else if (v[0].value == "continue" && v.size() > 1) error = "Statement 'continue' got too much arguments!";
+			else if (v[0].value == "break" && v.size() > 1) error = "Statement 'break' got too much arguments!";
 			else if (v[0].value == "cll" && v.size() < 2) error = "Statement 'cll' got too few arguments!";
+			else if (v[0].value == "include" && v.size() < 2) error = "Statement 'include' got too few arguments!";
 			else if ((v[0].value == "if" || v[0].value == "while") && v.size() < 2) error = "Statement '" + v[0].value + "' got too few arguments!";
 			else if (v[0].value == "do" && v.size() < 3) error = "Statement 'do while' got too few arguments!";
 			else if (v[0].value == "for")
@@ -302,14 +316,11 @@ namespace cll
 		{
 			if (v[0].value == "return")
 			{
-				returned = true;
+				if (v.size() < 2) returned = var("1");
+				else returned = v[1];
 				return false;
 			}
-			else if (v[0].value == "pause")
-			{
-				std::string buff;
-				std::getline(std::cin, buff);
-			}
+			else if (v[0].value == "pause") while (!_kbhit()) { std::this_thread::sleep_for(std::chrono::milliseconds(10)); }
 			else if (v[0].value == "cout")
 			{
 				for (size_t i = 1; i < v.size(); ++i)
@@ -325,19 +336,35 @@ namespace cll
 					std::string buff;
 					std::getline(std::cin, buff);
 					var test(buff);
-					if (test.type == UNDEFINED || test.type == BARE || test.type == FUNCTION) buff = "\"" + buff + "\"";
+					if (test.type == UNDEFINED || test.type == BARE) buff = "\"" + buff + "\"";
 					setVar(v[i].name, buff);
 				}
 			}
 			else if (v[0].value == "if" || v[0].value == "while" || v[0].value == "else" || v[0].value == "do" || v[0].value == "for" || v[0].value == "function")
 			{
-				for(size_t i = 0; i < v.size(); ++i) scope_action.emplace_back(v[i]);
+				for (size_t i = 0; i < v.size(); ++i) scope_action.emplace_back(v[i]);
 			}
 			else if (v[0].value == "delete")
 			{
 				for (size_t i = 1; i < v.size(); ++i) if (v[i].type != SYMBOL) deleteVar(v[i].name);
 			}
 			else if (v[0].value == "cll") return newInterpreter(v);
+			else if (v[0].value == "continue") continued = true;
+			else if (v[0].value == "break") broke = true;
+			else if (v[0].value == "include")
+			{
+				std::fstream buff(v[1].getString(), std::ios::in, std::ios::binary);
+				std::string l;
+
+				if (buff.good())
+				{
+					while (getline(buff, l))
+					{
+						if (!readLine(l)) return errorLog();
+					}
+				}
+				else error = "File '" + v[1].getString() + "' could not be included!";
+			}
 		}
 		else if (v[0].value == "{" && v[0].type == SYMBOL) scope = 1;
 		//else if (v.size() == 1 && v[0].type != UNDEFINED) write(v[0].value + " " + v[0].getType());
@@ -361,9 +388,14 @@ namespace cll
 			else if (v[i].type == ARRAY)
 			{
 				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)));
-				std::string arr = "[";
-				for (size_t i = 0; i < buff.size(); ++i) arr += buff[i].value;
-				arr += "]";
+				var arr("[]");
+				for (size_t i = 0; i < buff.size(); ++i)
+				{
+					if (buff[i].value != ",")
+					{
+						arr += buff[i];
+					}
+				}
 				vec.emplace_back(arr);
 			}
 			else if(v[i].type == UNDEFINED)
@@ -565,7 +597,7 @@ namespace cll
 
 		if (scope)
 		{
-			std::string buff = "";
+			std::string buff("");
 			for (size_t i = 0; i < v.size(); ++i) buff += v[i].value + " ";
 			scope_lines.emplace_back(buff);
 			return true;
@@ -590,7 +622,9 @@ namespace cll
 				while (math(scope_action)[1].getBool())
 				{
 					state = newScope(scope_lines);
-					if (!state) break;
+
+					if (continued) continue;
+					if (broke || !state) break;
 				}
 			}
 			else if (scope_action[0].value == "for")
@@ -618,8 +652,10 @@ namespace cll
 				while (math(loop)[0].getBool())
 				{
 					state = newScope(scope_lines);
-					if (!state) break;
 					math(incr);
+
+					if (continued) continue;
+					if (broke || !state) break;
 				}
 
 				if (name.size() > 1) deleteVar(buff);
@@ -632,7 +668,9 @@ namespace cll
 					while (math(scope_action)[2].getBool())
 					{
 						state = newScope(scope_lines);
-						if (!state) break;
+
+						if (continued) continue;
+						if (broke || !state) break;
 					}
 				}
 			}
@@ -658,7 +696,7 @@ namespace cll
 		// CHECKS FOR LINE BREAK (SEMICOLON) AND FOR BRACKETS
 		std::vector<var> args;
 		args.reserve(args_line.size());
-		std::string newline = "";
+		std::string newline("");
 		bool multiline = false;
 			
 		for (size_t i = 0; i < args_line.size(); ++i)
@@ -760,7 +798,7 @@ namespace cll
 		filename = f;
 
 		std::fstream file(filename, std::ios::in);
-		std::string l = "";
+		std::string l("");
 
 		if (file.good())
 		{
@@ -771,7 +809,7 @@ namespace cll
 				{
 					file.close();
 
-					if (returned) return true;
+					if (returned.value == "") return true;
 					else return false;
 				}
 			}
@@ -779,7 +817,7 @@ namespace cll
 		else error = "File '" + f + "' could not be opened!";
 
 		line = 0;
-		filename = "";
+		filename.clear();
 		file.close();
 
 		return errorLog();
@@ -797,7 +835,7 @@ namespace cll
 				if (name == "" || name == "()" || name == "[]") return var(n, "");
 
 				std::string buff = n.substr(name.length());
-				std::string raw = "";
+				std::string raw("");
 
 				for (size_t i = 0; i < buff.length(); ++i)
 				{
@@ -852,7 +890,7 @@ namespace cll
 				if (name == "" || name == "()" || name == "[]") return;
 
 				std::string buff = v.name.substr(name.length());
-				std::string raw = "";
+				std::string raw("");
 
 				for (size_t i = 0; i < buff.length(); ++i)
 				{

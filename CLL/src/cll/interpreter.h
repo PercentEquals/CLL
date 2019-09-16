@@ -30,7 +30,9 @@ namespace cll
 
 		// OTHER VARIABLES
 		unsigned int line; // Actual line number of file - to show where error took place
-		bool returned; // If true - closes program execution (when using 'return' command)
+		var returned;
+		bool continued;
+		bool broke;
 		bool log; // Determines wheter to output errors or not
 		bool debug; // Determines wheter to output additional debug information about tokens
 		bool enabledIO;
@@ -49,7 +51,7 @@ namespace cll
 	public:
 
 		// CONSTRUCTORS //
-		Interpreter() : error(""), filename(""), scope(0), line(0), returned(false), log(false), debug(false), enabledIO(false) 
+		Interpreter() : error(""), filename(""), scope(0), line(0), returned(""), continued(false), broke(false), log(false), debug(false), enabledIO(false) 
 		{
 			vars.reserve(1000);
 
@@ -101,8 +103,8 @@ namespace cll
 		inline void toggleIO()  { enabledIO = !enabledIO; };
 
 		// OTHER PUBLIC METHODS //
-		inline void clearError() { error = ""; }; // Clears error
-		inline bool getReturned() const { return returned; }; 
+		inline void clearError() { error.clear(); }; // Clears error
+		inline var getReturned() const { return returned; }; 
 		inline unsigned int getScope() const { return scope; };
 		inline unsigned int getLine() const { return line; }; // Returns actual line number
 		inline std::string getFilename() const { return filename; }; // Returns non-empty string if interpreter interpretes a file

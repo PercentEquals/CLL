@@ -56,9 +56,9 @@ int main(int argc, char* argv[])
 		//local->enableDebug();
 		local->enableIO();
 
-		std::string input = "";
+		std::string input("");
 
-		std::cout << cll::var("CLL Interpreter [0.2.0] - Bartosz Niciak");
+		std::cout << cll::var("CLL Interpreter [0.3.0] - Bartosz Niciak");
 
 		do 
 		{
@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
 			if (!local->readLine(input)) errorLog(local);
 			local->clearError();
 		} 
-		while (!local->getReturned());
+		while (local->getReturned().getValue() == "");
 	}
 
 	console::reset();

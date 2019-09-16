@@ -389,14 +389,9 @@ namespace cll
 			else if (v[i].type == ARRAY)
 			{
 				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)));
-				var arr("[]");
-				for (size_t i = 0; i < buff.size(); ++i)
-				{
-					if (buff[i].value != ",")
-					{
-						arr += buff[i];
-					}
-				}
+				std::string arr = "[";
+				for (size_t i = 0; i < buff.size(); ++i) arr += buff[i].value;
+				arr += "]";
 				vec.emplace_back(arr);
 			}
 			else if(v[i].type == UNDEFINED)

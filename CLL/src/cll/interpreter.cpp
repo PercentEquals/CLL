@@ -106,6 +106,8 @@ namespace cll
 
 		for (size_t i = 0; i < l.size(); ++i)
 		{
+			nested->continued = false;
+
 			if (!nested->readLine(l[i]))
 			{
 				error = nested->error;
@@ -113,8 +115,12 @@ namespace cll
 			}
 
 			if (filename != "") nested->line++;
+			if (nested->continued || nested->broke) break;
 		}
 	
+		continued = nested->continued;
+		broke = nested->broke;
+
 		// SETTING PREVIOUS (THIS) SCOPE VARIABLES
 		for (size_t i = 0; i < nested->vars.size(); ++i)
 		{
@@ -616,6 +622,9 @@ namespace cll
 				while (math(scope_action)[1].getBool())
 				{
 					state = newScope(scope_lines);
+
+					if (continued) continue;
+					if (broke || !state) break;
 				}
 			}
 			else if (scope_action[0].value == "for")
@@ -643,8 +652,10 @@ namespace cll
 				while (math(loop)[0].getBool())
 				{
 					state = newScope(scope_lines);
-					if (!state) break;
 					math(incr);
+
+					if (continued) continue;
+					if (broke || !state) break;
 				}
 
 				if (name.size() > 1) deleteVar(buff);
@@ -657,7 +668,9 @@ namespace cll
 					while (math(scope_action)[2].getBool())
 					{
 						state = newScope(scope_lines);
-						if (!state) break;
+
+						if (continued) continue;
+						if (broke || !state) break;
 					}
 				}
 			}

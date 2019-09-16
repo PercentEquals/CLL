@@ -1,0 +1,29 @@
+cout "How many primes to find: "
+cin primes
+
+start = time("ms")
+
+vec = []
+i = 2
+while i < primes
+{
+	prime = true
+	ii = i - 1
+
+	while ii > 1
+	{
+		if i%ii == 0
+		{
+			prime = false
+			ii = 1
+		}
+		ii-=1
+	}
+
+	if prime; vec += i
+
+	i+=1
+}
+
+cout vec endl
+cout "TIME: " time("ms")-start

@@ -58,7 +58,11 @@ namespace cll
 		nested->setVar("params", params);
 
 		bool state = nested->readFile(v[1].getString());
-		if (!state) error = nested->error;
+		if (!state)
+		{
+			if (nested->line != 0) error = "Error in file '" + nested->filename + "' on line " + std::to_string(nested->line) + ":\n";
+			error += nested->error;
+		}
 		return state;
 	}
 
@@ -349,7 +353,11 @@ namespace cll
 			{
 				for (size_t i = 1; i < v.size(); ++i) if (v[i].type != SYMBOL) deleteVar(v[i].name);
 			}
-			else if (v[0].value == "cll") return newInterpreter(v);
+			else if (v[0].value == "cll")
+			{
+				bool state = newInterpreter(v);
+				if (!state) return errorLog();
+			}
 			else if (v[0].value == "continue") continued = true;
 			else if (v[0].value == "break") broke = true;
 			else if (v[0].value == "include")
@@ -802,7 +810,8 @@ namespace cll
 				{
 					file.close();
 
-					if (returned.value == "") return true;
+					if (error != "") return false;
+					else if (returned.value == "") return true;
 					else return false;
 				}
 			}

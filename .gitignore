@@ -21,11 +21,10 @@ ipch/
 
 # Other
 
-*.cll
+Interpreter/*.cll
 Debug/
 Release/
 
 # For development period
 
 CLL/lib/
-Examples/

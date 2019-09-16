@@ -163,6 +163,7 @@ namespace cll
 		{
 			// CHECKS FOR BARE WORD UNIQUE SYNTAX
 			if (v[0].value == "cout" && v.size() < 2) error = "Statement 'cout' got too few arguments!";
+			else if (v[0].value == "cin" && v.size() < 2) error = "Statement 'cin' got too few arguments!";
 			else if (v[0].value == "delete")
 			{
 				if (v.size() < 2) error = "Statement 'delete' got too few arguments!";
@@ -281,7 +282,7 @@ namespace cll
 
 				return true;
 			}
-			else if (v[i].type == UNDEFINED && v[0].value != "function")
+			else if (v[i].type == UNDEFINED && v[0].value != "function" && v[0].value != "cin")
 			{
 				if (i + 1 < v.size() && v[i].value.find_first_of("[]") == std::string::npos)
 				{
@@ -337,7 +338,7 @@ namespace cll
 					std::getline(std::cin, buff);
 					var test(buff);
 					if (test.type == UNDEFINED || test.type == BARE) buff = "\"" + buff + "\"";
-					setVar(v[i].name, buff);
+					setVar((v[i].name != "") ? v[i].name : v[i].value, buff);
 				}
 			}
 			else if (v[0].value == "if" || v[0].value == "while" || v[0].value == "else" || v[0].value == "do" || v[0].value == "for" || v[0].value == "function")
@@ -773,7 +774,7 @@ namespace cll
 			if (args.size() != 0) write("\n");
 		}
 
-		if (args[0].value != "while" && args[0].value != "for" && args[0].value != "function")
+		if (args[0].value != "while" && args[0].value != "for" && args[0].value != "function" && args[0].value != "cin")
 		{
 			for (size_t i = 0; i < args.size(); ++i)
 			{

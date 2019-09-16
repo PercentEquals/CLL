@@ -9,7 +9,7 @@ namespace cll
 {
 	enum Type
 	{
-		UNDEFINED, INT, FLOAT, DOUBLE, CHAR, STRING, ARRAY, PARENTHESIS, SYMBOL, BARE, FUNCTION
+		UNDEFINED, INT, FLOAT, DOUBLE, CHAR, STRING, ARRAY, PARENTHESIS, SYMBOL, BARE
 	};
 
 	struct var
@@ -50,7 +50,6 @@ namespace cll
 			if (type == PARENTHESIS) return "PARENTHESIS";
 			if (type == SYMBOL) return "SYMBOL";
 			if (type == BARE) return "BARE";
-			if (type == FUNCTION) return "FUNCTION";
 			return "UNDEFINED";
 		};
 

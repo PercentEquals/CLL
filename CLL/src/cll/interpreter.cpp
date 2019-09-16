@@ -5,6 +5,7 @@
 #include "utils/search.h"
 #include "lexer.h"
 
+#include <conio.h>
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -133,6 +134,7 @@ namespace cll
 
 		if (v[0].type == SYMBOL && v[0].value == "}" && !scope) error = "Unexpected symbol '}' - nothing to close!";
 		if (v[0].type == SYMBOL && v[0].value != "{" && v.size() == 1) error = "Unexpected symbol '" + v[0].value + "'!";
+		if (v[0].type == SYMBOL && v[0].value != "-" && v[0].value != "~" && v.size() > 1) error = "Unexpected symbol '" + v[0].value + "'!";
 		if (error != "") return false;
 
 		// CHECKS FOR MULTIPLE BARE WORDS
@@ -312,11 +314,7 @@ namespace cll
 				else returned = v[1];
 				return false;
 			}
-			else if (v[0].value == "pause")
-			{
-				std::string buff;
-				std::getline(std::cin, buff);
-			}
+			else if (v[0].value == "pause") while (!_kbhit()) { std::this_thread::sleep_for(std::chrono::milliseconds(10)); }
 			else if (v[0].value == "cout")
 			{
 				for (size_t i = 1; i < v.size(); ++i)
@@ -332,7 +330,7 @@ namespace cll
 					std::string buff;
 					std::getline(std::cin, buff);
 					var test(buff);
-					if (test.type == UNDEFINED || test.type == BARE || test.type == FUNCTION) buff = "\"" + buff + "\"";
+					if (test.type == UNDEFINED || test.type == BARE) buff = "\"" + buff + "\"";
 					setVar(v[i].name, buff);
 				}
 			}
@@ -384,9 +382,14 @@ namespace cll
 			else if (v[i].type == ARRAY)
 			{
 				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)));
-				std::string arr = "[";
-				for (size_t i = 0; i < buff.size(); ++i) arr += buff[i].value;
-				arr += "]";
+				var arr("[]");
+				for (size_t i = 0; i < buff.size(); ++i)
+				{
+					if (buff[i].value != ",")
+					{
+						arr += buff[i];
+					}
+				}
 				vec.emplace_back(arr);
 			}
 			else if(v[i].type == UNDEFINED)

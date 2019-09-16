@@ -148,15 +148,13 @@ namespace cll
 
 			for (size_t i = 0; i < buff.size(); ++i)
 			{
-				if (buff[i].type != SYMBOL && buff[i].value != ",")
+				if (buff[i].type == SYMBOL && buff[i].value == ",") actual_element++;
+				else if (actual_element == n)
 				{
-					if (actual_element == n)
-					{
-						ins += v.value;
-						continue;
-					}
+					if (buff[i].type == SYMBOL && buff[i].value == "-") continue;
+					ins += v.value;
+					continue;
 				}
-				else actual_element++;
 
 				if (actual_element == n && v.value == "") continue;
 
@@ -259,15 +257,15 @@ namespace cll
 		{
 			std::vector<var> buff = lexer(value.substr(1, value.length() - 2));
 			size_t actual_element = 0;
+			std::string ret("");
 
 			for (size_t i = 0; i < buff.size(); ++i)
 			{
-				if (buff[i].type != SYMBOL && buff[i].value != ",")
-				{
-					if (actual_element == n) return buff[i];
-				}
-				else actual_element++;
+				if (buff[i].type == SYMBOL && buff[i].value == ",") actual_element++;
+				else if (actual_element == n) ret += buff[i].value;//return buff[i];
 			}
+
+			return ret;
 		}
 		else if (n < getSize()) return var("'" + std::string(1, value[n]) + "'");
 

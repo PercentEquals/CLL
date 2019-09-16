@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 
 		std::string input("");
 
-		std::cout << cll::var("CLL Interpreter [0.3.0] - Bartosz Niciak");
+		std::cout << cll::var("CLL Interpreter [0.3.1] - Bartosz Niciak");
 
 		do 
 		{

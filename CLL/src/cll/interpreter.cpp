@@ -271,7 +271,18 @@ namespace cll
 				std::vector<var> buff;
 				
 				if (v[i].type == ARRAY || v[i].type == PARENTHESIS) buff = lexer(v[i].value.substr(1, v[i].value.length() - 2));
-				else buff = lexer(v[i].value.substr(v[i].value.rfind("["), v[i].value.length() - 2));
+				else
+				{
+					size_t nests = 0, ii = v[i].value.length() - 1;
+					for (ii; ii != 0; --ii)
+					{
+						if (v[i].value[ii] == ']') nests++;
+						if (v[i].value[ii] == '[') nests--;
+						if (nests == 0) break;
+					}
+
+					buff = lexer(v[i].value.substr(ii + 1, v[i].value.length() - ii - 2));
+				}
 
 				for (size_t ii = 0; ii < buff.size(); ++ii)
 				{
@@ -328,7 +339,10 @@ namespace cll
 				else returned = v[1];
 				return false;
 			}
-			else if (v[0].value == "pause") while (!_kbhit()) { std::this_thread::sleep_for(std::chrono::milliseconds(10)); }
+			else if (v[0].value == "pause")
+			{
+				while (!_kbhit()) std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			}
 			else if (v[0].value == "cout")
 			{
 				for (size_t i = 1; i < v.size(); ++i)
@@ -584,7 +598,10 @@ namespace cll
 					assignment = true;
 
 					vec.erase(vec.end() - i - 1, vec.end() - i + 2);
-					vec.insert(vec.end() - (i - 2), ins);
+
+					if (getVar(ins.name).value != "") vec.insert(vec.end() - (i - 2), ins);
+					else vec.insert(vec.end() - (i - 2), fvar);
+
 					i -= 2;
 				}
 			}
@@ -837,19 +854,20 @@ namespace cll
 			if (n[n.length() - 1] == ']')
 			{
 				bool literal = false;
-				std::string name = n.substr(0, n.rfind("["));
-				if (name == "" || name == "()" || name == "[]") return var(n, "");
 
-				std::string buff = n.substr(name.length());
-				std::string raw("");
-
-				for (size_t i = 0; i < buff.length(); ++i)
+				size_t nests = 0, ii = n.length() - 1;
+				for (ii; ii != 0; --ii)
 				{
-					if (buff[i] != '[' && buff[i] != ']') raw += buff[i];
-					if (buff[i] == ']') raw += ' ';
+					if (n[ii] == ']') nests++;
+					if (n[ii] == '[') nests--;
+					if (nests == 0) break;
 				}
 
-				std::vector<var> elem = math(lexer(raw));
+				std::string buff = n.substr(ii + 1, n.length() - ii - 2);
+				std::string name = n.substr(0, ii);
+				if (name == "" || name == "()" || name == "[]") return var(n, "");
+
+				std::vector<var> elem = math(lexer(buff));
 				if (elem.empty()) return var(n, "");
 
 				var ret = getVar(name);
@@ -860,7 +878,7 @@ namespace cll
 
 					if (test.type != BARE && test.type != UNDEFINED)
 					{
-						ret = math(lexer(name))[0].getElement((size_t)elem[0].getInt()); // String literals, arrays and parenthesis
+						ret = math(lexer(name))[0].getElement(size_t(elem[0].getInt())); // String literals, arrays and parenthesis
 						literal = true;
 					}
 				}
@@ -892,19 +910,19 @@ namespace cll
 		{
 			if (v.name[v.name.length() - 1] == ']')
 			{
-				std::string name = v.name.substr(0, v.name.rfind("["));
-				if (name == "" || name == "()" || name == "[]") return;
-
-				std::string buff = v.name.substr(name.length());
-				std::string raw("");
-
-				for (size_t i = 0; i < buff.length(); ++i)
+				size_t nests = 0, ii = v.name.length() - 1;
+				for (ii; ii != 0; --ii)
 				{
-					if (buff[i] != '[' && buff[i] != ']') raw += buff[i];
-					if (buff[i] == ']') raw += ' ';
+					if (v.name[ii] == ']') nests++;
+					if (v.name[ii] == '[') nests--;
+					if (nests == 0) break;
 				}
 
-				std::vector<var> elem = math(lexer(raw));
+				std::string buff = v.name.substr(ii + 1, v.name.length() - ii - 2);
+				std::string name = v.name.substr(0, ii);
+				if (name == "" || name == "()" || name == "[]") return;
+
+				std::vector<var> elem = math(lexer(buff));
 				if (elem.empty()) return;
 
 				var ret = getVar(name);

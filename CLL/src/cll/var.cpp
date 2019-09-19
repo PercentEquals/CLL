@@ -186,7 +186,8 @@ namespace cll
 
 				if ((actual_element - 1) == n)
 				{
-					ins += v.getString();
+					if (v.type == STRING) ins += v.getString();
+					if (v.type == INT) ins += std::string(1, v.getInt());
 					continue;
 				}
 
@@ -257,7 +258,7 @@ namespace cll
 			for (size_t i = 0; i < buff.size(); ++i)
 			{
 				if (buff[i].type == SYMBOL && buff[i].value == ",") actual_element++;
-				else if (actual_element == n) ret += buff[i].value;//return buff[i];
+				else if (actual_element == n) ret += buff[i].value;
 			}
 
 			return ret;

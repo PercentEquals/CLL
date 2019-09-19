@@ -79,6 +79,7 @@ namespace cll
 									{
 										if (it + ii >= end) break;
 										if (*(it + ii) == multi_symbols[i][ii]) mult += *(it + ii);
+										else break;
 									}
 
 									if (mult == multi_symbols[i]) special = mult;

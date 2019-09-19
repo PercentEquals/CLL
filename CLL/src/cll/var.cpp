@@ -107,8 +107,23 @@ namespace cll
 		if (type == STRING) value = v;
 		else if (type == CHAR)
 		{
-			// TODO: make it behave like char
-			value = (v.length() < 3) ? "'\\0'" : v;
+			if (v.length() == 3) value = std::to_string(int(v[1]));
+			else
+			{
+				if (v == "'\\0'")		value = std::to_string(int('\0'));
+				else if (v == "'\\n'")	value = std::to_string(int('\n'));
+				else if (v == "'\\t'")	value = std::to_string(int('\t'));
+				else if (v == "'\\v'")	value = std::to_string(int('\v'));
+				else if (v == "'\\b'")	value = std::to_string(int('\b'));
+				else if (v == "'\\r'")	value = std::to_string(int('\r'));
+				else if (v == "'\\f'")	value = std::to_string(int('\f'));
+				else if (v == "'\\a'")	value = std::to_string(int('\a'));
+				else if (v == "'\\\\'")	value = std::to_string(int('\\'));
+				else if (v == "'\\?'")	value = std::to_string(int('\?'));
+				else if (v == "'\\''")	value = std::to_string(int('\''));
+				else if (v == "'\\\"'")	value = std::to_string(int('\"'));
+				else value = "0";
+			}
 		}
 		else if (type == INT || type == FLOAT || type == DOUBLE)
 		{
@@ -187,26 +202,6 @@ namespace cll
 	long long int var::getInt() const
 	{
 		if (type == STRING || type == ARRAY) return getSize();
-		else if (type == CHAR)
-		{
-			if (value.length() == 3) return int(value[1]);
-			else
-			{
-				if (value == "'\\0'")		return int('\0');
-				else if (value == "'\\n'")	return int('\n');
-				else if (value == "'\\t'")	return int('\t');
-				else if (value == "'\\v'")	return int('\v');
-				else if (value == "'\\b'")	return int('\b');
-				else if (value == "'\\r'")	return int('\r');
-				else if (value == "'\\f'")	return int('\f');
-				else if (value == "'\\a'")	return int('\a');
-				else if (value == "'\\\\'")	return int('\\');
-				else if (value == "'\\?'")	return int('\?');
-				else if (value == "'\\''")	return int('\'');
-				else if (value == "'\\\"'")	return int('\"');
-				else return 0;
-			}
-		}
 		else
 		{
 			try { return std::stoll(value); }
@@ -476,7 +471,7 @@ namespace cll
 	{
 		std::string val = value;
 
-		if (type == STRING) val = getString();
+		if (type == STRING) val = getValue();
 		else if (type == INT || type == CHAR)
 		{
 			if (v.type == DOUBLE) val = std::to_string(getInt() - v.getDouble());

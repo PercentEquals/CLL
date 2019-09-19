@@ -224,7 +224,7 @@ namespace cll
 			if (i == 0 && v[i].type == BARE) continue;
 			if (i == 1 && v[0].type == BARE && v[0].value == "else" && v[1].value == "if") continue;
 
-			if (i > 0 && v[i].type == SYMBOL && v[i].value != "-" && v[i].value != "!")
+			if (i > 0 && v[i].type == SYMBOL)
 			{
 				// TERNARY CHECK
 				if (v[i].value == "?")
@@ -250,12 +250,12 @@ namespace cll
 					}
 				}
 
-				if (v[i - 1].type == BARE)
+				if (v[i - 1].type == BARE && v[i].value != "-" && v[i].value != "!")
 				{
 					error = "Unexpected symbol '" + v[i].value + "' after '" + v[i - 1].value + "' statement!"; break;
 				}
 
-				if (v[i - 1].type == SYMBOL)
+				if (v[i - 1].type == SYMBOL && v[i].value != "-" && v[i].value != "!")
 				{
 					error = "Unexpected symbol '" + v[i].value + "' after '" + v[i - 1].value + "' symbol!"; break;
 				}
@@ -454,7 +454,7 @@ namespace cll
 							else if (vec[i - 1].value == "~") ins = ~vec[i];
 							else if (vec[i - 1].value == "-")
 							{
-								if (i > 1 && vec[i - 2].type != SYMBOL) continue;
+								if (i > 1 && (vec[i - 2].type != SYMBOL && vec[i - 2].type != BARE)) continue;
 								ins = var("0") - vec[i];
 							}
 
@@ -574,6 +574,7 @@ namespace cll
 					else continue;
 
 					ins.setName((fvar.name == "") ? fvar.value : fvar.name);
+					if(lvar.type == CHAR && ins.type == INT) ins.type = lvar.type;
 					
 					setVar(ins);
 

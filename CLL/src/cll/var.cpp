@@ -336,6 +336,12 @@ namespace cll
 		else if (getDouble() == v.getDouble()) val = "1";
 		else val = "0";
 
+		if (type == STRING && v.type == STRING)
+		{
+			if (getString() != v.getString()) val = "0";
+			else val = "1";
+		}
+
 		return var(val);
 	}
 

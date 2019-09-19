@@ -592,7 +592,7 @@ namespace cll
 		{
 			if (v.type == DOUBLE) val = std::to_string(std::pow(getFloat(), v.getDouble()));
 			else if (v.type == FLOAT) val = std::to_string(std::powf(getFloat(), v.getFloat()));
-			else val = std::to_string(std::pow(getInt(), v.getInt()));
+			else val = std::to_string((int)std::pow(getInt(), v.getInt()));
 		}
 		else if (type == FLOAT)
 		{

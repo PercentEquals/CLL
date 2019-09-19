@@ -266,9 +266,12 @@ namespace cll
 				}
 			}
 
-			if (v[i].type == ARRAY || v[i].type == PARENTHESIS)
+			if (v[i].type == ARRAY || v[i].type == PARENTHESIS || v[i].value[v[i].value.length() - 1] == ']')
 			{
-				std::vector<var> buff = lexer(v[i].value.substr(1, v[i].value.length() - 2));
+				std::vector<var> buff;
+				
+				if (v[i].type == ARRAY || v[i].type == PARENTHESIS) buff = lexer(v[i].value.substr(1, v[i].value.length() - 2));
+				else buff = lexer(v[i].value.substr(v[i].value.rfind("["), v[i].value.length() - 2));
 
 				for (size_t ii = 0; ii < buff.size(); ++ii)
 				{

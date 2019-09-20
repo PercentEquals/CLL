@@ -107,23 +107,28 @@ namespace cll
 		if (type == STRING) value = v;
 		else if (type == CHAR)
 		{
-			if (v.length() == 3) value = std::to_string(int(v[1]));
+			value = "'";
+
+			if (v.length() == 3) value += std::to_string(int(v[1]));
+			else if (var(v.substr(1, v.length() - 2)).type == INT) value += v.substr(1, v.length() - 2);
 			else
 			{
-				if (v == "'\\0'")		value = std::to_string(int('\0'));
-				else if (v == "'\\n'")	value = std::to_string(int('\n'));
-				else if (v == "'\\t'")	value = std::to_string(int('\t'));
-				else if (v == "'\\v'")	value = std::to_string(int('\v'));
-				else if (v == "'\\b'")	value = std::to_string(int('\b'));
-				else if (v == "'\\r'")	value = std::to_string(int('\r'));
-				else if (v == "'\\f'")	value = std::to_string(int('\f'));
-				else if (v == "'\\a'")	value = std::to_string(int('\a'));
-				else if (v == "'\\\\'")	value = std::to_string(int('\\'));
-				else if (v == "'\\?'")	value = std::to_string(int('\?'));
-				else if (v == "'\\''")	value = std::to_string(int('\''));
-				else if (v == "'\\\"'")	value = std::to_string(int('\"'));
-				else value = "0";
+				if (v == "'\\0'")		value += std::to_string(int('\0'));
+				else if (v == "'\\n'")	value += std::to_string(int('\n'));
+				else if (v == "'\\t'")	value += std::to_string(int('\t'));
+				else if (v == "'\\v'")	value += std::to_string(int('\v'));
+				else if (v == "'\\b'")	value += std::to_string(int('\b'));
+				else if (v == "'\\r'")	value += std::to_string(int('\r'));
+				else if (v == "'\\f'")	value += std::to_string(int('\f'));
+				else if (v == "'\\a'")	value += std::to_string(int('\a'));
+				else if (v == "'\\\\'")	value += std::to_string(int('\\'));
+				else if (v == "'\\?'")	value += std::to_string(int('\?'));
+				else if (v == "'\\''")	value += std::to_string(int('\''));
+				else if (v == "'\\\"'")	value += std::to_string(int('\"'));
+				else value += "0";
 			}
+
+			value += "'";
 		}
 		else if (type == INT || type == FLOAT || type == DOUBLE)
 		{
@@ -205,7 +210,11 @@ namespace cll
 		if (type == STRING || type == ARRAY) return getSize();
 		else
 		{
-			try { return std::stoll(value); }
+			try 
+			{ 
+				if (type == CHAR) return std::stoll(value.substr(1, value.length() - 2));
+				else return std::stoll(value); 
+			}
 			catch (const std::invalid_argument&) { return 0; }
 			catch (const std::out_of_range&) { return 0; }
 		}

@@ -591,7 +591,6 @@ namespace cll
 					else continue;
 
 					ins.setName((fvar.name == "") ? fvar.value : fvar.name);
-					if(lvar.type == CHAR && ins.type == INT) ins.type = lvar.type;
 					
 					setVar(ins);
 

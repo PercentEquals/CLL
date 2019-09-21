@@ -520,7 +520,7 @@ namespace cll
 		if (type == STRING)
 		{
 			val = '"' + getString();
-			if (v.getInt() > 0) for (int i = 0; i < v.getInt(); ++i) val += getString();
+			if (v.getInt() > 0) for (int i = 1; i < v.getInt(); ++i) val += getString();
 			val += '"';
 		}
 		else if (type == INT || type == CHAR)

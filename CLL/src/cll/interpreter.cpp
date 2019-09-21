@@ -813,6 +813,21 @@ namespace cll
 		return true;
 	}
 
+	bool Interpreter::readVector(const std::vector<std::string>& v)
+	{
+		for (size_t i = 0; i < v.size(); ++i)
+		{
+			if (!readLine(v[i]))
+			{
+				if (error != "") return false;
+				else if (returned.value == "") return true;
+				else return false;
+			}
+		}
+
+		return errorLog();
+	}
+
 	// Function that interpretes whole file line by line
 	bool Interpreter::readFile(const std::string& f)
 	{

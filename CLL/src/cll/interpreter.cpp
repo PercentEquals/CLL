@@ -311,7 +311,7 @@ namespace cll
 					}
 				}
 
-				if (v[i].value.find("(") == std::string::npos && getVar(v[i].value).type == UNDEFINED)
+				if (getVar(v[i].value).type == UNDEFINED && v[i].value.find("(") == std::string::npos)
 				{
 					if (std::find(defined.begin(), defined.end(), v[i].value) == defined.end())
 					{
@@ -362,7 +362,7 @@ namespace cll
 					setVar((v[i].name != "") ? v[i].name : v[i].value, buff);
 				}
 			}
-			else if (v[0].value == "if" || v[0].value == "while" || v[0].value == "else" || v[0].value == "do" || v[0].value == "for" || v[0].value == "function")
+			else if (v[0].value == "if" || v[0].value == "while" || v[0].value == "for" || v[0].value == "else" || v[0].value == "do" || v[0].value == "function")
 			{
 				for (size_t i = 0; i < v.size(); ++i) scope_action.emplace_back(v[i]);
 			}
@@ -775,8 +775,11 @@ namespace cll
 		// PARSER
 		if (!parse(args)) return errorLog();
 
+		std::vector<var> old_args = args;
+
 		// APPLIES MATH TO TOKENS
-		if (args[0].value != "while" && args[0].value != "for") args = math(args);
+		args = math(args);
+
 		if (error != "") return errorLog();
 		if (args.empty()) return true;
 
@@ -794,7 +797,7 @@ namespace cll
 			if (args.size() != 0) write("\n");
 		}
 
-		if (args[0].value != "while" && args[0].value != "for" && args[0].value != "function" && args[0].value != "cin")
+		if (args[0].value != "function" && args[0].value != "cin")
 		{
 			for (size_t i = 0; i < args.size(); ++i)
 			{
@@ -807,7 +810,11 @@ namespace cll
 		}
 
 		// INTERPRETS ARGUMENTS
-		if (!bare(args)) return errorLog();
+		if (args[0].value == "do" || args[0].value == "while" || args[0].value == "for")
+		{
+			if (!bare(old_args)) return errorLog();
+		}
+		else if (!bare(args)) return errorLog();
 
 		if (newline != "" && !readLine(newline)) return errorLog();
 		return true;

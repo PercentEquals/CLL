@@ -72,6 +72,7 @@ namespace cll
 		Interpreter(const std::string& f);
 
 		// METHODS INTERPRETING THEIR PARAMETERS //
+		bool readVector(const std::vector<std::string>& v);
 		bool readLine(const std::string& l); // Interpretes only one line
 		bool readFile(const std::string& f); // Interpretes file by path
 

@@ -36,7 +36,7 @@ namespace cll
 
 			if (chars && *it == '\'')
 			{
-				if(it != l.begin() && *(it - 1) != '\\') chars = false;
+				if (it != l.begin() && *(it - 1) != '\\') chars = false;
 				else buff.pop_back();
 			}
 			else if (!chars && *it == '\'') chars = true;
@@ -52,7 +52,16 @@ namespace cll
 			}
 
 			// PUSHES TO BUFFOR
-			if (string || parenthesis || array || chars) buff += *it;
+			if (string || parenthesis || array || chars)
+			{
+				if (string && *it == '\\' && it + 1 != l.end())
+				{
+					// CHARACTER ESCAPE
+					buff += char(var("'\\" + std::string(1, *(it + 1)) + "'").getInt());
+					it++;
+				}
+				else buff += *it;
+			}
 			else
 			{
 				size_t symbols = lexer_symbols.find_first_of(*it);
@@ -79,6 +88,7 @@ namespace cll
 									{
 										if (it + ii >= end) break;
 										if (*(it + ii) == multi_symbols[i][ii]) mult += *(it + ii);
+										else break;
 									}
 
 									if (mult == multi_symbols[i]) special = mult;

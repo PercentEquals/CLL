@@ -9,6 +9,8 @@
 // and can be used to type code on the fly
 // or to execute a file by passing its path by arguments with cmd or terminal
 
+const std::string version = "0.4";
+
 void errorLog(const std::unique_ptr<cll::Interpreter>& i)
 {
 	console::color(console::red);
@@ -58,7 +60,7 @@ int main(int argc, char* argv[])
 
 		std::string input("");
 
-		std::cout << cll::var("CLL Interpreter [0.3.1] - Bartosz Niciak");
+		std::cout << cll::var("CLL Interpreter [" + version + "] - Bartosz Niciak");
 
 		do 
 		{

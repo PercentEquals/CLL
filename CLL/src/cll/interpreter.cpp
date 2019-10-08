@@ -290,7 +290,10 @@ namespace cll
 					{
 						error = (buff[ii].type == BARE) ? "Unexpected name '" : "Unexpected symbol '";
 						error += buff[ii].value + "' in ";
-						error += (v[i].type == ARRAY) ? "array!" : "parenthesis!";
+						if (v[i].type == ARRAY) error += "array!";
+						else if (v[i].type == PARENTHESIS) error += "parenthesis!";
+						else error += "subscript!";
+
 						break;
 					}
 				}
@@ -318,13 +321,6 @@ namespace cll
 						error = "Name '" + v[i].value + "' not recognized!"; break;
 					}
 				} 
-				else if (v[i].value.find("(") != std::string::npos) 
-				{
-					if (dfunctions.get(v[i].value.substr(0, v[i].value.find("("))).name == "" && functions.get(v[i].value.substr(0, v[i].value.find("("))).name == "")
-					{
-						error = "Name '" + v[i].value + "' not recognized!"; break;
-					}
-				}
 			}
 			else if (i + 1 < v.size() && v[i + 1].type == SYMBOL && v[i + 1].value == "=")
 			{
@@ -597,7 +593,7 @@ namespace cll
 					else if (symb.value == ">>=") ins = fvar >> lvar;
 					else continue;
 
-					ins.setName((fvar.name == "") ? fvar.value : fvar.name);
+					ins.name = (fvar.name == "") ? fvar.value : fvar.name;
 					
 					setVar(ins);
 
@@ -898,6 +894,8 @@ namespace cll
 				std::vector<var> elem = math(lexer(buff));
 
 				if (elem.empty()) return var(n, "");
+				if (elem[0].type == UNDEFINED) return var(n, "");
+				if (elem.size() > 1) return var(n, "");
 
 				var ret = getVar(name);
 
@@ -957,6 +955,9 @@ namespace cll
 				var ret = getVar(name);
 
 				if (ret.type == UNDEFINED) return;
+				if (elem[0].type == UNDEFINED) return;
+				if (elem.size() > 1) return;
+
 				ret.setElement((size_t)elem[0].getInt(), v.value);
 
 				setVar(ret);

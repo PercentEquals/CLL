@@ -351,6 +351,12 @@ namespace cll
 			else val = "1";
 		}
 
+		if (type == CHAR && v.type == CHAR)
+		{
+			if (getValue() != v.getValue()) val = "0";
+			else val = "1";
+		}
+
 		return var(val);
 	}
 

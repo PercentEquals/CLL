@@ -269,7 +269,7 @@ namespace cll
 			if (v[i].type == ARRAY || v[i].type == PARENTHESIS || v[i].value[v[i].value.length() - 1] == ']')
 			{
 				std::vector<var> buff;
-				
+
 				if (v[i].type == ARRAY || v[i].type == PARENTHESIS) buff = lexer(v[i].value.substr(1, v[i].value.length() - 2));
 				else
 				{
@@ -311,9 +311,16 @@ namespace cll
 					}
 				}
 
-				if (getVar(v[i].value).type == UNDEFINED && v[i].value.find("(") == std::string::npos)
+				if (getVar(v[i].value).type == UNDEFINED && (v[i].value.find("(") == std::string::npos || v[i].value[0] == '('))
 				{
 					if (std::find(defined.begin(), defined.end(), v[i].value) == defined.end())
+					{
+						error = "Name '" + v[i].value + "' not recognized!"; break;
+					}
+				} 
+				else if (v[i].value.find("(") != std::string::npos) 
+				{
+					if (dfunctions.get(v[i].value.substr(0, v[i].value.find("("))).name == "" && functions.get(v[i].value.substr(0, v[i].value.find("("))).name == "")
 					{
 						error = "Name '" + v[i].value + "' not recognized!"; break;
 					}
@@ -889,6 +896,7 @@ namespace cll
 				if (name == "" || name == "()" || name == "[]") return var(n, "");
 
 				std::vector<var> elem = math(lexer(buff));
+
 				if (elem.empty()) return var(n, "");
 
 				var ret = getVar(name);

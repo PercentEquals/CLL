@@ -167,7 +167,7 @@ namespace cll
 				if ((actual_element - 1) == n)
 				{
 					if (v.type == STRING) ins += v.getString();
-					else ins += std::string(1, v.getInt());
+					else ins += std::string(1, char(v.getInt()));
 					continue;
 				}
 
@@ -190,22 +190,19 @@ namespace cll
 				if (type == CHAR)
 				{
 					if (value.length() == 3) return int(value[1]);
-					else
-					{
-						if (value == "'\\0'")		return int('\0');
-						else if (value == "'\\n'")	return int('\n');
-						else if (value == "'\\t'")	return int('\t');
-						else if (value == "'\\v'")	return int('\v');
-						else if (value == "'\\b'")	return int('\b');
-						else if (value == "'\\r'")	return int('\r');
-						else if (value == "'\\f'")	return int('\f');
-						else if (value == "'\\a'")	return int('\a');
-						else if (value == "'\\\\'")	return int('\\');
-						else if (value == "'\\?'")	return int('\?');
-						else if (value == "'\\''")	return int('\'');
-						else if (value == "'\\\"'")	return int('\"');
-						else return 0;
-					}
+					else if (value == "'\\0'")	return int('\0');
+					else if (value == "'\\n'")	return int('\n');
+					else if (value == "'\\t'")	return int('\t');
+					else if (value == "'\\v'")	return int('\v');
+					else if (value == "'\\b'")	return int('\b');
+					else if (value == "'\\r'")	return int('\r');
+					else if (value == "'\\f'")	return int('\f');
+					else if (value == "'\\a'")	return int('\a');
+					else if (value == "'\\\\'")	return int('\\');
+					else if (value == "'\\?'")	return int('\?');
+					else if (value == "'\\''")	return int('\'');
+					else if (value == "'\\\"'")	return int('\"');
+					else return 0;
 				}
 				else return std::stoll(value); 
 			}
@@ -624,7 +621,11 @@ namespace cll
 		{
 			if (v.type == DOUBLE && v.getDouble() != 0) val = std::to_string(getInt() / v.getDouble());
 			else if (v.type == FLOAT && v.getFloat() != 0) val = std::to_string(getInt() / v.getFloat());
-			else if (v.getInt() != 0) val = std::to_string(getInt() / v.getFloat());
+			else if (v.getInt() != 0)
+			{
+				if(getInt() / v.getFloat() == getInt() / v.getInt()) val = std::to_string(getInt() / v.getInt());
+				else val = std::to_string(getInt() / v.getFloat());
+			}
 			else val = "inf";
 		}
 		else if(type == FLOAT)
@@ -668,7 +669,7 @@ namespace cll
 		{
 			if (v.type == DOUBLE) val = std::to_string(std::pow(getFloat(), v.getDouble()));
 			else if (v.type == FLOAT) val = std::to_string(std::powf(getFloat(), v.getFloat()));
-			else val = std::to_string((int)std::pow(getInt(), v.getInt()));
+			else val = std::to_string(int(std::pow(getInt(), v.getInt())));
 		}
 		else if (type == FLOAT)
 		{

@@ -250,12 +250,12 @@ namespace cll
 					}
 				}
 
-				if (v[i - 1].type == BARE && v[i].value != "-" && v[i].value != "!")
+				if (v[i - 1].type == BARE && v[i].value != "-" && v[i].value != "!" && v[i].value != "~")
 				{
 					error = "Unexpected symbol '" + v[i].value + "' after '" + v[i - 1].value + "' statement!"; break;
 				}
 
-				if (v[i - 1].type == SYMBOL && v[i].value != "-" && v[i].value != "!")
+				if (v[i - 1].type == SYMBOL && v[i].value != "-" && v[i].value != "!" && v[i].value != "~")
 				{
 					error = "Unexpected symbol '" + v[i].value + "' after '" + v[i - 1].value + "' symbol!"; break;
 				}

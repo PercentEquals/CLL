@@ -396,7 +396,7 @@ namespace cll
 			}
 		}
 		else if (v[0].value == "{" && v[0].type == SYMBOL) scope = 1;
-		//else if (v.size() == 1 && v[0].type != UNDEFINED) write(v[0].value + " " + v[0].getType());
+		else if (v.size() == 1 && v[0].type != UNDEFINED) output = v[0].value + " " + v[0].getType();
 
 		if (error != "") return false;
 		return true;
@@ -434,15 +434,17 @@ namespace cll
 			{
 				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)));
 				var errflag("");
-				var arr("[]");
+				std::string arr = "[";
 				for (size_t i = 0; i < buff.size(); ++i)
 				{
-					if (!(arr.value == "," && arr.type == SYMBOL)) arr += buff[i].value;
 					if (buff[i].type == UNDEFINED)
 					{
 						errflag = buff[i]; break;
 					}
+
+					arr += buff[i].value;
 				}
+				arr += "]";
 
 				if (errflag.value == "") vec.emplace_back(arr);
 				else vec.emplace_back(errflag);

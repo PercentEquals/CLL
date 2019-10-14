@@ -412,26 +412,58 @@ namespace cll
 			if (v[i].type == PARENTHESIS)
 			{
 				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)));
-				vec.insert(std::end(vec), std::begin(buff), std::end(buff));
+				var errflag("");
+
+				for (size_t i = 0; i < buff.size(); ++i)
+				{
+					if (buff[i].type == UNDEFINED)
+					{
+						errflag = buff[i]; break;
+					}
+
+					if (!(i % 2 == 0) && buff[i].type != SYMBOL && buff[i].value != ",")
+					{
+						errflag = var("UNDEFINED"); break;
+					}
+				}
+
+				if (errflag.value == "") vec.insert(std::end(vec), std::begin(buff), std::end(buff));
+				else vec.emplace_back(errflag);
 			}
 			else if (v[i].type == ARRAY)
 			{
 				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)));
-				std::string arr = "[";
-				for (size_t i = 0; i < buff.size(); ++i) arr += buff[i].value;
-				arr += "]";
-				vec.emplace_back(arr);
+				var errflag("");
+				var arr("[]");
+				for (size_t i = 0; i < buff.size(); ++i)
+				{
+					if (!(arr.value == "," && arr.type == SYMBOL)) arr += buff[i].value;
+					if (buff[i].type == UNDEFINED)
+					{
+						errflag = buff[i]; break;
+					}
+				}
+
+				if (errflag.value == "") vec.emplace_back(arr);
+				else vec.emplace_back(errflag);
 			}
 			else if(v[i].type == UNDEFINED)
 			{
 				if (v[i].value.find("(") != std::string::npos && v[i].value[v[i].value.length() - 1] == ')')
 				{
 					std::string fun = v[i].value.substr(0, v[i].value.find("("));
-					std::vector<var> args = math(lexer(v[i].value.substr(fun.length() + 1, v[i].value.length() - fun.length() - 2)));
+					std::vector<var> args = math(lexer(v[i].value.substr(fun.length(), v[i].value.length() - fun.length())));
 					function buff = functions.get(fun);
 					defined dbuff = dfunctions.get(fun);
+					bool errflag = false;
 
-					if (dbuff.name != "" && parse({ v[i].value.substr(fun.length(), v[i].value.length() - fun.length()) }))
+					for (size_t i = 0; i < args.size(); ++i)
+					{
+						if (args[i].type == UNDEFINED) errflag = true;
+					}
+
+					if (errflag) vec.emplace_back(v[i]);
+					else if (dbuff.name != "" && parse({ v[i].value.substr(fun.length(), v[i].value.length() - fun.length()) }))
 					{
 						vec.emplace_back(newFunction(args, dbuff.lines));
 					}

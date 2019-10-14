@@ -83,7 +83,17 @@ namespace cll
 			else if (v[0] == '\'' && v[v.length() - 1] == '\'') type = CHAR;
 			else if (v[0] == '[' && v[v.length() - 1] == ']')
 			{
-				if (v.find("][") == std::string::npos) type = ARRAY;
+				type = ARRAY;
+
+				size_t nests = 0, ii = v.length() - 1;
+				for (ii; ii != 0; --ii)
+				{
+					if (v[ii] == ']') nests++;
+					if (v[ii] == '[') nests--;
+					if (nests == 0) break;
+				}
+
+				if (ii != 0 || nests != 1) type = UNDEFINED;
 			}
 			else if (v[0] == '(' && v[v.length() - 1] == ')')
 			{
@@ -226,6 +236,7 @@ namespace cll
 	float var::getFloat() const
 	{
 		if (type == STRING || type == ARRAY) return float(getSize());
+		else if (type == CHAR) return float(getInt());
 		else
 		{
 			try { return std::stof(value); }
@@ -237,6 +248,7 @@ namespace cll
 	double var::getDouble() const
 	{
 		if (type == STRING || type == ARRAY) return double(getSize());
+		else if (type == CHAR) return float(getInt());
 		else
 		{
 			try { return std::stod(value); }

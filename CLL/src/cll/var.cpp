@@ -177,6 +177,8 @@ namespace cll
 				if ((actual_element - 1) == n)
 				{
 					if (v.type == STRING) ins += v.getString();
+					else if (type == CHAR) ins += v.getChar(0);
+					else if (type == INT) ins += std::to_string(v.getInt());
 					else ins += std::string(1, char(v.getInt()));
 					continue;
 				}

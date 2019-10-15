@@ -345,6 +345,7 @@ namespace cll
 			else if (enabledIO && v[0].value == "pause")
 			{
 				while (!_kbhit()) std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				_getch();
 			}
 			else if (enabledIO && v[0].value == "cout")
 			{

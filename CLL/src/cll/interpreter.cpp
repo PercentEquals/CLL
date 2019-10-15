@@ -250,12 +250,12 @@ namespace cll
 					}
 				}
 
-				if (v[i - 1].type == BARE && v[i].value != "-" && v[i].value != "!")
+				if (v[i - 1].type == BARE && v[i].value != "-" && v[i].value != "!" && v[i].value != "~")
 				{
 					error = "Unexpected symbol '" + v[i].value + "' after '" + v[i - 1].value + "' statement!"; break;
 				}
 
-				if (v[i - 1].type == SYMBOL && v[i].value != "-" && v[i].value != "!")
+				if (v[i - 1].type == SYMBOL && v[i].value != "-" && v[i].value != "!" && v[i].value != "~")
 				{
 					error = "Unexpected symbol '" + v[i].value + "' after '" + v[i - 1].value + "' symbol!"; break;
 				}
@@ -269,7 +269,7 @@ namespace cll
 			if (v[i].type == ARRAY || v[i].type == PARENTHESIS || v[i].value[v[i].value.length() - 1] == ']')
 			{
 				std::vector<var> buff;
-				
+
 				if (v[i].type == ARRAY || v[i].type == PARENTHESIS) buff = lexer(v[i].value.substr(1, v[i].value.length() - 2));
 				else
 				{
@@ -290,7 +290,10 @@ namespace cll
 					{
 						error = (buff[ii].type == BARE) ? "Unexpected name '" : "Unexpected symbol '";
 						error += buff[ii].value + "' in ";
-						error += (v[i].type == ARRAY) ? "array!" : "parenthesis!";
+						if (v[i].type == ARRAY) error += "array!";
+						else if (v[i].type == PARENTHESIS) error += "parenthesis!";
+						else error += "subscript!";
+
 						break;
 					}
 				}
@@ -311,13 +314,13 @@ namespace cll
 					}
 				}
 
-				if (getVar(v[i].value).type == UNDEFINED && v[i].value.find("(") == std::string::npos)
+				if (getVar(v[i].value).type == UNDEFINED && (v[i].value.find("(") == std::string::npos || v[i].value[0] == '('))
 				{
 					if (std::find(defined.begin(), defined.end(), v[i].value) == defined.end())
 					{
 						error = "Name '" + v[i].value + "' not recognized!"; break;
 					}
-				}
+				} 
 			}
 			else if (i + 1 < v.size() && v[i + 1].type == SYMBOL && v[i + 1].value == "=")
 			{
@@ -339,11 +342,12 @@ namespace cll
 				else returned = v[1];
 				return false;
 			}
-			else if (v[0].value == "pause")
+			else if (enabledIO && v[0].value == "pause")
 			{
 				while (!_kbhit()) std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				_getch();
 			}
-			else if (v[0].value == "cout")
+			else if (enabledIO && v[0].value == "cout")
 			{
 				for (size_t i = 1; i < v.size(); ++i)
 				{
@@ -393,7 +397,7 @@ namespace cll
 			}
 		}
 		else if (v[0].value == "{" && v[0].type == SYMBOL) scope = 1;
-		//else if (v.size() == 1 && v[0].type != UNDEFINED) write(v[0].value + " " + v[0].getType());
+		else if (v.size() == 1 && v[0].type != UNDEFINED) output = v[0].value + " " + v[0].getType();
 
 		if (error != "") return false;
 		return true;
@@ -409,26 +413,60 @@ namespace cll
 			if (v[i].type == PARENTHESIS)
 			{
 				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)));
-				vec.insert(std::end(vec), std::begin(buff), std::end(buff));
+				var errflag("");
+
+				for (size_t i = 0; i < buff.size(); ++i)
+				{
+					if (buff[i].type == UNDEFINED)
+					{
+						errflag = buff[i]; break;
+					}
+
+					if (!(i % 2 == 0) && buff[i].type != SYMBOL && buff[i].value != ",")
+					{
+						errflag = var("UNDEFINED"); break;
+					}
+				}
+
+				if (errflag.value == "") vec.insert(std::end(vec), std::begin(buff), std::end(buff));
+				else vec.emplace_back(errflag);
 			}
 			else if (v[i].type == ARRAY)
 			{
 				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)));
+				var errflag("");
 				std::string arr = "[";
-				for (size_t i = 0; i < buff.size(); ++i) arr += buff[i].value;
+				for (size_t i = 0; i < buff.size(); ++i)
+				{
+					if (buff[i].type == UNDEFINED)
+					{
+						errflag = buff[i]; break;
+					}
+
+					arr += buff[i].value;
+				}
 				arr += "]";
-				vec.emplace_back(arr);
+
+				if (errflag.value == "") vec.emplace_back(arr);
+				else vec.emplace_back(errflag);
 			}
 			else if(v[i].type == UNDEFINED)
 			{
 				if (v[i].value.find("(") != std::string::npos && v[i].value[v[i].value.length() - 1] == ')')
 				{
 					std::string fun = v[i].value.substr(0, v[i].value.find("("));
-					std::vector<var> args = math(lexer(v[i].value.substr(fun.length() + 1, v[i].value.length() - fun.length() - 2)));
+					std::vector<var> args = math(lexer(v[i].value.substr(fun.length(), v[i].value.length() - fun.length())));
 					function buff = functions.get(fun);
 					defined dbuff = dfunctions.get(fun);
+					bool errflag = false;
 
-					if (dbuff.name != "" && parse({ v[i].value.substr(fun.length(), v[i].value.length() - fun.length()) }))
+					for (size_t i = 0; i < args.size(); ++i)
+					{
+						if (args[i].type == UNDEFINED) errflag = true;
+					}
+
+					if (errflag) vec.emplace_back(v[i]);
+					else if (dbuff.name != "" && parse({ v[i].value.substr(fun.length(), v[i].value.length() - fun.length()) }))
 					{
 						vec.emplace_back(newFunction(args, dbuff.lines));
 					}
@@ -590,7 +628,7 @@ namespace cll
 					else if (symb.value == ">>=") ins = fvar >> lvar;
 					else continue;
 
-					ins.setName((fvar.name == "") ? fvar.value : fvar.name);
+					ins.name = (fvar.name == "") ? fvar.value : fvar.name;
 					
 					setVar(ins);
 
@@ -889,7 +927,10 @@ namespace cll
 				if (name == "" || name == "()" || name == "[]") return var(n, "");
 
 				std::vector<var> elem = math(lexer(buff));
+
 				if (elem.empty()) return var(n, "");
+				if (elem[0].type == UNDEFINED) return var(n, "");
+				if (elem.size() > 1) return var(n, "");
 
 				var ret = getVar(name);
 
@@ -949,6 +990,9 @@ namespace cll
 				var ret = getVar(name);
 
 				if (ret.type == UNDEFINED) return;
+				if (elem[0].type == UNDEFINED) return;
+				if (elem.size() > 1) return;
+
 				ret.setElement((size_t)elem[0].getInt(), v.value);
 
 				setVar(ret);

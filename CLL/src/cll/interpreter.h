@@ -16,6 +16,7 @@ namespace cll
 		std::vector<var> vars; // Interpreter variables
 		std::string error; // Holds errors
 		std::string filename; // Holds filename
+		std::string output;
 
 		// FUNCTIONS
 		Functions functions;
@@ -51,7 +52,7 @@ namespace cll
 	public:
 
 		// CONSTRUCTORS //
-		Interpreter() : error(""), filename(""), scope(0), line(0), returned(""), continued(false), broke(false), log(false), debug(false), enabledIO(false) 
+		Interpreter() : error(""), filename(""), output(""), scope(0), line(0), returned(""), continued(false), broke(false), log(false), debug(false), enabledIO(false)
 		{
 			vars.reserve(1000);
 
@@ -105,10 +106,12 @@ namespace cll
 
 		// OTHER PUBLIC METHODS //
 		inline void clearError() { error.clear(); }; // Clears error
+		inline void clearOutput() { output.clear(); };
 		inline var getReturned() const { return returned; }; 
 		inline unsigned int getScope() const { return scope; };
 		inline unsigned int getLine() const { return line; }; // Returns actual line number
-		inline std::string getFilename() const { return filename; }; // Returns non-empty string if interpreter interpretes a file
 		inline std::string getError() const { return error; }; // Returns non-empty string if some error is present (useful if error logging is disabled)
+		inline std::string getFilename() const { return filename; }; // Returns non-empty string if interpreter interpretes a file
+		inline std::string getOutput() const { return output; };
 	};
 }

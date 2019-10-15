@@ -71,7 +71,10 @@ int main(int argc, char* argv[])
 
 			std::getline(std::cin, input);
 			if (!local->readLine(input)) errorLog(local);
+			else std::cout << local->getOutput();
+
 			local->clearError();
+			local->clearOutput();
 		} 
 		while (local->getReturned().getValue() == "");
 	}

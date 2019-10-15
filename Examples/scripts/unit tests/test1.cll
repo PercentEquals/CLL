@@ -1,0 +1,98 @@
+// Expected output: C-1ike_ScriptIng_L4nguage
+// Last tested version: 0.5
+
+function opposite
+{
+	ret = ""
+
+	if typeof(params[0]) == "STRING"
+	{
+		for i = length(params[0]) - 1, i >= 0, i -= 1
+		{
+			ret += params[0][i]
+		}
+	}
+	else if typeof(params[0]) == "CHAR"; ret = char(params[0] ^ 32)
+	else; ret = int((params[0] > 0) ? (-abs(params[0])) : abs(params[0]))
+	return ret
+}
+
+// C-1
+
+vec = [[-99], [1]]
+
+cout opposite(char(opposite(vec[0][0]))) opposite(vec[length(vec) - 1][0]) 
+
+delete vec[1]
+
+// ike
+
+vec[0] = ["e", "k", "i"]
+i = 0
+while i < length(vec[0])
+{ 
+	cout vec[0][length(vec[0]) - 1 - i]
+	i += 1
+	continue
+	i -= 1
+}
+delete i
+
+// _S
+
+cout char((((((180 & 200) + 60) | 3) - 1) * 2) >> 2) char(9**2+2)
+
+// c
+
+cout ("c" * 2)[1] 
+
+// r
+
+c = 'a'
+
+do while c != 'z'
+{
+	c += 1
+	if c == 'r'; break
+}
+
+cout c
+
+// i
+
+for c, c > 'i', c -= 1; {}
+
+cout char(c)
+
+// ptIng
+
+vec = ["p", "a", "t", "i", "Ing0"]
+delete vec[1]
+delete vec[2]
+delete vec[2][3]
+
+for i = 0, i < length(vec), i += 1
+{
+	cout vec[i]
+}
+
+// _
+
+cout char((((((((200 & 200) + 40) | 5) - 8) * 1) << 2) + 2) / 10)
+
+if true and (true or false); cout 'L'[int(abs(0))]
+
+// 4nguag
+
+x = "4e"
+{
+	x[1] = "nguag"
+}
+
+cout x;
+
+// e
+
+cout opposite(char('e' ^ 32))
+
+pause

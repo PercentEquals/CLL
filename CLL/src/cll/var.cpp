@@ -114,7 +114,24 @@ namespace cll
 	{
 		setType(v);
 
-		if (type == STRING || type == CHAR) value = v;
+		if (type == STRING) value = v;
+		else if (type == CHAR)
+		{
+			if (v.length() == 3)	value = v;
+			else if (v == "'\\0'")	value = v;
+			else if (v == "'\\n'")	value = v;
+			else if (v == "'\\t'")	value = v;
+			else if (v == "'\\v'")	value = v;
+			else if (v == "'\\b'")	value = v;
+			else if (v == "'\\r'")	value = v;
+			else if (v == "'\\f'")	value = v;
+			else if (v == "'\\a'")	value = v;
+			else if (v == "'\\\\'")	value = v;
+			else if (v == "'\\?'")	value = v;
+			else if (v == "'\\''")	value = v;
+			else if (v == "'\\\"'")	value = v;
+			else value = "'\\0'";
+		}
 		else if (type == INT || type == FLOAT || type == DOUBLE)
 		{
 			try

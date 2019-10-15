@@ -443,6 +443,13 @@ namespace cll
 						errflag = buff[i]; break;
 					}
 
+					if (!(i % 2 == 0) && buff[i].type != SYMBOL && buff[i].value != ",")
+					{
+						var err(buff[i].value + " " + buff[i - 1].value);
+						err.type = UNDEFINED;
+						errflag = err; break;
+					}
+
 					arr += buff[i].value;
 				}
 				arr += "]";

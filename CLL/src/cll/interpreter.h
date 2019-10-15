@@ -59,7 +59,7 @@ namespace cll
 			vars =
 			{
 				var("and", "&&"),
-				var("endl", "'\n'"),
+				var("endl", "'\\n'"),
 				var("false", "0"),
 				var("is", "=="),
 				var("not", "!"),

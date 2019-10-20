@@ -266,6 +266,8 @@ namespace cll
 				}
 			}
 
+			if (error != "") return false;
+
 			if (v[i].type == Type::ARRAY || v[i].type == Type::PARENTHESIS || v[i].value[v[i].value.length() - 1] == ']')
 			{
 				std::vector<var> buff;
@@ -301,7 +303,7 @@ namespace cll
 				if (error != "") return false;
 				if (!parse(buff)) return false;
 
-				return true;
+				continue;
 			}
 			else if (v[i].type == Type::UNDEFINED && v[0].value != "function" && v[0].value != "cin")
 			{

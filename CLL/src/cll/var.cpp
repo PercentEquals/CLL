@@ -685,12 +685,7 @@ namespace cll
 
 	var var::operator%(const var& v) const
 	{
-		std::string val = value;
-
-		if (v.getInt() != 0) val = std::to_string(getInt() % v.getInt());
-		else val = "inf";
-
-		return var(val);
+		return (v.getInt() != 0) ? std::to_string(getInt() % v.getInt()) : "inf";
 	}
 
 	var var::pow(const var& v) const
@@ -726,36 +721,26 @@ namespace cll
 
 	var var::operator^(const var& v) const
 	{
-		std::string val = value;
-		val = std::to_string(getInt() ^ v.getInt());
-		return var(val);
+		return std::to_string(getInt() ^ v.getInt());
 	}
 
 	var var::operator&(const var& v) const
 	{
-		std::string val = value;
-		val = std::to_string(getInt() & v.getInt());
-		return var(val);
+		return std::to_string(getInt() & v.getInt());
 	}
 
 	var var::operator|(const var& v) const
 	{
-		std::string val = value;
-		val = std::to_string(getInt() | v.getInt());
-		return var(val);
+		return std::to_string(getInt() | v.getInt());
 	}
 
 	var var::operator<<(const var& v) const
 	{
-		std::string val = value;
-		val = std::to_string(getInt() << v.getInt());
-		return var(val);
+		return std::to_string(getInt() << v.getInt());
 	}
 
 	var var::operator>>(const var& v) const
 	{
-		std::string val = value;
-		val = std::to_string(getInt() >> v.getInt());
-		return var(val);
+		return std::to_string(getInt() >> v.getInt());
 	}
 }

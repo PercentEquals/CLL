@@ -32,8 +32,8 @@ namespace cll
 	{
 		if (error == "") return true;
 
-		scope.lines.clear();
-		scope.action.clear();
+		lines.clear();
+		action.clear();
 
 		if (log)
 		{
@@ -142,7 +142,7 @@ namespace cll
 	{
 		if (v.empty()) return true;
 
-		if (v[0].type == Type::SYMBOL && v[0].value == "}" && !scope.iterator) error = "Unexpected symbol '}' - nothing to close!";
+		if (v[0].type == Type::SYMBOL && v[0].value == "}" && !scope) error = "Unexpected symbol '}' - nothing to close!";
 		if (v[0].type == Type::SYMBOL && v[0].value != "{" && v.size() == 1) error = "Unexpected symbol '" + v[0].value + "'!";
 		if (v[0].type == Type::SYMBOL && v[0].value != "-" && v[0].value != "~" && v.size() > 1) error = "Unexpected symbol '" + v[0].value + "'!";
 		if (error != "") return false;
@@ -203,9 +203,9 @@ namespace cll
 			}
 			else if (v[0].value == "else")
 			{
-				if (scope.previous_action.empty()) error = "Unexpected statement 'else'!";
-				else if (scope.previous_action[0].value != "if" && scope.previous_action[0].value != "else") error = "Unexpected statement 'else'!";
-				else if (scope.previous_action[0].value == "else" && scope.previous_action.size() == 1) error = "Unexpected statement 'else'!";
+				if (previous_action.empty()) error = "Unexpected statement 'else'!";
+				else if (previous_action[0].value != "if" && previous_action[0].value != "else") error = "Unexpected statement 'else'!";
+				else if (previous_action[0].value == "else" && previous_action.size() == 1) error = "Unexpected statement 'else'!";
 
 				if (v.size() > 1)
 				{
@@ -370,7 +370,7 @@ namespace cll
 			}
 			else if (v[0].value == "if" || v[0].value == "while" || v[0].value == "for" || v[0].value == "else" || v[0].value == "do" || v[0].value == "function")
 			{
-				for (size_t i = 0; i < v.size(); ++i) scope.action.emplace_back(v[i]);
+				for (size_t i = 0; i < v.size(); ++i) action.emplace_back(v[i]);
 			}
 			else if (v[0].value == "delete")
 			{
@@ -398,7 +398,7 @@ namespace cll
 				else error = "File '" + v[1].getString() + "' could not be included!";
 			}
 		}
-		else if (v[0].value == "{" && v[0].type == Type::SYMBOL) scope.iterator = 1;
+		else if (v[0].value == "{" && v[0].type == Type::SYMBOL) scope = 1;
 		else if (v.size() == 1 && v[0].type != Type::UNDEFINED) output = v[0].value + " " + v[0].getType();
 
 		if (error != "") return false;
@@ -660,66 +660,66 @@ namespace cll
 
 	bool Interpreter::readScope(const std::vector<var>& v)
 	{
-		if (v[0].value == "{" && v[0].type == Type::SYMBOL) ++scope.iterator;
-		if (v[0].value == "}" && v[0].type == Type::SYMBOL) --scope.iterator;
+		if (v[0].value == "{" && v[0].type == Type::SYMBOL) ++scope;
+		if (v[0].value == "}" && v[0].type == Type::SYMBOL) --scope;
 
-		if (scope.iterator)
+		if (scope)
 		{
 			std::string buff("");
 			for (size_t i = 0; i < v.size(); ++i) buff += v[i].value + " ";
-			scope.lines.emplace_back(buff);
+			lines.emplace_back(buff);
 			return true;
 		}
 		else
 		{
 			bool state = true;
 
-			if (scope.action.empty()) state = newScope(scope.lines);
-			else if (scope.action[0].value == "function")
+			if (action.empty()) state = newScope(lines);
+			else if (action[0].value == "function")
 			{
-				dfunctions.add(defined(scope.action[1].value, scope.lines));
+				dfunctions.add(defined(action[1].value, lines));
 			}
-			else if (scope.action[0].value == "if" && scope.action[1].getBool()) state = newScope(scope.lines);
-			else if (scope.action[0].value == "else")
+			else if (action[0].value == "if" && action[1].getBool()) state = newScope(lines);
+			else if (action[0].value == "else")
 			{
-				if (scope.previous_action.size() <= 1 && !scope.previous_action[scope.previous_action.size() - 1].getBool()) state = newScope(scope.lines);
-				else if (!scope.previous_action[scope.previous_action.size() - 1].getBool() && scope.action[2].getBool()) state = newScope(scope.lines);
+				if (action.size() <= 1 && !previous_action[previous_action.size() - 1].getBool()) state = newScope(lines);
+				else if (!previous_action[previous_action.size() - 1].getBool() && action[2].getBool()) state = newScope(lines);
 			}
-			else if (scope.action[0].value == "while")
+			else if (action[0].value == "while")
 			{
-				while (math(scope.action)[1].getBool())
+				while (math(action)[1].getBool())
 				{
-					state = newScope(scope.lines);
+					state = newScope(lines);
 
 					if (continued) continue;
 					if (broke || !state) break;
 				}
 			}
-			else if (scope.action[0].value == "for")
+			else if (action[0].value == "for")
 			{
 				std::vector<var> name;
 				std::vector<var> loop;
 				std::vector<var> incr;
 				unsigned char commas = 0;
 
-				for (size_t i = 1; i < scope.action.size(); ++i)
+				for (size_t i = 1; i < action.size(); ++i)
 				{
-					if (scope.action[i].type == Type::SYMBOL && scope.action[i].value == ",")
+					if (action[i].type == Type::SYMBOL && action[i].value == ",")
 					{
 						++commas;
 						continue;
 					}
 					
-					if (commas == 0) name.emplace_back(scope.action[i]);
-					else if (commas == 1) loop.emplace_back(scope.action[i]);
-					else if (commas == 2) incr.emplace_back(scope.action[i]);
+					if (commas == 0) name.emplace_back(action[i]);
+					else if (commas == 1) loop.emplace_back(action[i]);
+					else if (commas == 2) incr.emplace_back(action[i]);
 				}
 
 				std::string buff = (name.size() > 1) ? math(name)[0].name : "";
 
 				while (math(loop)[0].getBool())
 				{
-					state = newScope(scope.lines);
+					state = newScope(lines);
 					math(incr);
 
 					if (continued) continue;
@@ -728,14 +728,14 @@ namespace cll
 
 				if (name.size() > 1) deleteVar(buff);
 			}
-			else if (scope.action[0].value == "do")
+			else if (action[0].value == "do")
 			{
-				state = newScope(scope.lines);
+				state = newScope(lines);
 				if (state)
 				{
-					while (math(scope.action)[2].getBool())
+					while (math(action)[2].getBool())
 					{
-						state = newScope(scope.lines);
+						state = newScope(lines);
 
 						if (continued) continue;
 						if (broke || !state) break;
@@ -743,9 +743,9 @@ namespace cll
 				}
 			}
 
-			scope.previous_action = scope.action;
-			scope.action.clear();
-			scope.lines.clear();
+			previous_action = action;
+			action.clear();
+			lines.clear();
 			if (!state) return errorLog();
 			return true;
 		}
@@ -785,9 +785,9 @@ namespace cll
 			else args.emplace_back(args_line[i]);
 		}
 
-		if (!scope.action.empty() && !scope.iterator && args[0].value != "{")
+		if (!action.empty() && !scope && args[0].value != "{")
 		{
-			scope.iterator = 1;
+			scope = 1;
 			newline += "}";
 		}
 
@@ -798,7 +798,7 @@ namespace cll
 		}
 
 		// SCOPING - i.e. CODE IN BRACKETS
-		if (scope.iterator)
+		if (scope)
 		{
 			if (!readScope(args)) return errorLog();
 			if (newline != "" && !readLine(newline)) return errorLog();

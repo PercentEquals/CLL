@@ -44,10 +44,14 @@ namespace cll
 			function("sinh", sinh),
 			function("sleep", sleep),
 			function("sqrt", sqrt),
+			function("stod", stod),
+			function("stof", stof),
+			function("stoi", stoi),
 			function("string", tostring),
 			function("tan", tan),
 			function("tanh", tanh),
 			function("time", time),
+			function("to_string", to_string),
 			function("trunc", trunc),
 			function("typeof", typeof)
 		};

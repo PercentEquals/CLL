@@ -310,14 +310,14 @@ namespace cll
 		if (args.empty()) return var("0");
 		if (args.size() < 3) return var("0");
 
-		if (args.size() == 3) return std::to_string(std::ldexp(args[0].getDouble(), args[2].getInt()));
+		if (args.size() == 3) return std::to_string(std::ldexp(args[0].getDouble(), (int)args[2].getInt()));
 		else
 		{
 			var ret("[]");
 			for (size_t i = 0; i < args.size(); i += 4)
 			{
 				if (i + 2 >= args.size()) break;
-				ret += std::to_string(std::ldexp(args[i].getDouble(), args[i + 2].getInt()));
+				ret += std::to_string(std::ldexp(args[i].getDouble(), (int)args[i + 2].getInt()));
 			}
 			return ret;
 		}

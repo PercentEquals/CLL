@@ -23,11 +23,13 @@ namespace cll
 		Defined dfunctions;
 
 		// SCOPE SPECIFIC VARIABLES //
-		std::vector<var> previous_scope_action; // Holds previous flow managed bare word (if, while, ...)
-		std::vector<var> scope_action; // Holds actual flow managed bare word (if, while, ...)
-
-		std::vector<std::string> scope_lines; // Holds actual scope - to be executed after closing bracket
-		unsigned int scope; // Holds actual scope number
+		struct Scope
+		{
+			std::vector<var> previous_action; // Holds previous flow managed bare word (if, while, ...)
+			std::vector<var> action; // Holds actual flow managed bare word (if, while, ...)
+			std::vector<std::string> lines; // Holds actual scope - to be executed after closing bracket
+			unsigned int iterator = 0; // Holds actual scope number
+		} scope;
 
 		// OTHER VARIABLES
 		unsigned int line; // Actual line number of file - to show where error took place
@@ -52,7 +54,7 @@ namespace cll
 	public:
 
 		// CONSTRUCTORS //
-		Interpreter() : error(""), filename(""), output(""), scope(0), line(0), returned(""), continued(false), broke(false), log(false), debug(false), enabledIO(false)
+		Interpreter() : error(""), filename(""), output(""), line(0), returned(""), continued(false), broke(false), log(false), debug(false), enabledIO(false)
 		{
 			vars.reserve(1000);
 
@@ -108,7 +110,7 @@ namespace cll
 		inline void clearError() { error.clear(); }; // Clears error
 		inline void clearOutput() { output.clear(); };
 		inline var getReturned() const { return returned; }; 
-		inline unsigned int getScope() const { return scope; };
+		inline unsigned int getScope() const { return scope.iterator; };
 		inline unsigned int getLine() const { return line; }; // Returns actual line number
 		inline std::string getError() const { return error; }; // Returns non-empty string if some error is present (useful if error logging is disabled)
 		inline std::string getFilename() const { return filename; }; // Returns non-empty string if interpreter interpretes a file

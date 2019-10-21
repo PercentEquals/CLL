@@ -682,8 +682,9 @@ namespace cll
 			else if (action[0].value == "if" && action[1].getBool()) state = newScope(lines);
 			else if (action[0].value == "else")
 			{
-				if (action.size() <= 1 && !previous_action[previous_action.size() - 1].getBool()) state = newScope(lines);
-				else if (!previous_action[previous_action.size() - 1].getBool() && action[2].getBool()) state = newScope(lines);
+				if (action.size() <= 1 && !previous_action[previous_action.size() - 1].getBool()) state = newScope(lines); // ELSE IF
+				else if (!previous_action[previous_action.size() - 1].getBool() && action[2].getBool())	state = newScope(lines); // ELSE
+				else action = previous_action;
 			}
 			else if (action[0].value == "while")
 			{

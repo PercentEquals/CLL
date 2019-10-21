@@ -2,12 +2,7 @@ cout "How many primes to find: "
 cin primes
 
 start = time("ms")
-vec = []
-
-for i = 0, i < primes, i+=1
-{
-	vec += 0
-}
+vec = [0] * primes
 
 for i = 2, i < primes, i+=1
 {
@@ -19,7 +14,7 @@ for i = 2, i < primes, i+=1
 
 vec2 = []
 
-for i = 1, i < primes, i+=1
+for i = 2, i < primes, i+=1
 {
 	if vec[i - 1] == 0; vec2 += i
 }

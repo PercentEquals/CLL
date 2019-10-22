@@ -93,7 +93,7 @@ namespace cll
 			if (nested->returned.value != "") return nested->returned;
 		}
 
-		return var("1");
+		return var("");
 	}
 
 	// Function that creates new scope that haves its own variables and also variables from one scope higher
@@ -477,7 +477,8 @@ namespace cll
 					if (errflag) vec.emplace_back(v[i]);
 					else if (dbuff.name != "" && parse({ v[i].value.substr(fun.length(), v[i].value.length() - fun.length()) }))
 					{
-						vec.emplace_back(newFunction(args, dbuff.lines));
+						var ret = newFunction(args, dbuff.lines);
+						if (ret.value != "") vec.emplace_back(ret);
 					}
 					else if (buff.name != "" && parse({ v[i].value.substr(fun.length(), v[i].value.length() - fun.length()) }))
 					{

@@ -16,7 +16,18 @@ namespace cll
 
 		if (f.good())
 		{
-			while (std::getline(f, l)) ret += var("\"" + l + "\"");
+			while (std::getline(f, l))
+			{
+				std::string b = "";
+				for (size_t i = 0; i < l.length(); ++i)
+				{
+					if (l[i] == '\\') b += "\\\\";
+					else if (l[i] == '"') b += "\\\"";
+					else if (l[i] == '\'') b += "\\\'";
+					else b += l[i];
+				}
+				ret += var("\"" + b + "\"");
+			}
 		}
 
 		return ret;

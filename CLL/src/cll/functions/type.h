@@ -14,6 +14,12 @@ namespace cll
 
 	// Type casting functions //
 
+	var tobool(const std::vector<var>& args)
+	{
+		if (args.empty()) return var("0");
+		return std::to_string(args[0].getBool());
+	}	
+	
 	var toint(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("0");

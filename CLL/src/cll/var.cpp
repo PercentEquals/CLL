@@ -79,8 +79,8 @@ namespace cll
 
 		if (v.length() > 0) // Checks for string, char or array
 		{
-			if (v[0] == '"' && v[v.length() - 1] == '"') type = Type::STRING;
-			else if (v[0] == '\'' && v[v.length() - 1] == '\'') type = Type::CHAR;
+			if (v[0] == '"' && v[v.length() - 1] == '"' && v.length() > 1) type = Type::STRING;
+			else if (v[0] == '\'' && v[v.length() - 1] == '\'' && v.length() > 1) type = Type::CHAR;
 			else if (v[0] == '[' && v[v.length() - 1] == ']')
 			{
 				type = Type::ARRAY;

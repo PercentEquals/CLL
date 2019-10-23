@@ -29,6 +29,7 @@ namespace cll
 			function("exp", exp),
 			function("exp2", exp2),
 			function("fappend", fappend),
+			function("fexist", fexist),
 			function("find", find),
 			function("float", tofloat),
 			function("floor", floor),

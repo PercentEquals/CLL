@@ -30,6 +30,7 @@ namespace cll
 			}
 		}
 
+		f.close();
 		return ret;
 	}
 
@@ -53,6 +54,7 @@ namespace cll
 		}
 		else return var("0");
 
+		f.close();
 		return var("1");
 	}
 
@@ -76,6 +78,23 @@ namespace cll
 		}
 		else return var("0");
 
+		f.close();
 		return var("1");
+	}
+
+	var fexist(const std::vector<var>& args)
+	{
+		if (args.empty()) return var("0");
+
+		var ret("[]");
+
+		for (size_t i = 0; i < args.size(); i += 2)
+		{
+			std::fstream f(args[i].getString(), std::ios::in);
+			ret += std::to_string(f.good());
+			f.close();
+		}
+
+		return (ret.getSize() > 1) ? ret : ret.getElement(0);
 	}
 }

@@ -329,6 +329,34 @@ namespace cll
 		else return "";
 	}
 
+	size_t var::getSubscript() const
+	{
+		size_t nests = 0, ii = value.length() - 1;
+		bool string = false, chars = false;
+		for (ii; ii != 0; --ii)
+		{
+			if (!chars && string && value[ii] == '"')
+			{
+				if (ii != 0 && value[ii - 1] != '\\') string = false;
+			}
+			else if (!chars && !string && value[ii] == '"') string = true;
+
+			if (!string && chars && value[ii] == '\'')
+			{
+				if (ii != 0 && value[ii - 1] != '\\') chars = false;
+			}
+			else if (!string && !chars && value[ii] == '\'') chars = true;
+
+			if (string || chars) continue;
+
+			if (value[ii] == ']') nests++;
+			if (value[ii] == '[') nests--;
+			if (nests == 0) break;
+		}
+
+		return ii;
+	}
+
 	size_t var::getSize() const
 	{
 		if (type == Type::ARRAY)

@@ -38,7 +38,6 @@ namespace cll
 		bool enabledIO;
 
 		// PRIVATE METHODS //
-		size_t getSubscript(const var& v);
 		inline void write(const std::string& s) { if (enabledIO) std::cout << s; };
 		bool errorLog(); // Returns false if there is an error and prints them with std::cout (if logging is enabled)
 		bool newInterpreter(const std::vector<var>& v); // Creates new instance of interpreter - for file in file execution

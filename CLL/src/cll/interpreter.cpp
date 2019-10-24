@@ -27,6 +27,34 @@ namespace cll
 		readFile(f);
 	}
 
+	size_t Interpreter::getSubscript(const var& v)
+	{
+		size_t nests = 0, ii = v.value.length() - 1;
+		bool string = false, chars = false;
+		for (ii; ii != 0; --ii)
+		{
+			if (!chars && string && v.value[ii] == '"')
+			{
+				if (ii != 0 && v.value[ii - 1] != '\\') string = false;
+			}
+			else if (!chars && !string && v.value[ii] == '"') string = true;
+
+			if (!string && chars && v.value[ii] == '\'')
+			{
+				if (ii != 0 && v.value[ii - 1] != '\\') chars = false;
+			}
+			else if (!string && !chars && v.value[ii] == '\'') chars = true;
+
+			if (string || chars) continue;
+
+			if (v.value[ii] == ']') nests++;
+			if (v.value[ii] == '[') nests--;
+			if (nests == 0) break;
+		}
+
+		return ii;
+	}
+
 	// Function that checks for errors and logs them on console screen
 	bool Interpreter::errorLog()
 	{
@@ -275,14 +303,7 @@ namespace cll
 				if (v[i].type == Type::ARRAY || v[i].type == Type::PARENTHESIS) buff = lexer(v[i].value.substr(1, v[i].value.length() - 2));
 				else
 				{
-					size_t nests = 0, ii = v[i].value.length() - 1;
-					for (ii; ii != 0; --ii)
-					{
-						if (v[i].value[ii] == ']') nests++;
-						if (v[i].value[ii] == '[') nests--;
-						if (nests == 0) break;
-					}
-
+					size_t ii = getSubscript(v[i]);
 					buff = lexer(v[i].value.substr(ii + 1, v[i].value.length() - ii - 2));
 				}
 
@@ -437,7 +458,7 @@ namespace cll
 			{
 				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)));
 				var errflag("");
-				std::string arr = "[";
+				var arr("[]");
 				for (size_t i = 0; i < buff.size(); ++i)
 				{
 					if (buff[i].type == Type::UNDEFINED)
@@ -451,10 +472,9 @@ namespace cll
 						err.type = Type::UNDEFINED;
 						errflag = err; break;
 					}
-
-					arr += buff[i].value;
+					
+					if (i % 2 == 0) arr += buff[i].value;
 				}
-				arr += "]";
 
 				if (errflag.value == "") vec.emplace_back(arr);
 				else vec.emplace_back(errflag);
@@ -925,14 +945,7 @@ namespace cll
 			{
 				bool literal = false;
 
-				size_t nests = 0, ii = n.length() - 1;
-				for (ii; ii != 0; --ii)
-				{
-					if (n[ii] == ']') nests++;
-					if (n[ii] == '[') nests--;
-					if (nests == 0) break;
-				}
-
+				size_t ii = getSubscript(n);
 				std::string buff = n.substr(ii + 1, n.length() - ii - 2);
 				std::string name = n.substr(0, ii);
 				if (name == "" || name == "()" || name == "[]") return var(n, "");
@@ -983,14 +996,7 @@ namespace cll
 		{
 			if (v.name[v.name.length() - 1] == ']')
 			{
-				size_t nests = 0, ii = v.name.length() - 1;
-				for (ii; ii != 0; --ii)
-				{
-					if (v.name[ii] == ']') nests++;
-					if (v.name[ii] == '[') nests--;
-					if (nests == 0) break;
-				}
-
+				size_t ii = getSubscript(v);
 				std::string buff = v.name.substr(ii + 1, v.name.length() - ii - 2);
 				std::string name = v.name.substr(0, ii);
 				if (name == "" || name == "()" || name == "[]") return;

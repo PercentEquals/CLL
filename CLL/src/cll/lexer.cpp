@@ -27,22 +27,20 @@ namespace cll
 		for (auto it = l.begin(), end = l.end(); it < end; ++it)
 		{
 			// CHECKS FOR STRINGS
-			if (string && *it == '"')
+			if (!chars && string && *it == '"')
 			{
 				if (it != l.begin() && *(it - 1) != '\\') string = false;
-				else buff.pop_back();
 			}
-			else if (!string && *it == '"') string = true;
-
-			if (chars && *it == '\'')
+			else if (!chars && !string && *it == '"') string = true;
+			
+			if (!string && chars && *it == '\'')
 			{
 				if (it != l.begin() && *(it - 1) != '\\') chars = false;
-				else buff.pop_back();
 			}
-			else if (!chars && *it == '\'') chars = true;
+			else if (!string && !chars && *it == '\'') chars = true;
 
 			// CHECKS FOR PARENTHESIS
-			if (!string)
+			if (!string && !chars)
 			{
 				if (parenthesis && *it == ')') parenthesis--;
 				else if (*it == '(') parenthesis++;

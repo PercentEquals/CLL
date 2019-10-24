@@ -86,8 +86,23 @@ namespace cll
 				type = Type::ARRAY;
 
 				size_t nests = 0, ii = v.length() - 1;
+				bool string = false, chars = false;
 				for (ii; ii != 0; --ii)
 				{
+					if (!chars && string && v[ii] == '"')
+					{
+						if (ii != 0 && v[ii - 1] != '\\') string = false;
+					}
+					else if (!chars && !string && v[ii] == '"') string = true;
+
+					if (!string && chars && v[ii] == '\'')
+					{
+						if (ii != 0 && v[ii - 1] != '\\') chars = false;
+					}
+					else if (!string && !chars && v[ii] == '\'') chars = true;
+
+					if (string || chars) continue;
+
 					if (v[ii] == ']') nests++;
 					if (v[ii] == '[') nests--;
 					if (nests == 0) break;

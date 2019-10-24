@@ -80,8 +80,15 @@ namespace cll
 		for (size_t i = 0; i < args.size(); i += 6)
 		{
 			if (i + 2 >= args.size()) ret += args[i];
-			else if (i + 4 >= args.size()) ret += "\"" + args[i].getString().substr(args[i + 2].getInt()) + "\"";
-			else ret += "\"" + args[i].getString().substr(args[i + 2].getInt(), args[i + 4].getInt()) + "\"";
+			else
+			{
+				size_t len1 = (args[i + 2].getInt() > args[i].getSize()) ? args[i].getSize() : args[i + 2].getInt();
+				size_t len2 = args[i].getSize();
+
+				if (i + 4 < args.size() && args[i + 4].getInt() < args[i].getSize()) len2 = args[i + 4].getInt();
+
+				ret += "\"" + args[i].getString().substr(len1, len2) + "\"";
+			}
 		}
 
 		return (ret.getSize() > 1) ? ret : ret.getElement(0);

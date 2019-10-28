@@ -5,7 +5,6 @@
 #include "utils/search.h"
 #include "lexer.h"
 
-#include <conio.h>
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -336,11 +335,6 @@ namespace cll
 				if (v.size() < 2) returned = var("1");
 				else returned = v[1];
 				return false;
-			}
-			else if (enabledIO && v[0].value == "pause")
-			{
-				while (!_kbhit()) std::this_thread::sleep_for(std::chrono::milliseconds(10));
-				_getch();
 			}
 			else if (enabledIO && v[0].value == "cout")
 			{

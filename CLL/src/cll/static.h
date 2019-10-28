@@ -22,7 +22,6 @@ namespace cll
 		"function",
 		"if",
 		"include",
-		"pause",
 		"return",
 		"while"
 	};

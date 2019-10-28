@@ -9,8 +9,6 @@
 // and can be used to type code on the fly
 // or to execute a file by passing its path by arguments with cmd or terminal
 
-const std::string version = "0.5";
-
 void errorLog(const std::unique_ptr<cll::Interpreter>& i)
 {
 	console::color(console::red);
@@ -22,6 +20,7 @@ void errorLog(const std::unique_ptr<cll::Interpreter>& i)
 
 int main(int argc, char* argv[])
 {
+	const std::string version = "0.6";
 	std::ios_base::sync_with_stdio(false);
 	std::cin.tie(NULL);
 

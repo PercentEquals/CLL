@@ -56,7 +56,6 @@ namespace console
 #elif __linux__
 // LINUX WRAPPER //
 
-#include <conio.h> 
 #include <stdio.h> 
 
 namespace console
@@ -87,7 +86,7 @@ namespace console
 	// Gets x position of cursor on screen
 	int getx()
 	{
-		return wherex();
+		return 1; // TODO: find a way to do this
 	}
 
 }

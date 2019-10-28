@@ -7,7 +7,7 @@
 
 namespace cll
 {
-	enum Type
+	enum class Type
 	{
 		UNDEFINED, INT, FLOAT, DOUBLE, CHAR, STRING, ARRAY, PARENTHESIS, SYMBOL, BARE
 	};
@@ -19,7 +19,7 @@ namespace cll
 		Type type;
 
 		// CONSTRUCTORS //
-		var() : name(""), value(""), type(UNDEFINED) { value.reserve(100); };
+		var() : name(""), value(""), type(Type::UNDEFINED) { value.reserve(100); };
 		var(const var& v) : name(v.name), value(v.value), type(v.type) {};
 		var(const std::string& n, const var& v) : value(v.value), type(v.type) { setName(n); };
 		var(const std::string& v);
@@ -40,16 +40,16 @@ namespace cll
 		inline std::string getValue() const { return value; };
 		inline std::string getType() const 
 		{
-			if (type == UNDEFINED) return "UNDEFINED";
-			if (type == INT) return "INT";
-			if (type == FLOAT) return "FLOAT";
-			if (type == DOUBLE) return "DOUBLE";
-			if (type == CHAR) return "CHAR";
-			if (type == STRING) return "STRING";
-			if (type == ARRAY) return "ARRAY";
-			if (type == PARENTHESIS) return "PARENTHESIS";
-			if (type == SYMBOL) return "SYMBOL";
-			if (type == BARE) return "BARE";
+			if (type == Type::INT) return "INT";
+			if (type == Type::BARE) return "BARE";
+			if (type == Type::CHAR) return "CHAR";
+			if (type == Type::FLOAT) return "FLOAT";
+			if (type == Type::ARRAY) return "ARRAY";
+			if (type == Type::DOUBLE) return "DOUBLE";
+			if (type == Type::STRING) return "STRING";
+			if (type == Type::SYMBOL) return "SYMBOL";
+			if (type == Type::UNDEFINED) return "UNDEFINED";
+			if (type == Type::PARENTHESIS) return "PARENTHESIS";
 			return "UNDEFINED";
 		};
 
@@ -61,6 +61,7 @@ namespace cll
 		var getElement(const size_t& n) const;
 		std::string getString() const;
 		std::string getError() const;
+		size_t getSubscript() const;
 		size_t getSize() const;
 
 		// OPERATORS //

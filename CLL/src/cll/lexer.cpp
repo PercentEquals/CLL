@@ -27,22 +27,22 @@ namespace cll
 		for (auto it = l.begin(), end = l.end(); it < end; ++it)
 		{
 			// CHECKS FOR STRINGS
-			if (string && *it == '"')
+			if (!chars && string && *it == '"')
 			{
 				if (it != l.begin() && *(it - 1) != '\\') string = false;
-				else buff.pop_back();
+				else if (it - 1 != l.begin() && *(it - 2) == '\\') string = false;
 			}
-			else if (!string && *it == '"') string = true;
-
-			if (chars && *it == '\'')
+			else if (!chars && !string && *it == '"') string = true;
+			
+			if (!string && chars && *it == '\'')
 			{
 				if (it != l.begin() && *(it - 1) != '\\') chars = false;
-				else buff.pop_back();
+				else if (it - 1 != l.begin() && *(it - 2) == '\\') chars = false;
 			}
-			else if (!chars && *it == '\'') chars = true;
+			else if (!string && !chars && *it == '\'') chars = true;
 
 			// CHECKS FOR PARENTHESIS
-			if (!string)
+			if (!string && !chars)
 			{
 				if (parenthesis && *it == ')') parenthesis--;
 				else if (*it == '(') parenthesis++;
@@ -52,16 +52,7 @@ namespace cll
 			}
 
 			// PUSHES TO BUFFOR
-			if (string || parenthesis || array || chars)
-			{
-				if (string && *it == '\\' && it + 1 != l.end())
-				{
-					// CHARACTER ESCAPE
-					buff += char(var("'\\" + std::string(1, *(it + 1)) + "'").getInt());
-					it++;
-				}
-				else buff += *it;
-			}
+			if (string || parenthesis || array || chars) buff += *it;
 			else
 			{
 				size_t symbols = lexer_symbols.find_first_of(*it);

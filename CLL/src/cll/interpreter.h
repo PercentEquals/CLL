@@ -23,10 +23,9 @@ namespace cll
 		Defined dfunctions;
 
 		// SCOPE SPECIFIC VARIABLES //
-		std::vector<var> previous_scope_action; // Holds previous flow managed bare word (if, while, ...)
-		std::vector<var> scope_action; // Holds actual flow managed bare word (if, while, ...)
-
-		std::vector<std::string> scope_lines; // Holds actual scope - to be executed after closing bracket
+		std::vector<var> previous_action; // Holds previous flow managed bare word (if, while, ...)
+		std::vector<var> action; // Holds actual flow managed bare word (if, while, ...)
+		std::vector<std::string> lines; // Holds actual scope - to be executed after closing bracket
 		unsigned int scope; // Holds actual scope number
 
 		// OTHER VARIABLES

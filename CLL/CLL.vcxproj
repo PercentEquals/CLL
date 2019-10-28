@@ -159,6 +159,7 @@
     <ClInclude Include="src\cll\functions\header.h" />
     <ClInclude Include="src\cll\functions\math.h" />
     <ClInclude Include="src\cll\functions\rand.h" />
+    <ClInclude Include="src\cll\functions\string.h" />
     <ClInclude Include="src\cll\functions\time.h" />
     <ClInclude Include="src\cll\functions\type.h" />
     <ClInclude Include="src\cll\interpreter.h" />

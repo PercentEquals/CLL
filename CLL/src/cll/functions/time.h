@@ -12,30 +12,37 @@ namespace cll
 	{
 		auto clock = std::chrono::system_clock::now();
 
-		if (!args.empty() && (args[0].getString() == "s" || args[0].getString() == "seconds"))
+		var ret("[]");
+
+		for (size_t i = 0; i < args.size(); i += 2)
 		{
-			auto point = std::chrono::time_point_cast<std::chrono::seconds>(clock);
-			auto epoch = point.time_since_epoch();
-			return std::to_string(epoch.count());
+			if (!args.empty() && (args[i].getString() == "s" || args[i].getString() == "seconds"))
+			{
+				auto point = std::chrono::time_point_cast<std::chrono::seconds>(clock);
+				auto epoch = point.time_since_epoch();
+				ret += std::to_string(epoch.count());
+			}
+			else if (!args.empty() && (args[i].getString() == "us" || args[i].getString() == "microseconds"))
+			{
+				auto point = std::chrono::time_point_cast<std::chrono::microseconds>(clock);
+				auto epoch = point.time_since_epoch();
+				ret += std::to_string(epoch.count());
+			}
+			else if (!args.empty() && (args[i].getString() == "ns" || args[i].getString() == "nanoseconds"))
+			{
+				auto point = std::chrono::time_point_cast<std::chrono::nanoseconds>(clock);
+				auto epoch = point.time_since_epoch();
+				ret += std::to_string(epoch.count());
+			}
+			else
+			{
+				auto point = std::chrono::time_point_cast<std::chrono::milliseconds>(clock);
+				auto epoch = point.time_since_epoch();
+				ret += std::to_string(epoch.count());
+			}
 		}
-		else if (!args.empty() && (args[0].getString() == "us" || args[0].getString() == "microseconds"))
-		{
-			auto point = std::chrono::time_point_cast<std::chrono::microseconds>(clock);
-			auto epoch = point.time_since_epoch();
-			return std::to_string(epoch.count());
-		}
-		else if (!args.empty() && (args[0].getString() == "ns" || args[0].getString() == "nanoseconds"))
-		{
-			auto point = std::chrono::time_point_cast<std::chrono::nanoseconds>(clock);
-			auto epoch = point.time_since_epoch();
-			return std::to_string(epoch.count());
-		}
-		else
-		{
-			auto point = std::chrono::time_point_cast<std::chrono::milliseconds>(clock);
-			auto epoch = point.time_since_epoch();
-			return std::to_string(epoch.count());
-		}
+
+		return (ret.getSize() > 1) ? ret : ret.getElement(0);
 	}
 
 	var sleep(const std::vector<var>& args)

@@ -30,12 +30,14 @@ namespace cll
 			if (!chars && string && *it == '"')
 			{
 				if (it != l.begin() && *(it - 1) != '\\') string = false;
+				else if (it - 1 != l.begin() && *(it - 2) == '\\') string = false;
 			}
 			else if (!chars && !string && *it == '"') string = true;
 			
 			if (!string && chars && *it == '\'')
 			{
 				if (it != l.begin() && *(it - 1) != '\\') chars = false;
+				else if (it - 1 != l.begin() && *(it - 2) == '\\') chars = false;
 			}
 			else if (!string && !chars && *it == '\'') chars = true;
 
@@ -50,16 +52,7 @@ namespace cll
 			}
 
 			// PUSHES TO BUFFOR
-			if (string || parenthesis || array || chars)
-			{
-				if (string && *it == '\\' && it + 1 != l.end())
-				{
-					// CHARACTER ESCAPE
-					buff += char(var("'\\" + std::string(1, *(it + 1)) + "'").getInt());
-					it++;
-				}
-				else buff += *it;
-			}
+			if (string || parenthesis || array || chars) buff += *it;
 			else
 			{
 				size_t symbols = lexer_symbols.find_first_of(*it);

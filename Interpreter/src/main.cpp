@@ -20,7 +20,7 @@ void errorLog(const std::unique_ptr<cll::Interpreter>& i)
 
 int main(int argc, char* argv[])
 {
-	const std::string version = "0.6";
+	const std::string version = "0.6.1";
 	std::ios_base::sync_with_stdio(false);
 	std::cin.tie(NULL);
 

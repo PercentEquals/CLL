@@ -915,6 +915,7 @@ namespace cll
 				size_t ii = var(n).getSubscript();
 				std::string buff = n.substr(ii + 1, n.length() - ii - 2);
 				std::string name = n.substr(0, ii);
+
 				if (name == "" || name == "()" || name == "[]") return var(n, "");
 
 				std::vector<var> elem = math(lexer(buff));
@@ -963,9 +964,10 @@ namespace cll
 		{
 			if (v.name[v.name.length() - 1] == ']')
 			{
-				size_t ii = v.getSubscript();
+				size_t ii = var(v.name).getSubscript();
 				std::string buff = v.name.substr(ii + 1, v.name.length() - ii - 2);
 				std::string name = v.name.substr(0, ii);
+
 				if (name == "" || name == "()" || name == "[]") return;
 
 				std::vector<var> elem = math(lexer(buff));

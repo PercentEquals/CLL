@@ -424,7 +424,7 @@ namespace cll
 			{
 				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)));
 				var errflag("");
-				var arr("[]");
+				std::string arr = "[";
 				for (size_t i = 0; i < buff.size(); ++i)
 				{
 					if (buff[i].type == Type::UNDEFINED)
@@ -439,8 +439,9 @@ namespace cll
 						errflag = err; break;
 					}
 					
-					if (i % 2 == 0) arr += buff[i].value;
+					arr += buff[i].value;
 				}
+				arr += "]";
 
 				if (errflag.value == "") vec.emplace_back(arr);
 				else vec.emplace_back(errflag);

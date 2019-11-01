@@ -1,5 +1,5 @@
 // Expected output: C-1ike_ScriptIng_L4nguage
-// Last tested version: 0.5
+// Last tested version: 0.6
 
 function opposite
 {
@@ -80,6 +80,8 @@ for i = 0, i < length(vec), i += 1
 
 cout char((((((((200 & 200) + 40) | 5) - 8) * 1) << 2) + 2) / 10)
 
+// L
+
 if true and (true or false); cout 'L'[int(abs(0))]
 
 // 4nguag
@@ -94,5 +96,3 @@ cout x;
 // e
 
 cout opposite(char('e' ^ 32))
-
-pause

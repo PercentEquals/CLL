@@ -392,7 +392,7 @@ namespace cll
 		return true;
 	}
 
-	std::vector<var> Interpreter::math(const std::vector<var>& v)
+	std::vector<var> Interpreter::math(const std::vector<var>& v, const bool& fun)
 	{
 		std::vector<var> vec;
 		vec.reserve(v.size());
@@ -451,7 +451,7 @@ namespace cll
 				if (v[i].value.find("(") != std::string::npos && v[i].value[v[i].value.length() - 1] == ')')
 				{
 					std::string fun = v[i].value.substr(0, v[i].value.find("("));
-					std::vector<var> args = math(lexer(v[i].value.substr(fun.length(), v[i].value.length() - fun.length())));
+					std::vector<var> args = math(lexer(v[i].value.substr(fun.length() + 1, v[i].value.length() - fun.length() - 2)), true);
 					function buff = functions.get(fun);
 					defined dbuff = dfunctions.get(fun);
 					bool errflag = false;
@@ -491,7 +491,7 @@ namespace cll
 
 		vins.reserve(10);
 
-		for (unsigned char step = 0; step < 14; ++step)
+		for (unsigned char step = 0; step < 15; ++step)
 		{
 			for (size_t i = 0; i < vec.size(); ++i)
 			{
@@ -502,101 +502,98 @@ namespace cll
 				{
 					// PREFIX OPERATORS
 
-					if (vec[i - 1].type == Type::SYMBOL)
+					if (vec[i - 1].type != Type::SYMBOL) continue;
+					if (!(vec[i - 1].value == "!" || vec[i - 1].value == "~" || vec[i - 1].value == "-")) continue;
+
+					if (vec[i].type == Type::SYMBOL || vec[i].type == Type::UNDEFINED) continue;
+
+					if (vec[i - 1].value == "!") ins = !vec[i];
+					else if (vec[i - 1].value == "~") ins = ~vec[i];
+					else if (vec[i - 1].value == "-")
 					{
-						if (vec[i - 1].value == "!" || vec[i - 1].value == "~" || vec[i - 1].value == "-")
-						{
-							if (vec[i].type == Type::SYMBOL || vec[i].type == Type::UNDEFINED) continue;
-
-							if (vec[i - 1].value == "!") ins = !vec[i];
-							else if (vec[i - 1].value == "~") ins = ~vec[i];
-							else if (vec[i - 1].value == "-")
-							{
-								if (i > 1 && (vec[i - 2].type != Type::SYMBOL && vec[i - 2].type != Type::BARE)) continue;
-								ins = var("0") - vec[i];
-							}
-
-							vec.erase(vec.begin() + (i - 1), vec.begin() + i + 1);
-							vec.insert(vec.begin() + (i - 1), ins);
-							i -= 2;
-						}
+						if (i > 1 && (vec[i - 2].type != Type::SYMBOL && vec[i - 2].type != Type::BARE)) continue;
+						ins = var("0") - vec[i];
 					}
+
+					vec.erase(vec.begin() + (i - 1), vec.begin() + i + 1);
+					vec.insert(vec.begin() + (i - 1), ins);
+					i -= 2;
 				}
 				else if (i > 1 && step < 12)
 				{
-					if (vec[i - 1].type == Type::SYMBOL)
+					if (vec[i - 1].type != Type::SYMBOL) continue;
+
+					if (vec[i - 2].type == Type::SYMBOL || vec[i - 2].type == Type::UNDEFINED) continue;
+					if (vec[i].type == Type::SYMBOL || vec[i].type == Type::UNDEFINED) continue;
+					if (vec[i - 2].type == Type::SYMBOL && vec[i - 1].value != "-") continue;
+
+					if (step == 1 && vec[i - 1].value == "**") ins = vec[i - 2].pow(vec[i]);
+					else if (step == 2)
 					{
-						if (vec[i - 2].type == Type::SYMBOL || vec[i - 2].type == Type::UNDEFINED) continue;
-						if (vec[i].type == Type::SYMBOL || vec[i].type == Type::UNDEFINED) continue;
-						if (vec[i - 2].type == Type::SYMBOL && vec[i - 1].value != "-") continue;
+						if (vec[i - 1].value == "*") ins = vec[i - 2] * vec[i];
+						else if (vec[i - 1].value == "/") ins = vec[i - 2] / vec[i];
+						else if (vec[i - 1].value == "%") ins = vec[i - 2] % vec[i];
+					}
+					else if (step == 3)
+					{
+						if (vec[i - 1].value == "+") ins = vec[i - 2] + vec[i];
+						else if (vec[i - 1].value == "-") ins = vec[i - 2] - vec[i];
+					}
+					else if (step == 4)
+					{
+						if (vec[i - 1].value == "<<") ins = vec[i - 2] << vec[i];
+						else if (vec[i - 1].value == ">>") ins = vec[i - 2] >> vec[i];
+					}
+					else if (step == 5)
+					{
+						if (vec[i - 1].value == "<=") ins = vec[i - 2] <= vec[i];
+						else if (vec[i - 1].value == ">=") ins = vec[i - 2] >= vec[i];
+						else if (vec[i - 1].value == "<") ins = vec[i - 2] < vec[i];
+						else if (vec[i - 1].value == ">") ins = vec[i - 2] > vec[i];
+					}
+					else if (step == 6)
+					{
+						if (vec[i - 1].value == "==") ins = vec[i - 2] == vec[i];
+						else if (vec[i - 1].value == "!=") ins = vec[i - 2] != vec[i];
+						else if (vec[i - 1].value == "===") ins = std::to_string((vec[i - 2] == vec[i]).getBool() && vec[i - 2].type == vec[i].type);
+						else if (vec[i - 1].value == "!==") ins = std::to_string((vec[i - 2] != vec[i]).getBool() || vec[i - 2].type != vec[i].type);
+					}
+					else if (step == 7 && vec[i - 1].value == "&") ins = vec[i - 2] & vec[i];
+					else if (step == 8 && vec[i - 1].value == "^") ins = vec[i - 2] ^ vec[i];
+					else if (step == 9 && vec[i - 1].value == "|") ins = vec[i - 2] | vec[i];
+					else if (step == 10 && vec[i - 1].value == "&&") ins = vec[i - 2] && vec[i];
+					else if (step == 11 && vec[i - 1].value == "||") ins = vec[i - 2] || vec[i];
 
-						if (step == 1 && vec[i - 1].value == "**") ins = vec[i - 2].pow(vec[i]);
-						else if (step == 2)
-						{
-							if (vec[i - 1].value == "*") ins = vec[i - 2] * vec[i];
-							else if (vec[i - 1].value == "/") ins = vec[i - 2] / vec[i];
-							else if (vec[i - 1].value == "%") ins = vec[i - 2] % vec[i];
-						}
-						else if (step == 3)
-						{
-							if (vec[i - 1].value == "+") ins = vec[i - 2] + vec[i];
-							else if (vec[i - 1].value == "-") ins = vec[i - 2] - vec[i];
-						}
-						else if (step == 4)
-						{
-							if (vec[i - 1].value == "<<") ins = vec[i - 2] << vec[i];
-							else if (vec[i - 1].value == ">>") ins = vec[i - 2] >> vec[i];
-						}
-						else if (step == 5)
-						{
-							if (vec[i - 1].value == "<=") ins = vec[i - 2] <= vec[i];
-							else if (vec[i - 1].value == ">=") ins = vec[i - 2] >= vec[i];
-							else if (vec[i - 1].value == "<") ins = vec[i - 2] < vec[i];
-							else if (vec[i - 1].value == ">") ins = vec[i - 2] > vec[i];
-						}
-						else if (step == 6)
-						{
-							if (vec[i - 1].value == "==") ins = vec[i - 2] == vec[i];
-							else if (vec[i - 1].value == "!=") ins = vec[i - 2] != vec[i];
-							else if (vec[i - 1].value == "===") ins = std::to_string((vec[i - 2] == vec[i]).getBool() && vec[i - 2].type == vec[i].type);
-							else if (vec[i - 1].value == "!==") ins = std::to_string((vec[i - 2] != vec[i]).getBool() || vec[i - 2].type != vec[i].type);
-						}
-						else if (step == 7 && vec[i - 1].value == "&") ins = vec[i - 2] & vec[i];
-						else if (step == 8 && vec[i - 1].value == "^") ins = vec[i - 2] ^ vec[i];
-						else if (step == 9 && vec[i - 1].value == "|") ins = vec[i - 2] | vec[i];
-						else if (step == 10 && vec[i - 1].value == "&&") ins = vec[i - 2] && vec[i];
-						else if (step == 11 && vec[i - 1].value == "||") ins = vec[i - 2] || vec[i];
-
-						if (ins.value != "")
-						{
-							vec.erase(vec.begin() + i - 2, vec.begin() + i + 1);
-							vec.insert(vec.begin() + (i - 2), ins);
-							i -= 2;
-						}
+					if (ins.value != "")
+					{
+						vec.erase(vec.begin() + i - 2, vec.begin() + i + 1);
+						vec.insert(vec.begin() + (i - 2), ins);
+						i -= 2;
 					}
 				}
 				else if (i > 0 && step == 12)
 				{
-					if (vec[i].type == Type::SYMBOL && vec[i].value == "?")
+					// TERNARY OPERATOR
+
+					if (!(vec[i].type == Type::SYMBOL && vec[i].value == "?")) continue;
+
+					if (vec[i - 1].type == Type::SYMBOL || vec[i - 1].type == Type::UNDEFINED) continue;
+
+					bool state = vec[i - 1].getBool();
+					bool buff = false;
+
+					for (size_t ii = i + 1; ii < vec.size(); ++ii)
 					{
-						if (vec[i - 1].type == Type::SYMBOL || vec[i - 1].type == Type::UNDEFINED) continue;
+						if (vec[ii].type == Type::SYMBOL && vec[ii].value == ":") buff = true;
+						else if (!buff && state) vins.push_back(vec[ii]);
+						else if (buff && !state) vins.push_back(vec[ii]);
+					}
 
-						bool state = vec[i - 1].getBool();
-						bool buff = false;
-
-						for (size_t ii = i + 1; ii < vec.size(); ++ii)
-						{
-							if (vec[ii].type == Type::SYMBOL && vec[ii].value == ":") buff = true;
-							else if (!buff && state) vins.push_back(vec[ii]);
-							else if (buff && !state) vins.push_back(vec[ii]);
-						}
-
-						if (!vins.empty())
-						{
-							vec.erase(vec.begin() + i - 1, vec.end());
-							for (size_t ii = 0; ii < vins.size(); ++ii) vec.insert(vec.begin() + (i - 1) + ii, vins[ii]);
-							i -= 1;
-						}
+					if (!vins.empty())
+					{
+						vec.erase(vec.begin() + i - 1, vec.end());
+						for (size_t ii = 0; ii < vins.size(); ++ii) vec.insert(vec.begin() + (i - 1) + ii, vins[ii]);
+						i -= 1;
 					}
 				}
 				else if (i > 1 && step == 13)
@@ -639,6 +636,20 @@ namespace cll
 					if (getVar(ins.name).value != "") vec.insert(vec.end() - (i - 2), ins);
 					else vec.insert(vec.end() - (i - 2), fvar);
 
+					i -= 2;
+				}
+				else if (i > 1 && step == 14 && !fun)
+				{
+					if (!(vec[i - 1].type == Type::SYMBOL && vec[i - 1].value == ",")) continue;
+
+					if (vec[i - 2].type == Type::SYMBOL || vec[i - 2].type == Type::BARE) continue;
+					if (vec[i].type == Type::SYMBOL || vec[i].type == Type::BARE) continue;
+					if (vec[i].type == Type::UNDEFINED || vec[i - 2].type == Type::UNDEFINED) continue;
+
+					ins = vec[i];
+
+					vec.erase(vec.begin() + i - 2, vec.begin() + i + 1);
+					vec.insert(vec.begin() + (i - 2), ins);
 					i -= 2;
 				}
 			}

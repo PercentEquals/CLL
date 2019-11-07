@@ -42,15 +42,6 @@ namespace cll
 		"|=", "&=", "^=", "//"
 	};
 
-	// Vector of math operators
-	const std::vector<std::string> math_symbols =
-	{
-		"+=", "==", "===", ">", "!=", "!==", "%", 
-		"%=", "&", "&&", "&=", "*", "**", "*=",
-		"+", "-", "-=", "/", "/=", "<", "<<", "<=", 
-		">=", ">>", "^", "^=", "|", "|=", "||"
-	};
-
 	// Symbols that are illegal in variable name
 	const std::string symbols = "`~{}/,.<>\\|&*!@#$%^&()+-=;':\"?";
 

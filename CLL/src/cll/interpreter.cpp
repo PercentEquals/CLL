@@ -486,10 +486,18 @@ namespace cll
 		// MATH WITH OPERATOR PRECEDENCE
 		bool assignment = false;
 
+		std::vector<var> vins;
+		var ins;
+
+		vins.reserve(10);
+
 		for (unsigned char step = 0; step < 14; ++step)
 		{
 			for (size_t i = 0; i < vec.size(); ++i)
 			{
+				ins.value.clear();
+				vins.clear();
+
 				if (i > 0 && step == 0)
 				{
 					// PREFIX OPERATORS
@@ -499,8 +507,6 @@ namespace cll
 						if (vec[i - 1].value == "!" || vec[i - 1].value == "~" || vec[i - 1].value == "-")
 						{
 							if (vec[i].type == Type::SYMBOL || vec[i].type == Type::UNDEFINED) continue;
-
-							var ins;
 
 							if (vec[i - 1].value == "!") ins = !vec[i];
 							else if (vec[i - 1].value == "~") ins = ~vec[i];
@@ -523,7 +529,6 @@ namespace cll
 						if (vec[i - 2].type == Type::SYMBOL || vec[i - 2].type == Type::UNDEFINED) continue;
 						if (vec[i].type == Type::SYMBOL || vec[i].type == Type::UNDEFINED) continue;
 						if (vec[i - 2].type == Type::SYMBOL && vec[i - 1].value != "-") continue;
-						var ins;
 
 						if (step == 1 && vec[i - 1].value == "**") ins = vec[i - 2].pow(vec[i]);
 						else if (step == 2)
@@ -575,22 +580,21 @@ namespace cll
 					if (vec[i].type == Type::SYMBOL && vec[i].value == "?")
 					{
 						if (vec[i - 1].type == Type::SYMBOL || vec[i - 1].type == Type::UNDEFINED) continue;
-						std::vector<var> ins;
-						ins.reserve(10);
+
 						bool state = vec[i - 1].getBool();
 						bool buff = false;
 
 						for (size_t ii = i + 1; ii < vec.size(); ++ii)
 						{
 							if (vec[ii].type == Type::SYMBOL && vec[ii].value == ":") buff = true;
-							else if (!buff && state) ins.push_back(vec[ii]);
-							else if (buff && !state) ins.push_back(vec[ii]);
+							else if (!buff && state) vins.push_back(vec[ii]);
+							else if (buff && !state) vins.push_back(vec[ii]);
 						}
 
-						if (!ins.empty())
+						if (!vins.empty())
 						{
 							vec.erase(vec.begin() + i - 1, vec.end());
-							for (size_t ii = 0; ii < ins.size(); ++ii) vec.insert(vec.begin() + (i - 1) + ii, ins[ii]);
+							for (size_t ii = 0; ii < vins.size(); ++ii) vec.insert(vec.begin() + (i - 1) + ii, vins[ii]);
 							i -= 1;
 						}
 					}
@@ -602,7 +606,6 @@ namespace cll
 					var lvar = vec[(vec.size() - 1) - i + 2];
 					var symb = vec[(vec.size() - 1) - i + 1];
 					var fvar = vec[(vec.size() - 1) - i];
-					var ins;
 
 					if (lvar.type == Type::SYMBOL || lvar.type == Type::BARE) continue;
 					if (fvar.type == Type::SYMBOL || fvar.type == Type::BARE) continue;

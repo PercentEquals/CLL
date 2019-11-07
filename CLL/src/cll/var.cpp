@@ -77,6 +77,15 @@ namespace cll
 			}
 		}
 
+		if (v.length() > 2 && strspn(v.c_str(), "b01") == v.length()) // Checks for binary
+		{
+			if (v.substr(0, 2) == "0b" && v.substr(2).find_first_of("b") == std::string::npos)
+			{
+				type = Type::INT;
+				return;
+			}
+		}
+
 		if (v.length() > 0) // Checks for string, char or array
 		{
 			if (v[0] == '"' && v[v.length() - 1] == '"' && v.length() > 1) type = Type::STRING;
@@ -155,8 +164,9 @@ namespace cll
 			{
 				if (type == Type::INT)
 				{
-					if (v[0] == '0' && v.length() > 1 && v.find_first_of("x89") == std::string::npos) value = std::to_string(std::stoll(v.substr(1), 0, 8));
+					if (v[0] == '0' && v.length() > 1 && v.find_first_of("bx89") == std::string::npos) value = std::to_string(std::stoll(v.substr(1), 0, 8));
 					else if (v.substr(0, 2) == "0x" && v.length() > 2) value = std::to_string(std::stoll(v.substr(2), 0, 16));
+					else if (v.substr(0, 2) == "0b" && v.length() > 2) value = std::to_string(std::stoll(v.substr(2), 0, 2));
 					else if (v[0] == '0' && v.length() > 1 && v.find_first_of("89") != std::string::npos) value = std::to_string(std::stoll(v));
 					else value = v;
 				}

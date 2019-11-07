@@ -496,7 +496,6 @@ namespace cll
 			for (size_t i = 0; i < vec.size(); ++i)
 			{
 				ins.value.clear();
-				vins.clear();
 
 				if (i > 0 && step == 0)
 				{
@@ -526,6 +525,7 @@ namespace cll
 					if (vec[i - 2].type == Type::SYMBOL || vec[i - 2].type == Type::UNDEFINED) continue;
 					if (vec[i].type == Type::SYMBOL || vec[i].type == Type::UNDEFINED) continue;
 					if (vec[i - 2].type == Type::SYMBOL && vec[i - 1].value != "-") continue;
+					if (i + 1 < vec.size() && vec[i + 1].type == Type::SYMBOL && vec[i + 1].value == "?") continue;
 
 					if (step == 1 && vec[i - 1].value == "**") ins = vec[i - 2].pow(vec[i]);
 					else if (step == 2)
@@ -574,10 +574,10 @@ namespace cll
 				else if (i > 0 && step == 12)
 				{
 					// TERNARY OPERATOR
-
 					if (!(vec[i].type == Type::SYMBOL && vec[i].value == "?")) continue;
-
 					if (vec[i - 1].type == Type::SYMBOL || vec[i - 1].type == Type::UNDEFINED) continue;
+
+					vins.clear();
 
 					bool state = vec[i - 1].getBool();
 					bool buff = false;
@@ -594,6 +594,7 @@ namespace cll
 						vec.erase(vec.begin() + i - 1, vec.end());
 						for (size_t ii = 0; ii < vins.size(); ++ii) vec.insert(vec.begin() + (i - 1) + ii, vins[ii]);
 						i -= 1;
+						step = 1;
 					}
 				}
 				else if (i > 1 && step == 13)

@@ -749,9 +749,9 @@ namespace cll
 		}
 		else if(type == Type::FLOAT)
 		{
-			if (v.type == Type::DOUBLE && v.getDouble() != 0) val = std::to_string(getFloat() + v.getDouble());
-			else if (v.type == Type::FLOAT && v.getFloat() != 0) val = std::to_string(getFloat() + v.getFloat());
-			else if (v.getInt() != 0) val = std::to_string(getFloat() + v.getInt());
+			if (v.type == Type::DOUBLE && v.getDouble() != 0) val = std::to_string(getFloat() / v.getDouble());
+			else if (v.type == Type::FLOAT && v.getFloat() != 0) val = std::to_string(getFloat() / v.getFloat());
+			else if (v.getInt() != 0) val = std::to_string(getFloat() / v.getInt());
 
 			if (v.type != Type::DOUBLE)
 			{

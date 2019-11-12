@@ -422,7 +422,7 @@ namespace cll
 			}
 			else if (v[i].type == Type::ARRAY)
 			{
-				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)));
+				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)), true);
 				var errflag("");
 				std::string arr = "[";
 				for (size_t i = 0; i < buff.size(); ++i)

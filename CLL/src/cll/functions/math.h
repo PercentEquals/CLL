@@ -19,7 +19,7 @@ namespace cll
 
 	var sqrt(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -30,7 +30,7 @@ namespace cll
 
 	var cbrt(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -41,8 +41,8 @@ namespace cll
 
 	var hypot(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
-		if (args.size() < 3) return var("0");
+		if (args.empty()) return var("0.0");
+		if (args.size() < 3) return var("0.0");
 
 		var ret("[]");
 
@@ -53,7 +53,7 @@ namespace cll
 
 	var abs(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -66,7 +66,7 @@ namespace cll
 
 	var floor(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -77,7 +77,7 @@ namespace cll
 
 	var ceil(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -88,7 +88,7 @@ namespace cll
 
 	var round(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -99,7 +99,7 @@ namespace cll
 
 	var trunc(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -112,7 +112,7 @@ namespace cll
 
 	var cos(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -123,7 +123,7 @@ namespace cll
 
 	var sin(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -134,7 +134,7 @@ namespace cll
 
 	var tan(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -145,7 +145,7 @@ namespace cll
 
 	var acos(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -156,7 +156,7 @@ namespace cll
 
 	var asin(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -167,7 +167,7 @@ namespace cll
 
 	var atan(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -180,7 +180,7 @@ namespace cll
 
 	var cosh(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -191,7 +191,7 @@ namespace cll
 
 	var sinh(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -202,7 +202,7 @@ namespace cll
 
 	var tanh(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -213,7 +213,7 @@ namespace cll
 
 	var acosh(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -224,7 +224,7 @@ namespace cll
 
 	var asinh(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -235,7 +235,7 @@ namespace cll
 
 	var atanh(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -248,7 +248,7 @@ namespace cll
 
 	var exp(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -259,8 +259,8 @@ namespace cll
 
 	var ldexp(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
-		if (args.size() < 3) return var("0");
+		if (args.empty()) return var("0.0");
+		if (args.size() < 3) return var("0.0");
 
 		var ret("[]");
 
@@ -271,7 +271,7 @@ namespace cll
 
 	var log(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -282,7 +282,7 @@ namespace cll
 
 	var log10(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 
@@ -293,7 +293,7 @@ namespace cll
 
 	var exp2(const std::vector<var>& args)
 	{
-		if (args.empty()) return var("0");
+		if (args.empty()) return var("0.0");
 
 		var ret("[]");
 

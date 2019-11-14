@@ -341,7 +341,7 @@ namespace cll
 				for (size_t i = 1; i < v.size(); ++i)
 				{
 					if (v[i].type == Type::CHAR) write(std::string(1, char(v[i].getInt())));
-					else write(v[i].getString());
+					else write(v[i].getEscapedString());
 				}
 			}
 			else if (enabledIO && v[0].value == "cin")

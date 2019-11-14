@@ -334,6 +334,30 @@ namespace cll
 		else return value;
 	}
 
+	std::string var::getEscapedString() const
+	{
+		if (type == Type::STRING)
+		{
+			std::string ret = "";
+			bool force = false;
+
+			for (size_t i = 1; i < value.length() - 1; ++i)
+			{
+				if (value[i] == '\\' && value[i - 1] != '\\') continue;
+				if (i > 2 && value[i - 1] == '\\' && value[i - 2] == '\\') force = true;
+
+				if (value[i - 1] != '\\' || force) ret += value[i];
+				else ret += var("'\\" + std::string(1, value[i]) + "'").getInt();
+
+				force = false;
+			}
+
+			return ret;
+		}
+		else if (type == Type::CHAR) return value.substr(1, value.length() - 2);
+		else return value;
+	}
+
 	std::string var::getError() const
 	{
 		if (name == "INVALID_NAME") return name;
@@ -581,11 +605,7 @@ namespace cll
 			if (val[0] != '[') val = "[" + val;
 			if (val[val.length() - 1] != ']') val += "]";
 		}
-		else if (type == Type::STRING || v.type == Type::STRING)
-		{
-			if (v.type == Type::CHAR) val = "\"" + getString() + ((v.getChar(0) == '\\') ? "\\\\" : std::string(1, v.getChar(0))) + "\"";
-			else val = "\"" + getString() + v.getString() + "\"";
-		}
+		else if (type == Type::STRING || v.type == Type::STRING) val = "\"" + getString() + v.getString() + "\"";
 		else if (type == Type::INT || type == Type::CHAR)
 		{
 			if (v.type == Type::DOUBLE) val = std::to_string(getInt() + v.getDouble());

@@ -12,15 +12,26 @@ namespace cll
 		UNDEFINED, INT, FLOAT, DOUBLE, CHAR, STRING, ARRAY, PARENTHESIS, SYMBOL, BARE
 	};
 
+	union Buffor
+	{
+		long long int i;
+		double d;
+		float f;
+		char c;
+
+		Buffor() : i(0) {};
+	};
+
 	struct var
 	{
 		std::string name; // Holds declared name of variable
 		std::string value; // Holds non-raw value of variable - meaning its value representation depends on detected type
 		Type type;
+		Buffor buffor;
 
 		// CONSTRUCTORS //
 		var() : name(""), value(""), type(Type::UNDEFINED) { value.reserve(100); };
-		var(const var& v) : name(v.name), value(v.value), type(v.type) {};
+		var(const var& v) : name(v.name), value(v.value), type(v.type), buffor(v.buffor) {}
 		var(const std::string& n, const var& v) : value(v.value), type(v.type) { setName(n); };
 		var(const std::string& v);
 		var(const std::string& n, const std::string& v);

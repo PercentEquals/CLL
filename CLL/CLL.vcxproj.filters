@@ -23,5 +23,6 @@
     <ClInclude Include="src\cll\functions\type.h" />
     <ClInclude Include="src\cll\defined.h" />
     <ClInclude Include="src\cll\functions\string.h" />
+    <ClInclude Include="src\cll\utils\convert.h" />
   </ItemGroup>
 </Project>

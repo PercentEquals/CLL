@@ -2,6 +2,8 @@
 
 // Author: Bartosz Niciak
 
+#include "utils/convert.h"
+
 #include "lexer.h"
 #include "static.h"
 
@@ -170,29 +172,28 @@ namespace cll
 			{
 				if (type == Type::INT)
 				{
-					if (v[0] == '0' && v.length() > 1 && v.find_first_of("bx89") == std::string::npos) buffor.i = std::stoll(v.substr(1), 0, 8);
-					else if (v.substr(0, 2) == "0x" && v.length() > 2) buffor.i = std::stoll(v.substr(2), 0, 16);
-					else if (v.substr(0, 2) == "0b" && v.length() > 2) buffor.i = std::stoll(v.substr(2), 0, 2);
-					else if (v[0] == '0' && v.length() > 1 && v.find_first_of("89") != std::string::npos) buffor.i = std::stoll(v);
-					else buffor.i = std::stoll(v);
+					if (v[0] == '0' && v.length() > 1 && v.find_first_of("bx89") == std::string::npos) buffor.i = cll::fatoi(v.substr(1).c_str(), 8);
+					else if (v.substr(0, 2) == "0x" && v.length() > 2) buffor.i = cll::fatoi(v.substr(2).c_str(), 16);
+					else if (v.substr(0, 2) == "0b" && v.length() > 2) buffor.i = cll::fatoi(v.substr(2).c_str(), 2);
+					else if (v[0] == '0' && v.length() > 1 && v.find_first_of("89") != std::string::npos) buffor.i = cll::fatoi(v.c_str());
+					else buffor.i = cll::fatoi(v.c_str());
 
 					value = std::to_string(buffor.i);
 				}
 				else if (type == Type::FLOAT)
 				{
-					buffor.f = std::stof(v);
+					buffor.f = float(cll::fatof(v.c_str()));
 					value = std::to_string(buffor.f);
+				}
+				else if (type == Type::DOUBLE && (v == "-nan(ind)" || v == "-inf" || v == "inf"))
+				{
+					buffor.d = ((v == "inf") ? 1 : -1) * std::numeric_limits<double>::infinity();
+					value = (v == "inf") ? "inf" : "-inf";
 				}
 				else if (type == Type::DOUBLE)
 				{
-					buffor.d = std::stod(v);
-
-					if (v == "-nan(ind)")
-					{
-						buffor.d = -std::numeric_limits<double>::infinity();
-						value = "-inf";
-					}
-					else value = std::to_string(buffor.d);
+					buffor.d = cll::fatof(v.c_str());
+					value = std::to_string(buffor.d);
 				}
 			}
 			catch (const std::invalid_argument&) { value = "INVALID_VALUE"; type = Type::UNDEFINED; }

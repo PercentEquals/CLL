@@ -35,7 +35,6 @@ namespace cll
 		var(const std::string& n, const var& v) : value(v.value), type(v.type), buffor(v.buffor) { setName(n); };
 		var(const std::string& v);
 		var(const std::string& n, const std::string& v);
-		var(const std::string& n, const std::string& v, const Type& t) : type(t) { setName(n); setValue(v); };
 
 		// SET METHODS //
 		void setName(const std::string& n); // Sets variable name and checks for special symbols and bare words
@@ -44,24 +43,27 @@ namespace cll
 		void setElement(const size_t& n, const var& v);
 
 		// DELETE METHODS
-		inline void deleteElement(const size_t& n) { setElement(n, var("")); };
+		__forceinline void deleteElement(const size_t& n) { setElement(n, var("")); };
 
 		// GET METHODS //
-		inline std::string getName() const { return name; };
-		inline std::string getValue() const { return value; };
-		inline std::string getType() const 
+		__forceinline std::string getName() const { return name; };
+		__forceinline std::string getValue() const { return value; };
+		std::string getType() const
 		{
-			if (type == Type::INT) return "INT";
-			if (type == Type::BARE) return "BARE";
-			if (type == Type::CHAR) return "CHAR";
-			if (type == Type::FLOAT) return "FLOAT";
-			if (type == Type::ARRAY) return "ARRAY";
-			if (type == Type::DOUBLE) return "DOUBLE";
-			if (type == Type::STRING) return "STRING";
-			if (type == Type::SYMBOL) return "SYMBOL";
-			if (type == Type::UNDEFINED) return "UNDEFINED";
-			if (type == Type::PARENTHESIS) return "PARENTHESIS";
-			return "UNDEFINED";
+			switch (type)
+			{
+				case Type::INT: return "INT";
+				case Type::BARE: return "BARE";
+				case Type::CHAR: return "CHAR";
+				case Type::FLOAT: return "FLOAT";
+				case Type::ARRAY: return "ARRAY";
+				case Type::DOUBLE: return "DOUBLE";
+				case Type::STRING: return "STRING";
+				case Type::SYMBOL: return "SYMBOL";
+				case Type::UNDEFINED: return "UNDEFINED";
+				case Type::PARENTHESIS: return "PARENTHESIS";
+				default: return "UNDEFINED";
+			}
 		};
 
 		long long int getInt() const;
@@ -109,15 +111,15 @@ namespace cll
 		var operator|(const var& v) const;
 
 		// INLINE ASSIGNMENT OPERATORS // 
-		inline var& operator+=(const var& v) { *this = *this + v; return *this; };
-		inline var& operator-=(const var& v) { *this = *this - v; return *this; };
-		inline var& operator*=(const var& v) { *this = *this * v; return *this; };
-		inline var& operator/=(const var& v) { *this = *this / v; return *this; };
-		inline var& operator%=(const var& v) { *this = *this % v; return *this; };
-		inline var& operator^=(const var& v) { *this = *this ^ v; return *this; };
-		inline var& operator&=(const var& v) { *this = *this & v; return *this; };
-		inline var& operator|=(const var& v) { *this = *this | v; return *this; };
-		inline var& operator<<=(const var& v) { *this = *this << v; return *this; };
-		inline var& operator>>=(const var& v) { *this = *this >> v; return *this; };
+		__forceinline var& operator+=(const var& v) { *this = *this + v; return *this; };
+		__forceinline var& operator-=(const var& v) { *this = *this - v; return *this; };
+		__forceinline var& operator*=(const var& v) { *this = *this * v; return *this; };
+		__forceinline var& operator/=(const var& v) { *this = *this / v; return *this; };
+		__forceinline var& operator%=(const var& v) { *this = *this % v; return *this; };
+		__forceinline var& operator^=(const var& v) { *this = *this ^ v; return *this; };
+		__forceinline var& operator&=(const var& v) { *this = *this & v; return *this; };
+		__forceinline var& operator|=(const var& v) { *this = *this | v; return *this; };
+		__forceinline var& operator<<=(const var& v) { *this = *this << v; return *this; };
+		__forceinline var& operator>>=(const var& v) { *this = *this >> v; return *this; };
 	};
 }

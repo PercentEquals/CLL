@@ -386,7 +386,7 @@ namespace cll
 			}
 		}
 		else if (v[0].value == "{" && v[0].type == Type::SYMBOL) scope = 1;
-		else if (v.size() == 1 && v[0].type != Type::UNDEFINED) output = v[0].value + " " + v[0].getType();
+		else if (enabledOutput && v.size() == 1 && v[0].type != Type::UNDEFINED) output = v[0].value + " " + v[0].getType();
 
 		if (error != "") return false;
 		return true;

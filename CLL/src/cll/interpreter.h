@@ -36,9 +36,10 @@ namespace cll
 		bool log; // Determines wheter to output errors or not
 		bool debug; // Determines wheter to output additional debug information about tokens
 		bool enabledIO;
+		bool enabledOutput;
 
 		// PRIVATE METHODS //
-		inline void write(const std::string& s) { if (enabledIO) std::cout << s; };
+		__forceinline void write(const std::string& s) { if (enabledIO) std::cout << s; };
 		bool errorLog(); // Returns false if there is an error and prints them with std::cout (if logging is enabled)
 		bool newInterpreter(const std::vector<var>& v); // Creates new instance of interpreter - for file in file execution
 		var newFunction(const std::vector<var>& args, const std::vector<std::string>& l);
@@ -51,9 +52,15 @@ namespace cll
 	public:
 
 		// CONSTRUCTORS //
-		Interpreter() : error(""), filename(""), output(""), scope(0), line(0), returned(""), continued(false), broke(false), log(false), debug(false), enabledIO(false)
+		Interpreter() : error(""), filename(""), output(""), scope(0), line(0), returned(""), continued(false), 
+						broke(false), log(false), debug(false), enabledIO(false), enabledOutput(false)
 		{
 			vars.reserve(1000);
+			output.reserve(20);
+
+			previous_action.reserve(15);
+			action.reserve(15);
+			lines.reserve(50);
 
 			vars =
 			{
@@ -80,7 +87,6 @@ namespace cll
 		void setVar(const var& v); // Sets or adds variable to interpreter by var abstract
 		inline void setVar(const std::string& n, const var& v) { setVar(var(n, v)); };
 		inline void setVar(const std::string& n, const std::string& v) { setVar(var(n, v)); };
-		inline void setVar(const std::string& n, const std::string& v, const Type& t) { setVar(var(n, v, t)); };
 
 		var getVar(const std::string& n); // Returns variable by its name
 		void deleteVar(const std::string& n); // Deletes variable by its name
@@ -102,6 +108,10 @@ namespace cll
 		inline void enableIO()  { enabledIO = true; };
 		inline void disableIO() { enabledIO = false; };
 		inline void toggleIO()  { enabledIO = !enabledIO; };
+
+		inline void enableOutput() { enabledOutput = true; };
+		inline void disableOutput() { enabledOutput = false; };
+		inline void toggleOutput() { enabledOutput = !enabledOutput; };
 
 		// OTHER PUBLIC METHODS //
 		inline void clearError() { error.clear(); }; // Clears error

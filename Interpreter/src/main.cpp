@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
 	{
 		std::unique_ptr<cll::Interpreter> local = std::make_unique<cll::Interpreter>();
 		//local->enableDebug();
+		local->enableOutput();
 		local->enableIO();
 
 		std::string input("");

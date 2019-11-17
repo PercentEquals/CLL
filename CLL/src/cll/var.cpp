@@ -58,7 +58,7 @@ namespace cll
 		for (size_t i = 0; i < v.length(); ++i)
 		{
 			if (num && !((v[i] == '-' && i == 0) || v[i] == '.' || (v[i] == 'f' && i == v.length() - 1) || (v[i] >= '0' && v[i] <= '9'))) num = false;
-			if (hex && !(v[i] == 'x' || (v[i] >= 'a' && v[i] <= 'f') || (v[i] >= 'A' && v[i] <= 'F') || (v[i] >= '0' && v[i] <= '9'))) hex = false;
+			if (hex && !((v[i] == 'x' && i != v.length() - 1) || (v[i] >= 'a' && v[i] <= 'f') || (v[i] >= 'A' && v[i] <= 'F') || (v[i] >= '0' && v[i] <= '9'))) hex = false;
 			if (bin && !(v[i] == 'b' || v[i] == '0' || v[i] == '1')) bin = false;
 		}
 
@@ -138,11 +138,8 @@ namespace cll
 			if (type != Type::UNDEFINED) return;
 		}
 
-		if (type == Type::UNDEFINED)
-		{
-			if (std::all_of(v.begin(), v.end(), ::ispunct)) type = Type::SYMBOL;
-			else if (std::binary_search(barewords.begin(), barewords.end(), v)) type = Type::BARE;
-		}
+		if (std::all_of(v.begin(), v.end(), ::ispunct)) type = Type::SYMBOL;
+		else if (std::binary_search(barewords.begin(), barewords.end(), v)) type = Type::BARE;
 	}
 
 	void var::setValue(const std::string& v)

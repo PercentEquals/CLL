@@ -32,10 +32,10 @@ namespace cll
 		// CONSTRUCTORS //
 		var() : name(""), value(""), type(Type::UNDEFINED) { value.reserve(100); };
 		var(const var& v) : name(v.name), value(v.value), type(v.type), buffor(v.buffor) {}
-		var(const std::string& n, const var& v) : value(v.value), type(v.type) { setName(n); };
+		var(const std::string& n, const var& v) : value(v.value), type(v.type), buffor(v.buffor) { setName(n); };
 		var(const std::string& v);
 		var(const std::string& n, const std::string& v);
-		var(const std::string& n, const std::string& v, const Type& t) : value(v), type(t) { setName(n); };
+		var(const std::string& n, const std::string& v, const Type& t) : type(t) { setName(n); setValue(v); };
 
 		// SET METHODS //
 		void setName(const std::string& n); // Sets variable name and checks for special symbols and bare words

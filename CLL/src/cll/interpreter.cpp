@@ -54,7 +54,7 @@ namespace cll
 		nested->log = log;
 		nested->debug = debug;
 		nested->enabledIO = enabledIO;
-		nested->setVar("params", params);
+		nested->setVar("args", params);
 
 		bool state = nested->readFile(v[1].getString());
 		if (!state)
@@ -79,7 +79,7 @@ namespace cll
 		nested->enabledIO = enabledIO;
 		nested->functions = functions;
 		nested->dfunctions = dfunctions;
-		nested->setVar("params", params);
+		nested->setVar("args", params);
 
 		for (size_t i = 0; i < l.size(); ++i)
 		{

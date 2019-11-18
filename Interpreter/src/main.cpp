@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 		//runtime->enableDebug();
 		runtime->enableIO();
 		
-		if (!runtime->readLine("params = " + params.getValue())) errorLog(runtime);
+		if (!runtime->readLine("args = " + params.getValue())) errorLog(runtime);
 		else if (!runtime->readFile(path.getString())) errorLog(runtime);
 	}
 

@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 		//runtime->enableDebug();
 		runtime->enableIO();
 		
-		if (!runtime->readLine("params = " + params.getValue())) errorLog(runtime);
+		if (!runtime->readLine("args = " + params.getValue())) errorLog(runtime);
 		else if (!runtime->readFile(path.getString())) errorLog(runtime);
 	}
 
@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
 	{
 		std::unique_ptr<cll::Interpreter> local = std::make_unique<cll::Interpreter>();
 		//local->enableDebug();
+		local->enableOutput();
 		local->enableIO();
 
 		std::string input("");

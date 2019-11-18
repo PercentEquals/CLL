@@ -165,8 +165,8 @@
     <ClInclude Include="src\cll\interpreter.h" />
     <ClInclude Include="src\cll\lexer.h" />
     <ClInclude Include="src\cll\static.h" />
+    <ClInclude Include="src\cll\utils\convert.h" />
     <ClInclude Include="src\cll\utils\search.h" />
-    <ClInclude Include="src\cll\utils\strspn.h" />
     <ClInclude Include="src\cll\var.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

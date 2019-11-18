@@ -637,7 +637,7 @@ namespace cll
 
 					i -= 2;
 				}
-				else if (i > 1 && step == 14 && !fun)
+				else if (i > 1 && step == 14 && !assignment && !fun)
 				{
 					if (!(vec[i - 1].type == Type::SYMBOL && vec[i - 1].value == ",")) continue;
 
@@ -654,7 +654,7 @@ namespace cll
 			}
 		}
 
-		if (assignment && vec.size() > 1) vec = math(vec);
+		if (assignment && vec.size() > 1) vec = math(vec, fun);
 
 		return vec;
 	}

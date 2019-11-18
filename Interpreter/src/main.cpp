@@ -9,6 +9,12 @@
 // and can be used to type code on the fly
 // or to execute a file by passing its path by arguments with cmd or terminal
 
+#ifdef _WIN64
+	#define PLATFORM "x64"
+#elif _WIN32
+	#define PLATFORM ""
+#endif
+
 void errorLog(const std::unique_ptr<cll::Interpreter>& i)
 {
 	console::color(console::red);
@@ -20,12 +26,12 @@ void errorLog(const std::unique_ptr<cll::Interpreter>& i)
 
 int main(int argc, char* argv[])
 {
-	const std::string version = "0.6.1";
+	const std::string version = "0.7";
 	std::ios_base::sync_with_stdio(false);
 	std::cin.tie(NULL);
 
 	// Initializes console with title name passed as argument, also a simple unit test
-	console::init(cll::var("CLL Interpreter").getValue()); 
+	console::init(cll::var("CLL Interpreter ").getValue() + PLATFORM); 
 
 	// Interprets passed arguments as filepaths and executes them
 	if (argc > 1)

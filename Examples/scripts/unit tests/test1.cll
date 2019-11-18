@@ -1,19 +1,19 @@
 // Expected output: C-1ike_ScriptIng_L4nguage
-// Last tested version: 0.6.1
+// Last tested version: 0.7
 
 function opposite
 {
 	ret = ""
 
-	if typeof(params[0]) == "STRING"
+	if typeof(argv[0]) == "STRING"
 	{
-		for i = length(params[0]) - 1, i >= 0, i -= 1
+		for i = length(argv[0]) - 1, i >= 0, i -= 1
 		{
-			ret += params[0][i]
+			ret += argv[0][i]
 		}
 	}
-	else if typeof(params[0]) == "CHAR"; ret = char(params[0] ^ 32)
-	else; ret = int((params[0] > 0) ? (-abs(params[0])) : abs(params[0]))
+	else if typeof(argv[0]) == "CHAR"; ret = char(argv[0] ^ 32)
+	else; ret = int((argv[0] > 0) ? (-abs(argv[0])) : abs(argv[0]))
 	return ret
 }
 

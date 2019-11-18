@@ -55,7 +55,7 @@ namespace cll
 		Interpreter() : error(""), filename(""), output(""), scope(0), line(0), returned(""), continued(false), 
 						broke(false), log(false), debug(false), enabledIO(false), enabledOutput(false)
 		{
-			vars.reserve(1000);
+			vars.reserve(100);
 			output.reserve(20);
 
 			previous_action.reserve(15);

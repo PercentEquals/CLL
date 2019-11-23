@@ -10,7 +10,7 @@
 * [Examples](https://github.com/PercentEquals/CLL/tree/master/Examples)  
 * [Visual Studio Code Extension](https://github.com/PercentEquals/CLL/tree/master/VisualStudioCode)  
   
-## ABOUT
+## About
   
 CLL is my attempt at creating a 'simple' programming language with c-like features.  
 It can be used to create scripts or can be embedded into a c++ project.  
@@ -25,7 +25,7 @@ CLL is [turing complete](https://en.wikipedia.org/wiki/Turing_completeness), but
 * Flow control  
 * Functions and recursion  
 
-## Requirments
+## Requirements
 
 This solution was created using Visual Studio 2019 with v142 toolset on 10.0.18362.0 Windows SDK.
 You need to use atleast c++11 to compile it and other embedded programs.  

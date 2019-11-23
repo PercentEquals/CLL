@@ -4,9 +4,11 @@
 ![https://ci.appveyor.com/api/projects/status/github/PercentEquals/CLL?branch=master&svg=true](https://ci.appveyor.com/api/projects/status/github/PercentEquals/CLL?branch=master&svg=true)  
   
 **Useful links:**  
+
 * [Wiki](https://github.com/PercentEquals/CLL/wiki)  
 * [Releases](https://github.com/PercentEquals/CLL/releases)  
 * [Examples](https://github.com/PercentEquals/CLL/tree/master/Examples)  
+* [Visual Studio Code Extension](https://github.com/PercentEquals/CLL/tree/master/VisualStudioCode)  
   
 ## ABOUT
   

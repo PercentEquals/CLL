@@ -1,0 +1,80 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "cll",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#comments"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#variables"
+		},
+		{
+			"include": "#constants"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [
+				{
+				"name": "keyword.control",
+				"match": "\\b(?i)(cout|cin|delete|include|cll|return|function|do|while|for|if|else|break|continue)\\b"
+				},
+				{
+				"name": "keyword.other",
+				"match": "\\b(?i)(and|endl|true|false|is|not|or|xor)\\b"
+				}
+			]
+			},
+		"comments": {
+			"patterns": [
+				{
+				"name": "comment.line.double-slash",
+				"begin": "//",
+				"end": "\n"
+				}
+			]
+		},
+		"strings":{
+			"patterns": [
+				{
+				"name":"string.quoted.single",
+				"begin": "'",
+				"end": "'"
+				},
+				{
+				"name":"string.quoted.double",
+				"begin": "\"",
+				"end": "\""
+				}
+			]
+		},
+		"variables": {
+			"patterns": [
+				{
+				"name": "support.function",
+				"match": "\\b((sleep|time|rand|typeof|int|bool|float|double|char|string|fopen|fwrite|fexist|find|rfind|substr|strspn|stoi|stof|stod|to_string|length|sqrt|cbrt|round|abs|hypot|floor|ceil|round|trunc|cos|sin|tan|acos|asin|atan|cosh|sinh|tanh|acoh|asinh|atanh|exp|exp2|ldexp|log|log10)+)(?=\\()\\b"
+				}
+			]
+		},
+		"constants": {
+			"patterns": [
+				{
+				"name": "constant.character",
+				"match": "[^0-9a-zA-Z]"
+				},
+				{
+				"name": "constant.numeric",
+				"match": "([0-9]f|0x[0-9]|0b[0-1]|[0-9])"
+				}
+			]
+		}
+
+	},
+	"scopeName": "source.cll"
+}

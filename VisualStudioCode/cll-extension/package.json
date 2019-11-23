@@ -1,0 +1,26 @@
+{
+    "name": "cll-extension",
+    "displayName": "CLL extension",
+    "description": "A VSC extension to support CLL language",
+    "publisher": "PercentEquals",
+    "version": "1.0.0",
+    "engines": {
+        "vscode": "^1.35.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "cll",
+            "aliases": ["cll", "cll"],
+            "extensions": [".cll"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "cll",
+            "scopeName": "source.cll",
+            "path": "./syntaxes/cll.tmLanguage.json"
+        }]
+    }
+}

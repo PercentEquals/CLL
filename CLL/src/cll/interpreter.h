@@ -47,7 +47,7 @@ namespace cll
 		bool parse(const std::vector<var>& v); // Checks line syntax
 		bool bare(const std::vector<var>& v); // Procesess bare words and also some spiecial tokens
 		bool readScope(const std::vector<var>& v);
-		std::vector<var> math(const std::vector<var>& v, const bool& fun = false); // Procesess math equations
+		std::vector<var> math(const std::vector<var>& v, const bool& comma = true); // Procesess math equations
 
 	public:
 

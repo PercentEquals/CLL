@@ -143,7 +143,7 @@ namespace cll
 
 		if (v[0].type == Type::SYMBOL && v[0].value == "}" && !scope) error = "Unexpected symbol '}' - nothing to close!";
 		if (v[0].type == Type::SYMBOL && v[0].value != "{" && v.size() == 1) error = "Unexpected symbol '" + v[0].value + "'!";
-		if (v[0].type == Type::SYMBOL && v[0].value != "-" && v[0].value != "~" && v.size() > 1) error = "Unexpected symbol '" + v[0].value + "'!";
+		if (v[0].type == Type::SYMBOL && v[0].value != "-" && v[0].value != "~" && v[0].value != "!" && v.size() > 1) error = "Unexpected symbol '" + v[0].value + "'!";
 		if (error != "") return false;
 
 		// CHECKS FOR MULTIPLE BARE WORDS
@@ -392,7 +392,7 @@ namespace cll
 		return true;
 	}
 
-	std::vector<var> Interpreter::math(const std::vector<var>& v, const bool& fun)
+	std::vector<var> Interpreter::math(const std::vector<var>& v, const bool& comma)
 	{
 		std::vector<var> vec;
 		vec.reserve(v.size());
@@ -422,7 +422,7 @@ namespace cll
 			}
 			else if (v[i].type == Type::ARRAY)
 			{
-				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)), true);
+				std::vector<var> buff = math(lexer(v[i].value.substr(1, v[i].value.length() - 2)), false);
 				var errflag("");
 				std::string arr = "[";
 				for (size_t i = 0; i < buff.size(); ++i)
@@ -451,7 +451,7 @@ namespace cll
 				if (v[i].value.find("(") != std::string::npos && v[i].value[v[i].value.length() - 1] == ')')
 				{
 					std::string fun = v[i].value.substr(0, v[i].value.find("("));
-					std::vector<var> args = math(lexer(v[i].value.substr(fun.length() + 1, v[i].value.length() - fun.length() - 2)), true);
+					std::vector<var> args = math(lexer(v[i].value.substr(fun.length() + 1, v[i].value.length() - fun.length() - 2)), false);
 					function buff = functions.get(fun);
 					defined dbuff = dfunctions.get(fun);
 					bool errflag = false;
@@ -637,7 +637,7 @@ namespace cll
 
 					i -= 2;
 				}
-				else if (i > 1 && step == 14 && !assignment && !fun)
+				else if (i > 1 && step == 14 && !assignment && comma)
 				{
 					if (!(vec[i - 1].type == Type::SYMBOL && vec[i - 1].value == ",")) continue;
 
@@ -654,7 +654,7 @@ namespace cll
 			}
 		}
 
-		if (assignment && vec.size() > 1) vec = math(vec, fun);
+		if (assignment && vec.size() > 1) vec = math(vec, comma);
 
 		return vec;
 	}

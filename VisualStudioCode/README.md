@@ -4,7 +4,7 @@ Directory `cll-extension` contains simple visual studio code extension, that wil
 
 ## Instalation
 
-Because this extension is not avaiable on Visual Studio Marketplace, You need to install it manually.  
+Because this extension is not available on Visual Studio Marketplace, You need to install it manually.  
 Simply put `cll-extension` directory into `.vscode/extensions`. This directory can be found in:
 
 - Windows: `%USERPROFILE%\.vscode\extensions`

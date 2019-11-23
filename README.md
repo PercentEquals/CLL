@@ -20,7 +20,18 @@ CLL is [turing complete](https://en.wikipedia.org/wiki/Turing_completeness), but
 ## Features
   
 * Dynamic variables  
-* Multidimensional arrays/vectors
+* Multidimensional and irregular arrays (vectors)
 * Scoping  
 * Flow control  
-* Functions  
+* Functions and recursion  
+
+## Requirments
+
+This solution was created using Visual Studio 2019 with v142 toolset on 10.0.18362.0 Windows SDK.
+You need to use atleast c++11 to compile it and other embedded programs.  
+
+## Contributing
+
+Every contribution is welcome, whether it is typo or bug fix or new feature.  
+You can also create example scripts and embedded c++ programs. More info [here](https://github.com/PercentEquals/CLL/tree/master/Examples/scripts).  
+Just make sure pull request contains necessary infromation.

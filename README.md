@@ -27,7 +27,7 @@ CLL is [turing complete](https://en.wikipedia.org/wiki/Turing_completeness), but
 
 ## Requirements
 
-This solution was created using Visual Studio 2019 with v142 toolset on 10.0.18362.0 Windows SDK.
+This solution was created using Visual Studio 2019 with v142 toolset on 10.0.18362.0 Windows SDK.  
 You need to use atleast c++11 to compile it and other embedded programs.  
 
 ## Contributing

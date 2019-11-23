@@ -14,21 +14,28 @@ namespace cll
 
 		var ret("[]");
 
+		if (args.empty())
+		{
+			auto point = std::chrono::time_point_cast<std::chrono::milliseconds>(clock);
+			auto epoch = point.time_since_epoch();
+			ret += std::to_string(epoch.count());
+		}
+
 		for (size_t i = 0; i < args.size(); i += 2)
 		{
-			if (!args.empty() && (args[i].getString() == "s" || args[i].getString() == "seconds"))
+			if (args[i].getString() == "s" || args[i].getString() == "seconds")
 			{
 				auto point = std::chrono::time_point_cast<std::chrono::seconds>(clock);
 				auto epoch = point.time_since_epoch();
 				ret += std::to_string(epoch.count());
 			}
-			else if (!args.empty() && (args[i].getString() == "us" || args[i].getString() == "microseconds"))
+			else if (args[i].getString() == "us" || args[i].getString() == "microseconds")
 			{
 				auto point = std::chrono::time_point_cast<std::chrono::microseconds>(clock);
 				auto epoch = point.time_since_epoch();
 				ret += std::to_string(epoch.count());
 			}
-			else if (!args.empty() && (args[i].getString() == "ns" || args[i].getString() == "nanoseconds"))
+			else if (args[i].getString() == "ns" || args[i].getString() == "nanoseconds")
 			{
 				auto point = std::chrono::time_point_cast<std::chrono::nanoseconds>(clock);
 				auto epoch = point.time_since_epoch();

@@ -39,7 +39,7 @@ namespace cll
 		bool enabledOutput;
 
 		// PRIVATE METHODS //
-		__forceinline void write(const std::string& s) { if (enabledIO) std::cout << s; };
+		inline void write(const std::string& s) { if (enabledIO) std::cout << s; };
 		bool errorLog(); // Returns false if there is an error and prints them with std::cout (if logging is enabled)
 		bool newInterpreter(const std::vector<var>& v); // Creates new instance of interpreter - for file in file execution
 		var newFunction(const std::vector<var>& args, const std::vector<std::string>& l);

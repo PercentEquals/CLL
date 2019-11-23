@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 
 // Author: Bartosz Niciak
 
@@ -9,10 +10,10 @@
 // and can be used to type code on the fly
 // or to execute a file by passing its path by arguments with cmd or terminal
 
+#define PLATFORM ""
+
 #ifdef _WIN64
-	#define PLATFORM "x64"
-#elif _WIN32
-	#define PLATFORM ""
+#define PLATFORM "x64"
 #endif
 
 void errorLog(const std::unique_ptr<cll::Interpreter>& i)

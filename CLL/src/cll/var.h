@@ -43,11 +43,11 @@ namespace cll
 		void setElement(const size_t& n, const var& v);
 
 		// DELETE METHODS
-		__forceinline void deleteElement(const size_t& n) { setElement(n, var("")); };
+		inline void deleteElement(const size_t& n) { setElement(n, var("")); };
 
 		// GET METHODS //
-		__forceinline std::string getName() const { return name; };
-		__forceinline std::string getValue() const { return value; };
+		inline std::string getName() const { return name; };
+		inline std::string getValue() const { return value; };
 		std::string getType() const
 		{
 			switch (type)
@@ -111,15 +111,15 @@ namespace cll
 		var operator|(const var& v) const;
 
 		// INLINE ASSIGNMENT OPERATORS // 
-		__forceinline var& operator+=(const var& v) { *this = *this + v; return *this; };
-		__forceinline var& operator-=(const var& v) { *this = *this - v; return *this; };
-		__forceinline var& operator*=(const var& v) { *this = *this * v; return *this; };
-		__forceinline var& operator/=(const var& v) { *this = *this / v; return *this; };
-		__forceinline var& operator%=(const var& v) { *this = *this % v; return *this; };
-		__forceinline var& operator^=(const var& v) { *this = *this ^ v; return *this; };
-		__forceinline var& operator&=(const var& v) { *this = *this & v; return *this; };
-		__forceinline var& operator|=(const var& v) { *this = *this | v; return *this; };
-		__forceinline var& operator<<=(const var& v) { *this = *this << v; return *this; };
-		__forceinline var& operator>>=(const var& v) { *this = *this >> v; return *this; };
+		inline var& operator+=(const var& v) { *this = *this + v; return *this; };
+		inline var& operator-=(const var& v) { *this = *this - v; return *this; };
+		inline var& operator*=(const var& v) { *this = *this * v; return *this; };
+		inline var& operator/=(const var& v) { *this = *this / v; return *this; };
+		inline var& operator%=(const var& v) { *this = *this % v; return *this; };
+		inline var& operator^=(const var& v) { *this = *this ^ v; return *this; };
+		inline var& operator&=(const var& v) { *this = *this & v; return *this; };
+		inline var& operator|=(const var& v) { *this = *this | v; return *this; };
+		inline var& operator<<=(const var& v) { *this = *this << v; return *this; };
+		inline var& operator>>=(const var& v) { *this = *this >> v; return *this; };
 	};
 }

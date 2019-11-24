@@ -10,10 +10,10 @@
 // and can be used to type code on the fly
 // or to execute a file by passing its path by arguments with cmd or terminal
 
-#define PLATFORM ""
-
 #ifdef _WIN64
 #define PLATFORM "x64"
+#else
+#define PLATFORM ""
 #endif
 
 void errorLog(const std::unique_ptr<cll::Interpreter>& i)
@@ -27,7 +27,6 @@ void errorLog(const std::unique_ptr<cll::Interpreter>& i)
 
 int main(int argc, char* argv[])
 {
-	const std::string version = "0.7";
 	std::ios_base::sync_with_stdio(false);
 	std::cin.tie(NULL);
 
@@ -67,7 +66,7 @@ int main(int argc, char* argv[])
 
 		std::string input("");
 
-		std::cout << cll::var("CLL Interpreter [" + version + "] - Bartosz Niciak");
+		std::cout << cll::var("CLL Interpreter [" + local->getVersion() + "] - Bartosz Niciak");
 
 		do 
 		{

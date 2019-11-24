@@ -8,10 +8,11 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
-#include <thread>
 
 namespace cll
 {
+	const std::string Interpreter::version = "0.7.1";
+
 	// Constructor with already declared variables
 	Interpreter::Interpreter(const std::vector<var>& v)
 	{

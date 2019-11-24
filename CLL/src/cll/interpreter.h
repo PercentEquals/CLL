@@ -13,6 +13,8 @@ namespace cll
 {
 	class Interpreter
 	{
+		static const std::string version;
+
 		std::vector<var> vars; // Interpreter variables
 		std::string error; // Holds errors
 		std::string filename; // Holds filename
@@ -121,6 +123,7 @@ namespace cll
 		inline unsigned int getLine() const { return line; }; // Returns actual line number
 		inline std::string getError() const { return error; }; // Returns non-empty string if some error is present (useful if error logging is disabled)
 		inline std::string getFilename() const { return filename; }; // Returns non-empty string if interpreter interpretes a file
+		inline std::string getVersion() const { return version; };
 		inline std::string getOutput() const { return output; };
 	};
 }

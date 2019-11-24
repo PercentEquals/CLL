@@ -678,7 +678,7 @@ namespace cll
 			if (action.empty()) state = newScope(lines);
 			else if (action[0].value == "function")
 			{
-				dfunctions.add(defined(action[1].value, lines));
+				dfunctions.add(defined((action[1].name != "") ? action[1].name : action[1].value, lines));
 			}
 			else if (action[0].value == "if" && action[1].getBool()) state = newScope(lines);
 			else if (action[0].value == "else")
@@ -827,7 +827,7 @@ namespace cll
 		std::vector<var> old_args = args;
 
 		// APPLIES MATH TO TOKENS
-		args = math(args);
+		if (!(args[0].value == "do" || args[0].value == "while" || args[0].value == "for")) args = math(args);
 
 		if (error != "") return errorLog();
 		if (args.empty()) return true;
@@ -846,7 +846,7 @@ namespace cll
 			if (args.size() != 0) write("\n");
 		}
 
-		if (args[0].value != "function" && args[0].value != "cin")
+		if (args[0].value != "function" && args[0].value != "cin" && args[0].value != "do" && args[0].value != "while" && args[0].value != "for")
 		{
 			for (size_t i = 0; i < args.size(); ++i)
 			{

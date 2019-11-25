@@ -45,11 +45,12 @@ namespace cll
 		bool errorLog(); // Returns false if there is an error and prints them with std::cout (if logging is enabled)
 		bool newInterpreter(const std::vector<var>& v); // Creates new instance of interpreter - for file in file execution
 		var newFunction(const std::vector<var>& args, const std::vector<std::string>& l);
-		bool newScope(const std::vector<std::string>& l); // Creates new instance of interpreter - for scope execution
+		bool newScope(const std::vector<std::string>& l, const std::vector<var>& action = { var("1") }, const size_t& id = 0); // Creates new instance of interpreter - for scope execution
 		bool parse(const std::vector<var>& v); // Checks line syntax
 		bool bare(const std::vector<var>& v); // Procesess bare words and also some spiecial tokens
 		bool readScope(const std::vector<var>& v);
 		std::vector<var> math(const std::vector<var>& v, const bool& comma = true); // Procesess math equations
+		bool afterparse(const std::vector<var>& v);
 
 	public:
 

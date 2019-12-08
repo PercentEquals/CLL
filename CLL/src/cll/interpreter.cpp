@@ -431,7 +431,13 @@ namespace cll
 					std::getline(std::cin, buff);
 					var test(buff);
 					if (test.type == Type::UNDEFINED || test.type == Type::BARE) buff = "\"" + buff + "\"";
-					setVar((v[i].name != "") ? v[i].name : v[i].value, buff);
+
+					if (!setVar((v[i].name != "") ? v[i].name : v[i].value, buff))
+					{
+						std::string bname = (v[i].name != "") ? v[i].name : v[i].value;
+						error = "Name '" + bname + "' not recognized!";
+						break;
+					}
 				}
 			}
 			else if (v[0].value == "if" || v[0].value == "while" || v[0].value == "for" || v[0].value == "else" || v[0].value == "do" || v[0].value == "function")
@@ -1031,6 +1037,7 @@ namespace cll
 		size_t index = search(vars, ins.name, 0, vars.size() - 1);
 		if (index < vars.size()) vars[index] = ins;
 		else if (ins.name != "") vars.insert(std::upper_bound(vars.begin(), vars.end(), ins, [](var a, var b) { return a.name < b.name; }), ins);
+		else return false;
 
 		return true;
 	}

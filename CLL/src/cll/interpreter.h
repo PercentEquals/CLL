@@ -87,9 +87,9 @@ namespace cll
 		bool readFile(const std::string& f); // Interpretes file by path
 
 		// INTERPRETER VARIABLES ACCESSING METHODS //
-		void setVar(const var& v); // Sets or adds variable to interpreter by var abstract
-		inline void setVar(const std::string& n, const var& v) { setVar(var(n, v)); };
-		inline void setVar(const std::string& n, const std::string& v) { setVar(var(n, v)); };
+		bool setVar(const var& v); // Sets or adds variable to interpreter by var abstract
+		inline bool setVar(const std::string& n, const var& v) { return setVar(var(n, v)); };
+		inline bool setVar(const std::string& n, const std::string& v) { return setVar(var(n, v)); };
 
 		var getVar(const std::string& n); // Returns variable by its name
 		void deleteVar(const std::string& n); // Deletes variable by its name

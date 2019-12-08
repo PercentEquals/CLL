@@ -559,6 +559,7 @@ namespace cll
 					else vec.emplace_back(v[i]);
 				}
 			}
+			else if (v[i].name != "") vec.emplace_back(getVar(v[i].name));
 			else vec.emplace_back(v[i]);
 		}
 
@@ -687,7 +688,7 @@ namespace cll
 
 					if (lvar.name != "") lvar = getVar(lvar.name);
 					if (fvar.name != "") fvar = getVar(fvar.name);
-
+					
 					if (lvar.type == Type::UNDEFINED) continue;
 
 					if (symb.value == "=") ins = lvar.value;
@@ -705,16 +706,15 @@ namespace cll
 
 					ins.name = (fvar.name == "") ? fvar.value : fvar.name;
 					
-					setVar(ins);
+					if (setVar(ins))
+					{
+						assignment = true;
 
-					assignment = true;
+						vec.erase(vec.end() - i - 1, vec.end() - i + 2);
+						vec.insert(vec.end() - (i - 2), ins);
 
-					vec.erase(vec.end() - i - 1, vec.end() - i + 2);
-
-					if (getVar(ins.name).value != "") vec.insert(vec.end() - (i - 2), ins);
-					else vec.insert(vec.end() - (i - 2), fvar);
-
-					i -= 2;
+						i -= 2;
+					}
 				}
 				else if (i > 1 && step == 14 && !assignment && comma)
 				{
@@ -997,7 +997,7 @@ namespace cll
 	}
 
 	// Function that changes defined var value or creates new var if one does not exist
-	void Interpreter::setVar(const var& v)
+	bool Interpreter::setVar(const var& v)
 	{
 		var ins = v;
 
@@ -1009,30 +1009,30 @@ namespace cll
 				std::string buff = v.name.substr(ii + 1, v.name.length() - ii - 2);
 				std::string name = v.name.substr(0, ii);
 
-				if (name == "" || name == "()" || name == "[]") return;
+				if (name == "" || name == "()" || name == "[]") return false;
 
 				std::vector<var> elem = math(lexer(buff));
-				if (elem.empty()) return;
+				if (elem.empty()) return false;
 
 				var ret = getVar(name);
 
-				if (ret.type == Type::UNDEFINED) return;
-				if (elem[0].type == Type::UNDEFINED) return;
-				if (elem.size() > 1) return;
+				if (ret.type == Type::UNDEFINED) return false;
+				if (elem[0].type == Type::UNDEFINED) return false;
+				if (elem.size() > 1) return false;
 
 				ret.setElement((size_t)elem[0].getInt(), v.value);
 
-				setVar(ret);
-
-				return;
+				return setVar(ret);
 			}
 		}
 
-		if (ins.getError() != "" || ins.name == "") return;
+		if (ins.getError() != "" || ins.name == "") return false;
 
 		size_t index = search(vars, ins.name, 0, vars.size() - 1);
 		if (index < vars.size()) vars[index] = ins;
 		else if (ins.name != "") vars.insert(std::upper_bound(vars.begin(), vars.end(), ins, [](var a, var b) { return a.name < b.name; }), ins);
+
+		return true;
 	}
 
 	void Interpreter::deleteVar(const std::string& n)

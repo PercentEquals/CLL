@@ -421,7 +421,7 @@ namespace cll
 				for (size_t i = 1; i < v.size(); ++i)
 				{
 					if (v[i].type == Type::CHAR) write(std::string(1, char(v[i].getInt())));
-					else write(v[i].getEscapedString());
+					else write(v[i].getString());
 				}
 			}
 			else if (enabledIO && v[0].value == "cin")
@@ -988,7 +988,7 @@ namespace cll
 				else if (!literal)
 				{
 					ret.name = name;
-					for (size_t i = 0; i < elem.size(); ++i) ret.name += "[" + elem[i].getString() + "]";
+					for (size_t i = 0; i < elem.size(); ++i) ret.name += "[" + elem[i].getRawString() + "]";
 				}
 
 				return ret;

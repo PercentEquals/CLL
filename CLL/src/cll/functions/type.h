@@ -47,7 +47,7 @@ namespace cll
 	var tostring(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("\"\"");
-		return "\"" + args[0].getString() + "\"";
+		return "\"" + args[0].getRawString() + "\"";
 	}
 
 	// String conversion functions //
@@ -108,7 +108,7 @@ namespace cll
 
 		var ret("[]");
 
-		for (size_t i = 0; i < args.size(); i += 2) ret += "\"" + args[i].getString() + "\"";
+		for (size_t i = 0; i < args.size(); i += 2) ret += "\"" + args[i].getRawString() + "\"";
 
 		return (ret.getSize() > 1) ? ret : ret.getElement(0);
 	}

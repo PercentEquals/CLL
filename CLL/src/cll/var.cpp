@@ -222,7 +222,7 @@ namespace cll
 		}
 		else
 		{
-			std::string buff = getString();
+			std::string buff = getRawString();
 
 			for (auto it = buff.begin(), end = buff.end(); it != end; ++it) 
 			{
@@ -232,7 +232,7 @@ namespace cll
 				{
 					if (v.value == "") continue;
 
-					if (v.type == Type::STRING) ins += v.getString();
+					if (v.type == Type::STRING) ins += v.getRawString();
 					else if (type == Type::CHAR) ins += v.getChar(0);
 					else if (type == Type::INT) ins += std::to_string(v.getInt());
 					else ins += std::string(1, char(v.getInt()));
@@ -266,7 +266,7 @@ namespace cll
 	char var::getChar(const size_t& n) const
 	{
 		if (type == Type::CHAR || type == Type::INT) return char((getInt() != 27) ? getInt() : ' ');
-		else if (type == Type::STRING) return (n < value.length() - 2) ? value[n + 1] : '\0';
+		else if (type == Type::STRING) return (n < getSize()) ? getString()[n] : '\0';
 		else return '\0';
 	}
 
@@ -313,13 +313,13 @@ namespace cll
 		return var("");
 	}
 
-	std::string var::getString() const
+	std::string var::getRawString() const
 	{
 		if (type == Type::STRING || type == Type::CHAR) return value.substr(1, value.length() - 2);
 		else return value;
 	}
 
-	std::string var::getEscapedString() const
+	std::string var::getString() const
 	{
 		if (type == Type::STRING)
 		{
@@ -396,7 +396,7 @@ namespace cll
 
 			return (size + 1);
 		}
-		if (type == Type::STRING || type == Type::CHAR) return (value.length() - 2);
+		if (type == Type::STRING || type == Type::CHAR) return (getString().length());
 		return value.length();
 	}
 
@@ -431,7 +431,7 @@ namespace cll
 
 		if (type == Type::STRING)
 		{
-			if (v.type == Type::STRING) state = (getString() == v.getString());
+			if (v.type == Type::STRING) state = (getRawString() == v.getRawString());
 			else if (v.type == Type::DOUBLE) state = (getFloat() == v.getDouble());
 			else if (v.type == Type::FLOAT) state = (getFloat() == v.getFloat());
 			else state = (getInt() == v.getInt());
@@ -476,7 +476,7 @@ namespace cll
 
 		if (type == Type::STRING)
 		{
-			if (v.type == Type::STRING) state = (getString() > v.getString());
+			if (v.type == Type::STRING) state = (getRawString() > v.getRawString());
 			else if (v.type == Type::DOUBLE) state = (getFloat() > v.getDouble());
 			else if (v.type == Type::FLOAT) state = (getFloat() > v.getFloat());
 			else state = (getInt() > v.getInt());
@@ -516,7 +516,7 @@ namespace cll
 
 		if (type == Type::STRING)
 		{
-			if (v.type == Type::STRING) state = (getString() < v.getString());
+			if (v.type == Type::STRING) state = (getRawString() < v.getRawString());
 			else if (v.type == Type::DOUBLE) state = (getFloat() < v.getDouble());
 			else if (v.type == Type::FLOAT) state = (getFloat() < v.getFloat());
 			else state = (getInt() < v.getInt());
@@ -584,13 +584,13 @@ namespace cll
 			if (v.getSize() != 0 && getSize() != 0) val += ",";
 			else if (v.type == Type::STRING && getSize() != 0) val += ",";
 
-			if (v.type == Type::ARRAY) val += v.getString().substr(1);
+			if (v.type == Type::ARRAY) val += v.getRawString().substr(1);
 			else val += v.getValue() + "]";
 
 			if (val[0] != '[') val = "[" + val;
 			if (val[val.length() - 1] != ']') val += "]";
 		}
-		else if (type == Type::STRING || v.type == Type::STRING) val = "\"" + getString() + v.getString() + "\"";
+		else if (type == Type::STRING || v.type == Type::STRING) val = "\"" + getRawString() + v.getRawString() + "\"";
 		else if (type == Type::INT || type == Type::CHAR)
 		{
 			if (v.type == Type::DOUBLE) val = std::to_string(getInt() + v.getDouble());
@@ -691,7 +691,7 @@ namespace cll
 		}
 		else if (type == Type::STRING || v.type == Type::STRING)
 		{
-			std::string buff = (type == Type::STRING) ? getString() : v.getString();
+			std::string buff = (type == Type::STRING) ? getRawString() : v.getRawString();
 			val = '"' + buff;
 			if (v.getInt() > 0) for (int i = 1; i < v.getInt(); ++i) val += buff;
 			val += '"';
@@ -735,7 +735,7 @@ namespace cll
 	{
 		std::string val = value;
 
-		if (type == Type::STRING) val = getString();
+		if (type == Type::STRING) val = getRawString();
 		else if (type == Type::INT || type == Type::CHAR)
 		{
 			if (v.type == Type::DOUBLE && v.getDouble() != 0) val = std::to_string(getInt() / v.getDouble());
@@ -789,7 +789,7 @@ namespace cll
 	{
 		std::string val = value;
 
-		if (type == Type::STRING) val = getString();
+		if (type == Type::STRING) val = getRawString();
 		else if (type == Type::INT || type == Type::CHAR)
 		{
 			if (v.type == Type::DOUBLE) val = std::to_string(std::pow(getFloat(), v.getDouble()));

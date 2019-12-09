@@ -72,8 +72,8 @@ namespace cll
 		float getFloat() const;
 		double getDouble() const;
 		var getElement(const size_t& n) const;
+		std::string getRawString() const;
 		std::string getString() const;
-		std::string getEscapedString() const;
 		std::string getError() const;
 		size_t getSubscript() const;
 		size_t getSize() const;

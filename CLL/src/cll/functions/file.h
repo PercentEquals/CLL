@@ -46,7 +46,7 @@ namespace cll
 			{
 				for (size_t ii = 0; ii < args[i].getSize(); ++ii)
 				{
-					f << args[i].getElement(ii).getEscapedString();
+					f << args[i].getElement(ii).getString();
 					if (args[i].type == Type::ARRAY) f << '\n';
 				}
 				if (args[i].type != Type::ARRAY) f << '\n';

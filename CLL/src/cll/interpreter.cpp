@@ -165,6 +165,7 @@ namespace cll
 				if (!nested->readLine(l[i]))
 				{
 					error = nested->error;
+					line = nested->line;
 					return false;
 				}
 
@@ -779,10 +780,9 @@ namespace cll
 			previous_action = action;
 			action.clear();
 			lines.clear();
-			if (!state)
-			{
-				return errorLog();
-			}
+
+			if (!state) return errorLog();
+			
 			return true;
 		}
 	}
@@ -790,10 +790,6 @@ namespace cll
 	// Function that interpretes one line
 	bool Interpreter::readLine(const std::string& l)
 	{
-		// SKIPS EMPTY LINES
-		if (l == "")  return true;
-		if (l == ";") return true;
-
 		// SEPARATES LINE BY ARGUMENTS
 		std::vector<var> args_line = lexer(l); // Holds raw line tokens
 
@@ -829,6 +825,8 @@ namespace cll
 
 		if (args.empty())
 		{
+			if (scope) lines.emplace_back("");
+
 			if (!args_line.empty() && !readLine(newline)) return errorLog();
 			return true;
 		}

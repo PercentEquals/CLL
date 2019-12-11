@@ -199,6 +199,7 @@ namespace cll
 
 		size_t actual_element = 0;
 		std::string ins("");
+		ins.reserve(getSize() + 4);
 		if (value[0] == '[' || value[0] == '"' || value[0] == '\'') ins = std::string(1, value[0]);
 
 		if (type == Type::ARRAY)
@@ -222,7 +223,7 @@ namespace cll
 		}
 		else
 		{
-			std::string buff = getRawString();
+			std::string buff = getString();
 
 			for (auto it = buff.begin(), end = buff.end(); it != end; ++it) 
 			{
@@ -233,13 +234,13 @@ namespace cll
 					if (v.value == "") continue;
 
 					if (v.type == Type::STRING) ins += v.getRawString();
-					else if (type == Type::CHAR) ins += v.getChar(0);
-					else if (type == Type::INT) ins += std::to_string(v.getInt());
-					else ins += std::string(1, char(v.getInt()));
+					else if (type == Type::CHAR) ins += ctos(v.getChar(0));
+					else if (type == Type::INT) ins += ctos(v.getInt());
+					else ins += ctos(v.getInt());
 					continue;
 				}
 
-				ins += *it;
+				ins += ctos(*it);
 			}
 		}
 
@@ -292,7 +293,7 @@ namespace cll
 
 	var var::getElement(const size_t& n) const
 	{
-		if (type == Type::STRING) return var("'" + std::string(1, getChar(n)) + "'");
+		if (type == Type::STRING) return var("'" + ctos(getChar(n)) + "'");
 		else if (type == Type::CHAR && n < getSize()) return var("'" + std::string(1, getChar(n)) + "'");
 		else if (type == Type::ARRAY)
 		{

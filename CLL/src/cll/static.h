@@ -5,6 +5,10 @@
 #include <string>
 #include <vector>
 
+// Contains literals that are used by Interpreter class methods and lexer such as:
+// list of barewords, restricted variable names, multiple character operators,
+// symbols that are illegal in variable name and symbols.
+
 namespace cll
 {
 	// Vector of bare words

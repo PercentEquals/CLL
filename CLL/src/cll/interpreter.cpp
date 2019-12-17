@@ -28,6 +28,7 @@ namespace cll
 	}
 
 	// Function that checks for errors and logs them on console screen
+	// Return true or false based on whether it had any errors or not
 	bool Interpreter::errorLog()
 	{
 		if (error == "") return true;
@@ -46,6 +47,8 @@ namespace cll
 	}
 
 	// Function that creates new interpreter (i.e. interpretes another file)
+	// V parameter stands for tokens. It also should include 'cll' statement
+	// Returns true or false based on whether it had any errors or not
 	bool Interpreter::newInterpreter(const std::vector<var>& v)
 	{
 		var params("[]");
@@ -66,6 +69,10 @@ namespace cll
 		return state;
 	}
 
+	// Function that executes user defined functions along with passed parameters
+	// L parameter stands for lines defined in that function scope
+	// Args parameter stand for passed parameters in CLL
+	// Returns variable based on whether it returned anything by 'return' statement
 	var Interpreter::newFunction(const std::vector<var>& args, const std::vector<std::string>& l)
 	{
 		var params("[]");
@@ -96,7 +103,10 @@ namespace cll
 		return var("");
 	}
 
-	// Function that creates new scope that haves its own variables and also variables from one scope higher
+	// Function that creates new scope that has its own variables and also variables from one scope higher
+	// It also checks for loops conditions and executes accordingly
+	// Action parameter stands for tokens that have loop statement like so: while true
+	// ID parameter stands for id at which to look for condition. For 'while' it will be 1
 	bool Interpreter::newScope(const std::vector<std::string>& l, const std::vector<var>& action, const size_t& id)
 	{
 		std::unique_ptr<Interpreter> nested = std::make_unique<Interpreter>(vars);
@@ -108,8 +118,10 @@ namespace cll
 		nested->dfunctions = dfunctions;
 		nested->line = (line >= (unsigned int)l.size()) ? (line - (unsigned int)l.size()) : 0;
 		
-		bool condition = false;
-		bool state = true;
+		bool condition = false; // Whether to execute a scope or not
+		bool state = true; // Is set to false when there is an error inside of scope
+
+		// Vectors used in 'for' statement
 		std::vector<var> name;
 		std::vector<var> loop;
 		std::vector<var> incr;
@@ -158,6 +170,7 @@ namespace cll
 				return false;
 			}
 
+			// EXECUTE A SCOPE
 			for (size_t i = 0; i < l.size(); ++i)
 			{
 				nested->continued = false;
@@ -180,6 +193,7 @@ namespace cll
 				if (buff.type != Type::UNDEFINED) this->setVar(nested->vars[i]);
 			}
 
+			// INCREMENT AND CHECK FOR CONDITION
 			if (action[0].value == "for")
 			{
 				if (!nested->afterparse(nested->math(incr))) state = false;
@@ -242,9 +256,9 @@ namespace cll
 
 		if (error != "") return false;
 
+		// CHECKS FOR BARE WORD UNIQUE SYNTAX
 		if (v[0].type == Type::BARE)
 		{
-			// CHECKS FOR BARE WORD UNIQUE SYNTAX
 			if (v[0].value == "cout" && v.size() < 2) error = "Statement 'cout' got too few arguments!";
 			else if (v[0].value == "cin" && v.size() < 2) error = "Statement 'cin' got too few arguments!";
 			else if (v[0].value == "delete")
@@ -296,7 +310,10 @@ namespace cll
 
 		if (error != "") return false;
 
-		std::vector<std::string> defined; // Holds variables defined in actual line
+		// Vector that holds defined variables in actual line to prevent errors when
+		// variable is declared and used in the same line. Like so:
+		// x = 20, y = x
+		std::vector<std::string> defined; 
 
 		for (size_t i = 0; i < v.size(); ++i)
 		{
@@ -406,6 +423,9 @@ namespace cll
 		return true;
 	}
 
+	// Function that procesess bare words and also some special tokens
+	// V parameter stands for tokens
+	// Returns true or false based on whether it had any errors or not
 	bool Interpreter::bare(const std::vector<var>& v)
 	{
 		if (v[0].type == Type::BARE)
@@ -478,11 +498,15 @@ namespace cll
 		return true;
 	}
 
+	// Function that procesess math equations
+	// V parameter stands for tokens
+	// Returns processed tokens
 	std::vector<var> Interpreter::math(const std::vector<var>& v, const bool& comma)
 	{
 		std::vector<var> vec;
 		vec.reserve(v.size());
 
+		// PARETNHESES, ARRAYS, FUNCTIONS AND VARIABLES 
 		for (size_t i = 0; i < v.size(); ++i)
 		{
 			if (v[i].type == Type::PARENTHESIS)
@@ -745,6 +769,9 @@ namespace cll
 		return vec;
 	}
 
+	// Function that manipulates scope specific variables
+	// V parameter stands for tokens
+	// Returns true or false based on whether it had any errors or not
 	bool Interpreter::readScope(const std::vector<var>& v)
 	{
 		if (v[0].value == "{" && v[0].type == Type::SYMBOL) ++scope;
@@ -788,6 +815,8 @@ namespace cll
 	}
 
 	// Function that interpretes one line
+	// L parameter stands for line to interpret
+	// Returns true or false based on whether it had any errors or not
 	bool Interpreter::readLine(const std::string& l)
 	{
 		// SEPARATES LINE BY ARGUMENTS
@@ -887,6 +916,7 @@ namespace cll
 		return true;
 	}
 
+	// Function that checks for undefined variables
 	bool Interpreter::afterparse(const std::vector<var>& v)
 	{
 		for (size_t i = 0; i < v.size(); ++i)
@@ -901,6 +931,7 @@ namespace cll
 		return true;
 	}
 
+	// Function that interpretes whole vector line by line
 	bool Interpreter::readVector(const std::vector<std::string>& v)
 	{
 		for (size_t i = 0; i < v.size(); ++i)

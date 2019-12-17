@@ -5,13 +5,26 @@
 #include <iostream>
 #include <string>
 
+// Contains var struct that acts as a dynamic variable and also as a token (all tokens are variables in CLL).
+// Every object of it contains information such as : name, value, type (as enum).
+//
+// Every variable value is being held in a string, but primitive types like:
+// int, float, double and char have also their own union that holds converted value of a variable.
+// This aproach allows for dynamic variables and for multiple type arrays.
+// Main disadvantage of this aproach is its speed.
+//
+// Variable type is being held in a simple enum.
+// This offers a good code readability with minimal overhead.
+
 namespace cll
 {
+	// Enum that holds active type of a variable
 	enum class Type
 	{
 		UNDEFINED, INT, FLOAT, DOUBLE, CHAR, STRING, ARRAY, PARENTHESIS, SYMBOL, BARE
 	};
 
+	// Union that holds converted values so that they can be accessed faster without additional conversions
 	union Buffor
 	{
 		long long int i;
@@ -24,8 +37,8 @@ namespace cll
 
 	struct var
 	{
-		std::string name; // Holds declared name of variable
-		std::string value; // Holds non-raw value of variable - meaning its value representation depends on detected type
+		std::string name;
+		std::string value;
 		Type type;
 		Buffor buffor;
 
@@ -39,8 +52,8 @@ namespace cll
 		// SET METHODS //
 		void setName(const std::string& n); // Sets variable name and checks for special symbols and bare words
 		void setType(const std::string& v); // Sets types of variable based on its value
-		void setValue(const std::string& v); // Sets value of variable with a little tweaks
-		void setElement(const size_t& n, const var& v);
+		void setValue(const std::string& v); // Sets value, buffor and type of variable based on its value
+		void setElement(const size_t& n, const var& v); // Sets value for specific element in array/vector
 
 		// DELETE METHODS
 		inline void deleteElement(const size_t& n) { setElement(n, var("")); };
@@ -72,10 +85,10 @@ namespace cll
 		float getFloat() const;
 		double getDouble() const;
 		var getElement(const size_t& n) const;
-		std::string getRawString() const;
-		std::string getString() const;
-		std::string getError() const;
-		size_t getSubscript() const;
+		std::string getRawString() const; // Returns value as string with escape represented
+		std::string getString() const; // Returns value as string with escape characters acting as they should
+		std::string getError() const; // Returns non-empty string when some error occured
+		size_t getSubscript() const; // Returns position of right most square bracket that opens a subscript
 		size_t getSize() const;
 
 		// OPERATORS //
@@ -83,7 +96,6 @@ namespace cll
 		friend std::istream& operator>>(std::istream& in, var& v);
 
 		// BOOLEAN OPERATORS //
-		var operator~() const;
 		var operator!() const;
 		var operator==(const var& v) const;
 		var operator!=(const var& v) const;
@@ -109,6 +121,7 @@ namespace cll
 		var operator^(const var& v) const;
 		var operator&(const var& v) const;
 		var operator|(const var& v) const;
+		var operator~() const;
 
 		// INLINE ASSIGNMENT OPERATORS // 
 		inline var& operator+=(const var& v) { *this = *this + v; return *this; };

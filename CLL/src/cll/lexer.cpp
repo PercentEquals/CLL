@@ -10,13 +10,13 @@ namespace cll
 	{
 		std::vector<var> args; // Holds vars (token) list
 		std::string buff(""); // Holds token in buffor before pushing it to token list
-		bool push = false; // Holds wheter to push actual token to list
-		bool string = false; // Holds wheter token is a string (helpful to ignore special chars that create new tokens)
-		bool chars = false; // Holds wheter token is a char (helpful to ignore special chars that create new tokens)
-		bool comment = false; // Holds wheter token is a comment (helpful to ingore all following tokens as comments)
-		unsigned int parenthesis = 0; // Holds wheter token is a parenthesis (helpful to ignore special chars that create new tokens)
-		unsigned int array = 0; // Holds wheter token is an array (helpful to ignore special chars that create new tokens)
-		std::string special(""); // Holds sepcial char as token to be pushed (works like this: new x=10 -> new x = 10)
+		bool push = false; // Holds whether to push actual token to list
+		bool string = false; // Holds whether token is a string (helpful to ignore special chars that create new tokens)
+		bool chars = false; // Holds whether token is a char (helpful to ignore special chars that create new tokens)
+		bool comment = false; // Holds whether token is a comment (helpful to ingore all following tokens as comments)
+		unsigned int parenthesis = 0; // Holds whether token is a parenthesis (helpful to ignore special chars that create new tokens)
+		unsigned int array = 0; // Holds whether token is an array (helpful to ignore special chars that create new tokens)
+		std::string special(""); // Holds special char as token to be pushed (works like this: x=10 -> x = 10)
 		std::string mult("");
 
 		args.reserve(50);
@@ -120,6 +120,7 @@ namespace cll
 			}
 		}
 
+		// PUSHES LEFT OUT TOKENS
 		if (buff != "") args.emplace_back(buff);
 		if (special != "") args.emplace_back(special);
 

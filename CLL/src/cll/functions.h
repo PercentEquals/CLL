@@ -6,6 +6,11 @@
 
 #include <vector>
 
+// Contains function struct that holds function name (used in CLL) and pointer to that function.
+// It also contains vector wrapper for that struct that allows for function searching, addition and deletion.
+//
+// Builtin function can be found in 'functions' directory.
+
 namespace cll
 {
 	struct function

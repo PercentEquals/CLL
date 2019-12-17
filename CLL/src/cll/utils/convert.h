@@ -46,7 +46,7 @@ namespace cll
 		return sign * val;
 	}
 
-	std::string ctos(unsigned int c)
+	std::string ctos(const unsigned int& c)
 	{
 		switch (c)
 		{

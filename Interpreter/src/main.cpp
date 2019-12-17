@@ -72,6 +72,7 @@ int main(int argc, char* argv[])
 		{
 			if (console::getx() != 0) std::cout << '\n';
 			
+			// Prompt
 			if (local->getScope()) std::cout << "^ ";
 			else std::cout << "> ";
 

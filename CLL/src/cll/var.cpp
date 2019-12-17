@@ -35,7 +35,9 @@ namespace cll
 
 		if (name == "") return;
 
-		if (n.length() > 0 && isdigit(n[0])) name = "INVALID_NAME"; // Checks for illegal first digit
+		// INVALID_NAME is a reserved name used for error checking
+
+		if (n.length() > 0 && isdigit(n[0])) name = "INVALID_NAME";
 		else if (symbols.find_first_of(n) != std::string::npos) name = "INVALID_NAME";
 		else if (std::binary_search(barewords.begin(), barewords.end(), n)) name = "INVALID_NAME";
 		else if (std::binary_search(rnames.begin(), rnames.end(), n)) name = "INVALID_NAME";
@@ -63,7 +65,8 @@ namespace cll
 			if (bin && !(v[i] == 'b' || v[i] == '0' || v[i] == '1')) bin = false;
 		}
 
-		if (num) // Checks for numerical
+		// Checks for numerical
+		if (num)
 		{
 			if (v == "-" || v == "-=") type = Type::SYMBOL;
 			else if (v.find('.') != std::string::npos)
@@ -78,7 +81,8 @@ namespace cll
 			return;
 		}
 
-		if (hex) // Checks for hexadecimal
+		// Checks for hexadecimal
+		if (hex)
 		{
 			if (v.substr(0, 2) == "0x" && v.substr(2).find_first_of("x") == std::string::npos)
 			{
@@ -87,7 +91,8 @@ namespace cll
 			}
 		}
 
-		if (bin) // Checks for binary
+		// Checks for binary
+		if (bin)
 		{
 			if (v.substr(0, 2) == "0b" && v.substr(2).find_first_of("b") == std::string::npos)
 			{
@@ -96,7 +101,8 @@ namespace cll
 			}
 		}
 
-		if (v.length() > 0) // Checks for string, char or array
+		// Checks for string, char, array or parenthesis
+		if (v.length() > 0)
 		{
 			if (v[0] == '"' && v[v.length() - 1] == '"' && v.length() > 1) type = Type::STRING;
 			else if (v[0] == '\'' && v[v.length() - 1] == '\'' && v.length() > 1) type = Type::CHAR;
@@ -104,32 +110,38 @@ namespace cll
 			{
 				type = Type::ARRAY;
 
-				size_t nests = 0, ii = v.length() - 1;
-				bool string = false, chars = false;
-				for (ii; ii != 0; --ii)
-				{
-					if (!chars && string && v[ii] == '"')
-					{
-						if (ii != 0 && v[ii - 1] != '\\') string = false;
-						else if (ii - 1 != 0 && v[ii - 2] == '\\') string = false;
-					}
-					else if (!chars && !string && v[ii] == '"') string = true;
+				// Code below is basically the same as getSubscript() method,
+				// but it needs 2 variables (nests and index) and that method returns only one.
+				// It checks if all square brackets are closed and this
+				// determines if it is an array or an array with a subscript.
+				// More detailed explanation can be found in getSubscript() method.
 
-					if (!string && chars && v[ii] == '\'')
+				size_t nests = 0, index = v.length() - 1;
+				bool string = false, chars = false;
+				for (index; index != 0; --index)
+				{
+					if (!chars && string && v[index] == '"')
 					{
-						if (ii != 0 && v[ii - 1] != '\\') chars = false;
-						else if (ii - 1 != 0 && v[ii - 2] == '\\') chars = false;
+						if (index != 0 && v[index - 1] != '\\') string = false;
+						else if (index - 1 != 0 && v[index - 2] == '\\') string = false;
 					}
-					else if (!string && !chars && v[ii] == '\'') chars = true;
+					else if (!chars && !string && v[index] == '"') string = true;
+
+					if (!string && chars && v[index] == '\'')
+					{
+						if (index != 0 && v[index - 1] != '\\') chars = false;
+						else if (index - 1 != 0 && v[index - 2] == '\\') chars = false;
+					}
+					else if (!string && !chars && v[index] == '\'') chars = true;
 
 					if (string || chars) continue;
 
-					if (v[ii] == ']') nests++;
-					if (v[ii] == '[') nests--;
+					if (v[index] == ']') nests++;
+					if (v[index] == '[') nests--;
 					if (nests == 0) break;
 				}
 
-				if (ii != 0 || nests != 1) type = Type::UNDEFINED;
+				if (index != 0 || nests != 1) type = Type::UNDEFINED;
 			}
 			else if (v[0] == '(' && v[v.length() - 1] == ')')
 			{
@@ -139,6 +151,7 @@ namespace cll
 			if (type != Type::UNDEFINED) return;
 		}
 
+		// Checks for symbols and bare words
 		if (std::all_of(v.begin(), v.end(), ::ispunct)) type = Type::SYMBOL;
 		else if (std::binary_search(barewords.begin(), barewords.end(), v)) type = Type::BARE;
 	}
@@ -192,7 +205,8 @@ namespace cll
 		}
 		else value = v;
 	}
-
+	 
+	// This method creates a new copy of a variable with changed element
 	void var::setElement(const size_t& n, const var& v)
 	{
 		if (value.length() < 1) return;
@@ -200,6 +214,7 @@ namespace cll
 		size_t actual_element = 0;
 		std::string ins("");
 		ins.reserve(getSize() + 4);
+
 		if (value[0] == '[' || value[0] == '"' || value[0] == '\'') ins = std::string(1, value[0]);
 
 		if (type == Type::ARRAY)
@@ -294,7 +309,7 @@ namespace cll
 	var var::getElement(const size_t& n) const
 	{
 		if (type == Type::STRING) return var("'" + ctos(getChar(n)) + "'");
-		else if (type == Type::CHAR && n < getSize()) return var("'" + std::string(1, getChar(n)) + "'");
+		else if (type == Type::CHAR) return var("");
 		else if (type == Type::ARRAY)
 		{
 			std::vector<var> buff = lexer(value.substr(1, value.length() - 2));
@@ -351,34 +366,45 @@ namespace cll
 		else return "";
 	}
 
+	// This method looks for subscript "operator" from right to left.
+	// It returns index at which right most subscript starts. 
 	size_t var::getSubscript() const
 	{
-		size_t nests = 0, ii = value.length() - 1;
-		bool string = false, chars = false;
-		for (ii; ii != 0; --ii)
-		{
-			if (!chars && string && value[ii] == '"')
-			{
-				if (ii != 0 && value[ii - 1] != '\\') string = false;
-				else if (ii - 1 != 0 && value[ii - 2] == '\\') string = false;
-			}
-			else if (!chars && !string && value[ii] == '"') string = true;
+		// 'nests' variable is being increased every time a square bracket is closed
+		// and is decreased every time its is opened.
+		// This allows for usage of arrays inside of subscripts like in the following syntax:
+		// [0,1,2,3][[0][0]]
 
-			if (!string && chars && value[ii] == '\'')
+		// 'string' and 'chars' variables check for string and chars literals.
+		// This allows for usage of those literals that have square brackets inside them:
+		// [0,1,2,3,4,5]["s[t]r"]
+
+		size_t nests = 0, index = value.length() - 1;
+		bool string = false, chars = false;
+		for (index; index != 0; --index)
+		{
+			if (!chars && string && value[index] == '"')
 			{
-				if (ii != 0 && value[ii - 1] != '\\') chars = false;
-				else if (ii - 1 != 0 && value[ii - 2] == '\\') chars = false;
+				if (index != 0 && value[index - 1] != '\\') string = false;
+				else if (index - 1 != 0 && value[index - 2] == '\\') string = false;
 			}
-			else if (!string && !chars && value[ii] == '\'') chars = true;
+			else if (!chars && !string && value[index] == '"') string = true;
+
+			if (!string && chars && value[index] == '\'')
+			{
+				if (index != 0 && value[index - 1] != '\\') chars = false;
+				else if (index - 1 != 0 && value[index - 2] == '\\') chars = false;
+			}
+			else if (!string && !chars && value[index] == '\'') chars = true;
 
 			if (string || chars) continue;
 
-			if (value[ii] == ']') nests++;
-			if (value[ii] == '[') nests--;
+			if (value[index] == ']') nests++;
+			if (value[index] == '[') nests--;
 			if (nests == 0) break;
 		}
 
-		return ii;
+		return index;
 	}
 
 	size_t var::getSize() const
@@ -416,11 +442,6 @@ namespace cll
 	}
 
 	// BOOLEAN OPERATORS //
-	var var::operator~() const
-	{
-		return var(std::to_string(~getInt()));
-	}
-
 	var var::operator!() const
 	{
 		return (getBool()) ? var("0") : var("1");
@@ -824,6 +845,10 @@ namespace cll
 	}
 
 	// BITWISE OPERATORS //
+	var var::operator~() const
+	{
+		return var(std::to_string(~getInt()));
+	}
 
 	var var::operator^(const var& v) const
 	{

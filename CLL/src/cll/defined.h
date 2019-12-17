@@ -6,6 +6,9 @@
 
 #include <vector>
 
+// Contains defined struct that holds function name (used in CLL) and scope lines of that function.
+// It also contains vector wrapper for that struct that allows for function searching, addition and deletion.
+
 namespace cll
 {
 	struct defined

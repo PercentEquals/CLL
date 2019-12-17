@@ -18,7 +18,7 @@ namespace cll
 		std::vector<var> vars; // Interpreter variables
 		std::string error; // Holds errors
 		std::string filename; // Holds filename
-		std::string output;
+		std::string output; // Holds output - usefull for terminal applications
 
 		// FUNCTIONS
 		Functions functions;
@@ -32,19 +32,19 @@ namespace cll
 
 		// OTHER VARIABLES
 		unsigned int line; // Actual line number of file - to show where error took place
-		var returned;
-		bool continued;
-		bool broke;
-		bool log; // Determines wheter to output errors or not
-		bool debug; // Determines wheter to output additional debug information about tokens
-		bool enabledIO;
-		bool enabledOutput;
+		var returned;  // Hold execution state of 'return' statement 
+		bool continued; // Hold execution state of 'continue' statement 
+		bool broke; // Hold execution state of 'break' statement 
+		bool log; // Determines whether to output errors or not
+		bool debug; // Determines whether to output additional debug information about tokens
+		bool enabledIO; // Determines whether to give ability to use 'cin' and 'cout' statements
+		bool enabledOutput; // Determines whether to output additional info to "output" variable
 
 		// PRIVATE METHODS //
-		inline void write(const std::string& s) { if (enabledIO) std::cout << s; };
+		inline virtual void write(const std::string& s) { if (enabledIO) std::cout << s; };
 		bool errorLog(); // Returns false if there is an error and prints them with std::cout (if logging is enabled)
 		bool newInterpreter(const std::vector<var>& v); // Creates new instance of interpreter - for file in file execution
-		var newFunction(const std::vector<var>& args, const std::vector<std::string>& l);
+		var newFunction(const std::vector<var>& args, const std::vector<std::string>& l); // Function that creates new scope
 		bool newScope(const std::vector<std::string>& l, const std::vector<var>& action = { var("1") }, const size_t& id = 0); // Creates new instance of interpreter - for scope execution
 		bool parse(const std::vector<var>& v); // Checks line syntax
 		bool bare(const std::vector<var>& v); // Procesess bare words and also some spiecial tokens
@@ -117,7 +117,7 @@ namespace cll
 		inline void toggleOutput() { enabledOutput = !enabledOutput; };
 
 		// OTHER PUBLIC METHODS //
-		inline void clearError() { error.clear(); }; // Clears error
+		inline void clearError() { error.clear(); };
 		inline void clearOutput() { output.clear(); };
 		inline var getReturned() const { return returned; }; 
 		inline unsigned int getScope() const { return scope; };

@@ -39,7 +39,7 @@
 //
 // To tokenize inside of parentheses or arrays lexer must be applied one more time
 // to target variables without the first and last characters. 
-// Here is example of this fot above parenthesis:
+// Here is example of this for above parenthesis:
 //
 // - before (as string): [20][0] / 2
 //

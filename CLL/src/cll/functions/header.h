@@ -26,7 +26,7 @@
 //		return ret;
 //	}
 //
-// Example of function returns an array depending on 2 parameters:
+// Example of function returns an array depending on 1 parameter:
 //
 //	var name(const std::vector<var>& args)
 //	{
@@ -34,10 +34,10 @@
 //
 //		var ret("[]");
 //
-//		for (size_t i = 0; i < args.size(); i += 2) ret += std::to_string(args[i].getSize());
+//		for (size_t i = 0; i < args.size(); i += 2) ret += std::to_string(0);
 //
 //		return (ret.getSize() > 1) ? ret : ret.getElement(0);
 //	}
 //
 // Explanation: Args parameter also include a comma operator, so it is important to skip it
-// Returns one variable when only 2 parameters are given, or an array if 4, 6, 8, 10 or more parameters are given
+// Returns one variable when only 1 parameter are given, or an array if 3, 5, 7, 9 or more parameters are given (including commas)

@@ -184,6 +184,11 @@ namespace cll
 
 				if (filename != "") nested->line++;
 				if (nested->continued || nested->broke) break;
+				if (nested->returned.value != "")
+				{
+					returned = nested->returned;
+					return false;
+				}
 			}
 
 			// SETTING PREVIOUS (THIS) SCOPE VARIABLES
@@ -224,9 +229,6 @@ namespace cll
 
 		continued = nested->continued;
 		broke = nested->broke;
-		returned = nested->returned;
-
-		if (returned.value != "") return false;
 		return true;
 	}
 

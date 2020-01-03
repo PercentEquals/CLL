@@ -61,23 +61,7 @@ namespace cll
 		// GET METHODS //
 		inline std::string getName() const { return name; };
 		inline std::string getValue() const { return value; };
-		std::string getType() const
-		{
-			switch (type)
-			{
-				case Type::INT: return "INT";
-				case Type::BARE: return "BARE";
-				case Type::CHAR: return "CHAR";
-				case Type::FLOAT: return "FLOAT";
-				case Type::ARRAY: return "ARRAY";
-				case Type::DOUBLE: return "DOUBLE";
-				case Type::STRING: return "STRING";
-				case Type::SYMBOL: return "SYMBOL";
-				case Type::UNDEFINED: return "UNDEFINED";
-				case Type::PARENTHESIS: return "PARENTHESIS";
-				default: return "UNDEFINED";
-			}
-		};
+		std::string getType() const;
 
 		long long int getInt() const;
 		bool getBool() const;

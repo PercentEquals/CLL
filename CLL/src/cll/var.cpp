@@ -264,6 +264,24 @@ namespace cll
 	}
 
 	// GET METHODS //
+	std::string var::getType() const
+	{
+		switch (type)
+		{
+			case Type::INT: return "INT";
+			case Type::BARE: return "BARE";
+			case Type::CHAR: return "CHAR";
+			case Type::FLOAT: return "FLOAT";
+			case Type::ARRAY: return "ARRAY";
+			case Type::DOUBLE: return "DOUBLE";
+			case Type::STRING: return "STRING";
+			case Type::SYMBOL: return "SYMBOL";
+			case Type::UNDEFINED: return "UNDEFINED";
+			case Type::PARENTHESIS: return "PARENTHESIS";
+			default: return "UNDEFINED";
+		}
+	};
+
 	long long int var::getInt() const
 	{
 		if (type == Type::STRING || type == Type::ARRAY) return getSize();

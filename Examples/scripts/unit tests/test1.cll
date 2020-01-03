@@ -1,5 +1,5 @@
 // Expected output: C-1ike_ScriptIng_L4nguage
-// Last tested version: 0.7.1
+// Last tested version: 1.0
 
 function opposite
 {
@@ -82,7 +82,7 @@ cout char((((((((200 & 200) + 40) | 5) - 8) * 1) << 2) + 2) / 10)
 
 // L
 
-if true and (true or false); cout 'L'[int(abs(0))]
+if true and (true or false); cout "L"[int(abs(0))]
 
 // 4nguag
 

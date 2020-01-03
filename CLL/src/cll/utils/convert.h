@@ -45,4 +45,23 @@ namespace cll
 
 		return sign * val;
 	}
+
+	std::string ctos(const unsigned int& c)
+	{
+		switch (c)
+		{
+			case 7:  return "\\a";
+			case 8:  return "\\b";
+			case 9:  return "\\t";
+			case 10: return "\\n";
+			case 11: return "\\v";
+			case 12: return "\\f";
+			case 13: return "\\r";
+			case 92: return "\\\\";
+			case 39: return "\\\'";
+			case 34: return "\\\"";
+			case 63: return "\\?";
+			default: return std::string(1, c);
+		}
+	}
 }

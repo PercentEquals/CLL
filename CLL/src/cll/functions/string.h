@@ -16,7 +16,7 @@ namespace cll
 
 		for (size_t i = 0; i + 2 < args.size(); i += 4)
 		{
-			size_t buff = args[i].getString().find(args[i + 2].getString());
+			size_t buff = args[i].getRawString().find(args[i + 2].getRawString());
 		
 			if (args[i].type == Type::ARRAY)
 			{
@@ -48,7 +48,7 @@ namespace cll
 
 		for (size_t i = 0; i + 2 < args.size(); i += 4)
 		{
-			size_t buff = args[i].getString().rfind(args[i + 2].getString());
+			size_t buff = args[i].getRawString().rfind(args[i + 2].getRawString());
 
 			if (args[i].type == Type::ARRAY)
 			{
@@ -82,12 +82,12 @@ namespace cll
 			if (i + 2 >= args.size()) ret += args[i];
 			else
 			{
-				size_t len1 = (args[i + 2].getInt() > args[i].getString().length()) ? args[i].getString().length() : args[i + 2].getInt();
-				size_t len2 = args[i].getString().length();
+				size_t len1 = (args[i + 2].getInt() > args[i].getRawString().length()) ? args[i].getRawString().length() : args[i + 2].getInt();
+				size_t len2 = args[i].getRawString().length();
 
-				if (i + 4 < args.size() && args[i + 4].getInt() < args[i].getString().length()) len2 = args[i + 4].getInt();
+				if (i + 4 < args.size() && args[i + 4].getInt() < args[i].getRawString().length()) len2 = args[i + 4].getInt();
 
-				ret += "\"" + args[i].getString().substr(len1, len2) + "\"";
+				ret += "\"" + args[i].getRawString().substr(len1, len2) + "\"";
 			}
 		}
 
@@ -103,7 +103,7 @@ namespace cll
 
 		for (size_t i = 0; i + 2 < args.size(); i += 4)
 		{
-			ret += std::to_string(std::strspn(args[i].getString().c_str(), args[i + 2].getString().c_str()));
+			ret += std::to_string(std::strspn(args[i].getRawString().c_str(), args[i + 2].getRawString().c_str()));
 		}
 
 		return (ret.getSize() > 1) ? ret : ret.getElement(0);

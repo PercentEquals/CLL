@@ -28,6 +28,7 @@ namespace cll
 	}
 
 	// Function that checks for errors and logs them on console screen
+	// Return true or false based on whether it had any errors or not
 	bool Interpreter::errorLog()
 	{
 		if (error == "") return true;
@@ -46,6 +47,8 @@ namespace cll
 	}
 
 	// Function that creates new interpreter (i.e. interpretes another file)
+	// V parameter stands for tokens. It also should include 'cll' statement
+	// Returns true or false based on whether it had any errors or not
 	bool Interpreter::newInterpreter(const std::vector<var>& v)
 	{
 		var params("[]");
@@ -66,6 +69,10 @@ namespace cll
 		return state;
 	}
 
+	// Function that executes user defined functions along with passed parameters
+	// L parameter stands for lines defined in that function scope
+	// Args parameter stand for passed parameters in CLL
+	// Returns variable based on whether it returned anything by 'return' statement
 	var Interpreter::newFunction(const std::vector<var>& args, const std::vector<std::string>& l)
 	{
 		var params("[]");
@@ -96,8 +103,11 @@ namespace cll
 		return var("");
 	}
 
-	// Function that creates new scope that haves its own variables and also variables from one scope higher
-	bool Interpreter::newScope(const std::vector<std::string>& l)
+	// Function that creates new scope that has its own variables and also variables from one scope higher
+	// It also checks for loops conditions and executes accordingly
+	// Action parameter stands for tokens that have loop statement like so: while true
+	// ID parameter stands for id at which to look for condition. For 'while' it will be 1
+	bool Interpreter::newScope(const std::vector<std::string>& l, const std::vector<var>& action, const size_t& id)
 	{
 		std::unique_ptr<Interpreter> nested = std::make_unique<Interpreter>(vars);
 		nested->log = log;
@@ -107,23 +117,108 @@ namespace cll
 		nested->functions = functions;
 		nested->dfunctions = dfunctions;
 		nested->line = (line >= (unsigned int)l.size()) ? (line - (unsigned int)l.size()) : 0;
+		
+		bool condition = false; // Whether to execute a scope or not
+		bool state = true; // Is set to false when there is an error inside of scope
 
-		for (size_t i = 0; i < l.size(); ++i)
+		// Vectors used in 'for' statement
+		std::vector<var> name;
+		std::vector<var> loop;
+		std::vector<var> incr;
+		std::vector<var> buff;
+
+		if (action[0].value == "1" || action[0].value == "do" || action[0].value == "if" || action[0].value == "else") condition = true;
+		else if (action[0].value == "for")
 		{
-			nested->continued = false;
+			unsigned char commas = 0;
 
-			if (!nested->readLine(l[i]))
+			for (size_t i = 1; i < action.size(); ++i)
 			{
-				error = nested->error;
+				if (action[i].type == Type::SYMBOL && action[i].value == ",")
+				{
+					++commas;
+					continue;
+				}
+
+				if (commas == 0) name.emplace_back(action[i]);
+				else if (commas == 1) loop.emplace_back(action[i]);
+				else if (commas == 2) incr.emplace_back(action[i]);
+			}
+
+			if (!nested->afterparse(nested->math(name))) state = false;
+
+			buff = nested->math(loop);
+			if (!afterparse(buff)) state = false;
+
+			condition = buff[0].getBool();
+		}
+		else
+		{
+			buff = nested->math(action);
+			if (!afterparse(buff)) state = false;
+
+			condition = buff[id].getBool();
+		}
+
+		if (!state) condition = true;
+
+		while (condition)
+		{
+			if (!state)
+			{
+				if (error == "") error = nested->error;
 				return false;
 			}
 
-			if (filename != "") nested->line++;
-			if (nested->continued || nested->broke) break;
+			// EXECUTE A SCOPE
+			for (size_t i = 0; i < l.size(); ++i)
+			{
+				nested->continued = false;
+
+				if (!nested->readLine(l[i]))
+				{
+					error = nested->error;
+					line = nested->line;
+					return false;
+				}
+
+				if (filename != "") nested->line++;
+				if (nested->continued || nested->broke) break;
+				if (nested->returned.value != "")
+				{
+					returned = nested->returned;
+					return false;
+				}
+			}
+
+			// SETTING PREVIOUS (THIS) SCOPE VARIABLES
+			for (size_t i = 0; i < nested->vars.size(); ++i)
+			{
+				var buff = this->getVar(nested->vars[i].name);
+				if (buff.type != Type::UNDEFINED) this->setVar(nested->vars[i]);
+			}
+
+			// INCREMENT AND CHECK FOR CONDITION
+			if (action[0].value == "for")
+			{
+				if (!nested->afterparse(nested->math(incr))) state = false;
+
+				buff = nested->math(loop);
+				if (!afterparse(buff)) state = false;
+
+				condition = buff[0].getBool();
+			}
+			else if (action[0].value == "1" || action[0].value == "if" || action[0].value == "else") condition = false;
+			else
+			{
+				buff = nested->math(action);
+				if (!afterparse(buff)) state = false;
+
+				condition = buff[id].getBool();
+			}
+			
+			if (nested->broke) break;
 		}
-	
-		continued = nested->continued;
-		broke = nested->broke;
 
 		// SETTING PREVIOUS (THIS) SCOPE VARIABLES
 		for (size_t i = 0; i < nested->vars.size(); ++i)
@@ -132,8 +227,8 @@ namespace cll
 			if (buff.type != Type::UNDEFINED) this->setVar(nested->vars[i]);
 		}
 
-		returned = nested->returned;
-		if (returned.value != "") return false;
+		continued = nested->continued;
+		broke = nested->broke;
 		return true;
 	}
 
@@ -163,9 +258,9 @@ namespace cll
 
 		if (error != "") return false;
 
+		// CHECKS FOR BARE WORD UNIQUE SYNTAX
 		if (v[0].type == Type::BARE)
 		{
-			// CHECKS FOR BARE WORD UNIQUE SYNTAX
 			if (v[0].value == "cout" && v.size() < 2) error = "Statement 'cout' got too few arguments!";
 			else if (v[0].value == "cin" && v.size() < 2) error = "Statement 'cin' got too few arguments!";
 			else if (v[0].value == "delete")
@@ -217,7 +312,10 @@ namespace cll
 
 		if (error != "") return false;
 
-		std::vector<std::string> defined; // Holds variables defined in actual line
+		// Vector that holds defined variables in actual line to prevent errors when
+		// variable is declared and used in the same line. Like so:
+		// x = 20, y = x
+		std::vector<std::string> defined; 
 
 		for (size_t i = 0; i < v.size(); ++i)
 		{
@@ -327,6 +425,9 @@ namespace cll
 		return true;
 	}
 
+	// Function that procesess bare words and also some special tokens
+	// V parameter stands for tokens
+	// Returns true or false based on whether it had any errors or not
 	bool Interpreter::bare(const std::vector<var>& v)
 	{
 		if (v[0].type == Type::BARE)
@@ -342,7 +443,7 @@ namespace cll
 				for (size_t i = 1; i < v.size(); ++i)
 				{
 					if (v[i].type == Type::CHAR) write(std::string(1, char(v[i].getInt())));
-					else write(v[i].getEscapedString());
+					else write(v[i].getString());
 				}
 			}
 			else if (enabledIO && v[0].value == "cin")
@@ -353,7 +454,13 @@ namespace cll
 					std::getline(std::cin, buff);
 					var test(buff);
 					if (test.type == Type::UNDEFINED || test.type == Type::BARE) buff = "\"" + buff + "\"";
-					setVar((v[i].name != "") ? v[i].name : v[i].value, buff);
+
+					if (!setVar((v[i].name != "") ? v[i].name : v[i].value, buff))
+					{
+						std::string bname = (v[i].name != "") ? v[i].name : v[i].value;
+						error = "Name '" + bname + "' not recognized!";
+						break;
+					}
 				}
 			}
 			else if (v[0].value == "if" || v[0].value == "while" || v[0].value == "for" || v[0].value == "else" || v[0].value == "do" || v[0].value == "function")
@@ -393,11 +500,15 @@ namespace cll
 		return true;
 	}
 
+	// Function that procesess math equations
+	// V parameter stands for tokens
+	// Returns processed tokens
 	std::vector<var> Interpreter::math(const std::vector<var>& v, const bool& comma)
 	{
 		std::vector<var> vec;
 		vec.reserve(v.size());
 
+		// PARETNHESES, ARRAYS, FUNCTIONS AND VARIABLES 
 		for (size_t i = 0; i < v.size(); ++i)
 		{
 			if (v[i].type == Type::PARENTHESIS)
@@ -481,6 +592,7 @@ namespace cll
 					else vec.emplace_back(v[i]);
 				}
 			}
+			else if (v[i].name != "") vec.emplace_back(getVar(v[i].name));
 			else vec.emplace_back(v[i]);
 		}
 
@@ -609,7 +721,7 @@ namespace cll
 
 					if (lvar.name != "") lvar = getVar(lvar.name);
 					if (fvar.name != "") fvar = getVar(fvar.name);
-
+					
 					if (lvar.type == Type::UNDEFINED) continue;
 
 					if (symb.value == "=") ins = lvar.value;
@@ -627,16 +739,15 @@ namespace cll
 
 					ins.name = (fvar.name == "") ? fvar.value : fvar.name;
 					
-					setVar(ins);
+					if (setVar(ins))
+					{
+						assignment = true;
 
-					assignment = true;
+						vec.erase(vec.end() - i - 1, vec.end() - i + 2);
+						vec.insert(vec.end() - (i - 2), ins);
 
-					vec.erase(vec.end() - i - 1, vec.end() - i + 2);
-
-					if (getVar(ins.name).value != "") vec.insert(vec.end() - (i - 2), ins);
-					else vec.insert(vec.end() - (i - 2), fvar);
-
-					i -= 2;
+						i -= 2;
+					}
 				}
 				else if (i > 1 && step == 14 && !assignment && comma)
 				{
@@ -660,6 +771,9 @@ namespace cll
 		return vec;
 	}
 
+	// Function that manipulates scope specific variables
+	// V parameter stands for tokens
+	// Returns true or false based on whether it had any errors or not
 	bool Interpreter::readScope(const std::vector<var>& v)
 	{
 		if (v[0].value == "{" && v[0].type == Type::SYMBOL) ++scope;
@@ -681,86 +795,32 @@ namespace cll
 			{
 				dfunctions.add(defined((action[1].name != "") ? action[1].name : action[1].value, lines));
 			}
-			else if (action[0].value == "if" && action[1].getBool()) state = newScope(lines);
+			else if (action[0].value == "if" && action[1].getBool()) state = newScope(lines, action);
 			else if (action[0].value == "else")
 			{
-				if (action.size() <= 1 && !previous_action[previous_action.size() - 1].getBool()) state = newScope(lines); // ELSE IF
-				else if (!previous_action[previous_action.size() - 1].getBool() && action[2].getBool())	state = newScope(lines); // ELSE
+				if (action.size() <= 1 && !previous_action[previous_action.size() - 1].getBool()) state = newScope(lines, action); // ELSE IF
+				else if (!previous_action[previous_action.size() - 1].getBool() && action[2].getBool())	state = newScope(lines, action); // ELSE
 				else action = previous_action;
 			}
-			else if (action[0].value == "while")
-			{
-				while (math(action)[1].getBool())
-				{
-					state = newScope(lines);
-
-					if (continued) continue;
-					if (broke || !state) break;
-				}
-			}
-			else if (action[0].value == "for")
-			{
-				std::vector<var> name;
-				std::vector<var> loop;
-				std::vector<var> incr;
-				unsigned char commas = 0;
-
-				for (size_t i = 1; i < action.size(); ++i)
-				{
-					if (action[i].type == Type::SYMBOL && action[i].value == ",")
-					{
-						++commas;
-						continue;
-					}
-					
-					if (commas == 0) name.emplace_back(action[i]);
-					else if (commas == 1) loop.emplace_back(action[i]);
-					else if (commas == 2) incr.emplace_back(action[i]);
-				}
-
-				std::string buff = (name.size() > 1) ? math(name)[0].name : "";
-
-				while (math(loop)[0].getBool())
-				{
-					state = newScope(lines);
-					math(incr);
-
-					if (continued) continue;
-					if (broke || !state) break;
-				}
-
-				if (name.size() > 1) deleteVar(buff);
-			}
-			else if (action[0].value == "do")
-			{
-				state = newScope(lines);
-				if (state)
-				{
-					while (math(action)[2].getBool())
-					{
-						state = newScope(lines);
-
-						if (continued) continue;
-						if (broke || !state) break;
-					}
-				}
-			}
+			else if (action[0].value == "while") state = newScope(lines, action, 1);
+			else if (action[0].value == "for") state = newScope(lines, action, 0);
+			else if (action[0].value == "do") state = newScope(lines, action, 2);
 
 			previous_action = action;
 			action.clear();
 			lines.clear();
+
 			if (!state) return errorLog();
+			
 			return true;
 		}
 	}
 
 	// Function that interpretes one line
+	// L parameter stands for line to interpret
+	// Returns true or false based on whether it had any errors or not
 	bool Interpreter::readLine(const std::string& l)
 	{
-		// SKIPS EMPTY LINES
-		if (l == "")  return true;
-		if (l == ";") return true;
-
 		// SEPARATES LINE BY ARGUMENTS
 		std::vector<var> args_line = lexer(l); // Holds raw line tokens
 
@@ -796,6 +856,8 @@ namespace cll
 
 		if (args.empty())
 		{
+			if (scope) lines.emplace_back("");
+
 			if (!args_line.empty() && !readLine(newline)) return errorLog();
 			return true;
 		}
@@ -825,8 +887,6 @@ namespace cll
 		// PARSER
 		if (!parse(args)) return errorLog();
 
-		std::vector<var> old_args = args;
-
 		// APPLIES MATH TO TOKENS
 		if (!(args[0].value == "do" || args[0].value == "while" || args[0].value == "for")) args = math(args);
 
@@ -849,27 +909,31 @@ namespace cll
 
 		if (args[0].value != "function" && args[0].value != "cin" && args[0].value != "do" && args[0].value != "while" && args[0].value != "for")
 		{
-			for (size_t i = 0; i < args.size(); ++i)
-			{
-				if (args[i].type == Type::UNDEFINED)
-				{
-					error = "Name '" + args[i].value + "' not recognized!";
-					return errorLog();
-				}
-			}
+			if (!afterparse(args)) return errorLog();
 		}
 
-		// INTERPRETS ARGUMENTS
-		if (args[0].value == "do" || args[0].value == "while" || args[0].value == "for")
-		{
-			if (!bare(old_args)) return errorLog();
-		}
-		else if (!bare(args)) return errorLog();
+		if (!bare(args)) return errorLog();
 
 		if (newline != "" && !readLine(newline)) return errorLog();
 		return true;
 	}
 
+	// Function that checks for undefined variables
+	bool Interpreter::afterparse(const std::vector<var>& v)
+	{
+		for (size_t i = 0; i < v.size(); ++i)
+		{
+			if (v[i].type == Type::UNDEFINED)
+			{
+				error = "Name '" + v[i].value + "' not recognized!";
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	// Function that interpretes whole vector line by line
 	bool Interpreter::readVector(const std::vector<std::string>& v)
 	{
 		for (size_t i = 0; i < v.size(); ++i)
@@ -957,7 +1021,7 @@ namespace cll
 				else if (!literal)
 				{
 					ret.name = name;
-					for (size_t i = 0; i < elem.size(); ++i) ret.name += "[" + elem[i].getString() + "]";
+					for (size_t i = 0; i < elem.size(); ++i) ret.name += "[" + elem[i].getRawString() + "]";
 				}
 
 				return ret;
@@ -970,7 +1034,7 @@ namespace cll
 	}
 
 	// Function that changes defined var value or creates new var if one does not exist
-	void Interpreter::setVar(const var& v)
+	bool Interpreter::setVar(const var& v)
 	{
 		var ins = v;
 
@@ -982,30 +1046,31 @@ namespace cll
 				std::string buff = v.name.substr(ii + 1, v.name.length() - ii - 2);
 				std::string name = v.name.substr(0, ii);
 
-				if (name == "" || name == "()" || name == "[]") return;
+				if (name == "" || name == "()" || name == "[]") return false;
 
 				std::vector<var> elem = math(lexer(buff));
-				if (elem.empty()) return;
+				if (elem.empty()) return false;
 
 				var ret = getVar(name);
 
-				if (ret.type == Type::UNDEFINED) return;
-				if (elem[0].type == Type::UNDEFINED) return;
-				if (elem.size() > 1) return;
+				if (ret.type == Type::UNDEFINED) return false;
+				if (elem[0].type == Type::UNDEFINED) return false;
+				if (elem.size() > 1) return false;
 
 				ret.setElement((size_t)elem[0].getInt(), v.value);
 
-				setVar(ret);
-
-				return;
+				return setVar(ret);
 			}
 		}
 
-		if (ins.getError() != "" || ins.name == "") return;
+		if (ins.getError() != "" || ins.name == "") return false;
 
 		size_t index = search(vars, ins.name, 0, vars.size() - 1);
 		if (index < vars.size()) vars[index] = ins;
 		else if (ins.name != "") vars.insert(std::upper_bound(vars.begin(), vars.end(), ins, [](var a, var b) { return a.name < b.name; }), ins);
+		else return false;
+
+		return true;
 	}
 
 	void Interpreter::deleteVar(const std::string& n)

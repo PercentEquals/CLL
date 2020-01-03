@@ -1,7 +1,6 @@
 #pragma once
 
 // Simple console wrapper that provides additional console manipulation
-// For now platform specific - windows
 
 #ifdef _WIN32
 

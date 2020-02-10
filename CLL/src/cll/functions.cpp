@@ -21,6 +21,7 @@ namespace cll
 			function("atan", atan),
 			function("atanh", atanh),
 			function("bool", tobool),
+			function("cbrt", cbrt),
 			function("ceil", ceil),
 			function("char", tochar),
 			function("cos", cos),

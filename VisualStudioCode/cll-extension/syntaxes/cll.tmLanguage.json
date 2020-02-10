@@ -58,7 +58,7 @@
 			"patterns": [
 				{
 				"name": "support.function",
-				"match": "\\b((sleep|time|rand|typeof|int|bool|float|double|char|string|fopen|fwrite|fexist|find|rfind|substr|strspn|stoi|stof|stod|to_string|length|sqrt|cbrt|round|abs|hypot|floor|ceil|round|trunc|cos|sin|tan|acos|asin|atan|cosh|sinh|tanh|acoh|asinh|atanh|exp|exp2|ldexp|log|log10)+)(?=\\()\\b"
+				"match": "\\b((sleep|time|rand|typeof|int|bool|float|double|char|string|fopen|fwrite|fappend|fexist|find|rfind|substr|strspn|stoi|stof|stod|to_string|length|sqrt|cbrt|round|abs|hypot|floor|ceil|round|trunc|cos|sin|tan|acos|asin|atan|cosh|sinh|tanh|acosh|asinh|atanh|exp|exp2|ldexp|log|log10)+)(?=\\()\\b"
 				}
 			]
 		},

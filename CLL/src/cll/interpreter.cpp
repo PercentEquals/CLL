@@ -78,7 +78,7 @@ namespace cll
 		var params("[]");
 		for (size_t i = 0; i < args.size(); ++i)
 		{
-			if (args[i].getValue() != ",") params += args[i];
+			if (args[i].value != ",") params += args[i];
 		}
 
 		std::unique_ptr<Interpreter> nested = std::make_unique<Interpreter>();

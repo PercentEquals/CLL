@@ -1,3 +1,5 @@
+// Last tested version: 1.1
+
 function check
 {
 	if argv[1] === "NULL"; return "OK\n"

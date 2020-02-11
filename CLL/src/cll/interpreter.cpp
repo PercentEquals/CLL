@@ -921,11 +921,19 @@ namespace cll
 	// Function that checks for undefined variables
 	bool Interpreter::afterparse(const std::vector<var>& v)
 	{
+		if (v[0].type == Type::SYMBOL && v[0].value != "{" && v[0].value != "}") error = "Unexpected symbol '" + v[0].value + "'!";
+
 		for (size_t i = 0; i < v.size(); ++i)
 		{
 			if (v[i].type == Type::UNDEFINED)
 			{
 				error = "Name '" + v[i].value + "' not recognized!";
+				return false;
+			}
+
+			if (i != 0 && v[0].type != Type::BARE)
+			{
+				error = "Unexpected '" + ((v[i].name == "") ? v[i].value : v[i].name) + "'!";
 				return false;
 			}
 		}

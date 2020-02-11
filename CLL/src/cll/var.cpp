@@ -615,20 +615,32 @@ namespace cll
 	{
 		std::string val = value;
 
-		if (type == Type::ARRAY || v.type == Type::ARRAY)
+		if (type == Type::ARRAY)
 		{
 			val.reserve(val.length() + v.value.length() + 2);
-
 			if (val[val.length() - 1] == ']') val.pop_back();
 
 			if (v.getSize() != 0 && getSize() != 0) val += ",";
-			else if (v.type == Type::STRING && getSize() != 0) val += ",";
+			else if ((v.type == Type::STRING || v.type == Type::ARRAY) && getSize() != 0) val += ",";
 
-			if (v.type == Type::ARRAY) val += v.getRawString().substr(1);
-			else val += v.getValue() + "]";
+			val += v.getValue() + "]";
+		}
+		else if (v.type == Type::ARRAY)
+		{
+			val = v.value;
 
-			if (val[0] != '[') val = "[" + val;
-			if (val[val.length() - 1] != ']') val += "]";
+			val.reserve(val.length() + value.length() + 2);
+			if (val[0] == '[') val.erase(val.begin());
+			bool comma = false;
+
+			std::cout << "DEBUG" << v.value << " " << val << std::endl;
+
+			if (v.getSize() != 0 && getSize() != 0) comma = true;
+			else if ((type == Type::STRING || type == Type::ARRAY) && v.getSize() != 0) comma = true;
+
+			val = "[" + getValue();
+			if (comma) val += ",";
+			val += v.value.substr(1);
 		}
 		else if (type == Type::STRING || v.type == Type::STRING) val = "\"" + getRawString() + v.getRawString() + "\"";
 		else if (type == Type::INT || type == Type::CHAR)
@@ -712,20 +724,25 @@ namespace cll
 
 		if (type == Type::ARRAY || v.type == Type::ARRAY)
 		{
-			var buff; 
+			var buff = v.value; 
+			size_t siz = size_t(getInt());
 
 			if (type == Type::ARRAY)
 			{
 				buff = val;
-				for (size_t i = 1; i < size_t(v.getInt()); ++i) buff += getValue();
-				if (v.getInt() == 0) buff.value = "[]";
+				siz = size_t(v.getInt());
 			}
-			else
+
+			std::string add = buff.value;
+			add.pop_back();
+
+			for (size_t i = 1; i < siz; ++i)
 			{
-				buff = v.value;
-				for (size_t i = 1; i < size_t(getInt()); ++i) buff += v.getValue();
-				if (getInt() == 0) buff.value = "[]";
+				buff.value.pop_back();
+				buff.value += "," + add.substr(1) + "]";
 			}
+
+			if (siz == 0) buff.value = "[]";
 
 			val = buff.getValue();
 		}

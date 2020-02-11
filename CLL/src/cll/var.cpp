@@ -724,20 +724,25 @@ namespace cll
 
 		if (type == Type::ARRAY || v.type == Type::ARRAY)
 		{
-			var buff; 
+			var buff = v.value; 
+			size_t siz = size_t(getInt());
 
 			if (type == Type::ARRAY)
 			{
 				buff = val;
-				for (size_t i = 1; i < size_t(v.getInt()); ++i) buff += getValue();
-				if (v.getInt() == 0) buff.value = "[]";
+				siz = size_t(v.getInt());
 			}
-			else
+
+			std::string add = buff.value;
+			add.pop_back();
+
+			for (size_t i = 1; i < siz; ++i)
 			{
-				buff = v.value;
-				for (size_t i = 1; i < size_t(getInt()); ++i) buff += v.getValue();
-				if (getInt() == 0) buff.value = "[]";
+				buff.value.pop_back();
+				buff.value += "," + add.substr(1) + "]";
 			}
+
+			if (siz == 0) buff.value = "[]";
 
 			val = buff.getValue();
 		}

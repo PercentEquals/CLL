@@ -733,18 +733,21 @@ namespace cll
 				siz = size_t(v.getInt());
 			}
 
-			std::string add = buff.value;
-			add.pop_back();
-
-			for (size_t i = 1; i < siz; ++i)
+			if (buff.value != "[]")
 			{
-				buff.value.pop_back();
-				buff.value += "," + add.substr(1) + "]";
+				std::string add = buff.value;
+				add.pop_back();
+
+				for (size_t i = 1; i < siz; ++i)
+				{
+					buff.value.pop_back();
+					buff.value += "," + add.substr(1) + "]";
+				}
+
+				if (siz == 0) buff.value = "[]";
+
+				val = buff.getValue();
 			}
-
-			if (siz == 0) buff.value = "[]";
-
-			val = buff.getValue();
 		}
 		else if (type == Type::STRING || v.type == Type::STRING)
 		{

@@ -721,10 +721,10 @@ namespace cll
 
 					if (lvar.name != "") lvar = getVar(lvar.name);
 					if (fvar.name != "") fvar = getVar(fvar.name);
-					
+
 					if (lvar.type == Type::UNDEFINED) continue;
 
-					if (symb.value == "=") ins = lvar.value;
+					if (symb.value == "=") ins = lvar;
 					else if (symb.value == "+=") ins = fvar + lvar;
 					else if (symb.value == "-=") ins = fvar - lvar;
 					else if (symb.value == "/=") ins = fvar / lvar;

@@ -250,7 +250,7 @@ namespace cll
 
 					if (v.type == Type::STRING) ins += v.getRawString();
 					else if (type == Type::CHAR) ins += ctos(v.getChar(0));
-					else if (type == Type::INT) ins += ctos(v.getInt());
+					else if (type == Type::INT || type == Type::FLOAT || type == Type::DOUBLE) ins += std::to_string(v.getInt());
 					else ins += ctos(v.getInt());
 					continue;
 				}

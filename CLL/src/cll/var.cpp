@@ -207,13 +207,17 @@ namespace cll
 	}
 	 
 	// This method creates a new copy of a variable with changed element
-	void var::setElement(const size_t& n, const var& v)
+	bool var::setElement(const size_t& n, const var& v)
 	{
-		if (value.length() < 1) return;
+		if (value.length() < 1) return false;
 
+		size_t original_size = getSize();
 		size_t actual_element = 0;
+
+		if (n >= original_size) return false;
+
 		std::string ins("");
-		ins.reserve(getSize() + 4);
+		ins.reserve(original_size + 4);
 
 		if (value[0] == '[' || value[0] == '"' || value[0] == '\'') ins = std::string(1, value[0]);
 
@@ -260,7 +264,9 @@ namespace cll
 		}
 
 		if (value[value.length() - 1] == ']' || value[value.length() - 1] == '"' || value[value.length() - 1] == '\'') ins += value[value.length() - 1];
-		setValue(ins);
+		if (ins != value) setValue(ins);
+
+		return true;
 	}
 
 	// GET METHODS //

@@ -1065,7 +1065,7 @@ namespace cll
 				if (elem[0].type == Type::UNDEFINED) return false;
 				if (elem.size() > 1) return false;
 
-				ret.setElement((size_t)elem[0].getInt(), v.value);
+				if (!ret.setElement((size_t)elem[0].getInt(), v.value)) return false;
 
 				return setVar(ret);
 			}

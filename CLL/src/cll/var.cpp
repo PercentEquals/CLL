@@ -28,6 +28,13 @@ namespace cll
 		setValue(v);
 	}
 
+	// IS METHODS //
+	bool var::isFunction() const
+	{
+		if (value.length() > 0 && value.find("(") != std::string::npos && value[value.length() - 1] == ')') return true;
+		return false;
+	}
+
 	// SET METHODS //
 	void var::setName(const std::string& n)
 	{
@@ -207,13 +214,17 @@ namespace cll
 	}
 	 
 	// This method creates a new copy of a variable with changed element
-	void var::setElement(const size_t& n, const var& v)
+	bool var::setElement(const size_t& n, const var& v)
 	{
-		if (value.length() < 1) return;
+		if (value.length() < 1) return false;
 
+		size_t original_size = getSize();
 		size_t actual_element = 0;
+
+		if (n >= original_size) return false;
+
 		std::string ins("");
-		ins.reserve(getSize() + 4);
+		ins.reserve(original_size + 4);
 
 		if (value[0] == '[' || value[0] == '"' || value[0] == '\'') ins = std::string(1, value[0]);
 
@@ -250,7 +261,7 @@ namespace cll
 
 					if (v.type == Type::STRING) ins += v.getRawString();
 					else if (type == Type::CHAR) ins += ctos(v.getChar(0));
-					else if (type == Type::INT) ins += ctos(v.getInt());
+					else if (type == Type::INT || type == Type::FLOAT || type == Type::DOUBLE) ins += std::to_string(v.getInt());
 					else ins += ctos(v.getInt());
 					continue;
 				}
@@ -260,7 +271,9 @@ namespace cll
 		}
 
 		if (value[value.length() - 1] == ']' || value[value.length() - 1] == '"' || value[value.length() - 1] == '\'') ins += value[value.length() - 1];
-		setValue(ins);
+		if (ins != value) setValue(ins);
+
+		return true;
 	}
 
 	// GET METHODS //
@@ -632,8 +645,6 @@ namespace cll
 			val.reserve(val.length() + value.length() + 2);
 			if (val[0] == '[') val.erase(val.begin());
 			bool comma = false;
-
-			std::cout << "DEBUG" << v.value << " " << val << std::endl;
 
 			if (v.getSize() != 0 && getSize() != 0) comma = true;
 			else if ((type == Type::STRING || type == Type::ARRAY) && v.getSize() != 0) comma = true;

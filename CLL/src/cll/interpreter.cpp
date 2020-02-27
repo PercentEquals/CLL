@@ -415,10 +415,6 @@ namespace cll
 					}
 				} 
 			}
-			else if (i + 1 < v.size() && v[i + 1].type == Type::SYMBOL && v[i + 1].value == "=")
-			{
-				error = "Unexpected symbol '=' after '" + v[i].value + "'!"; break;
-			}
 		}
 
 		if (error != "") return false;
@@ -558,43 +554,46 @@ namespace cll
 				if (errflag.value == "") vec.emplace_back(arr);
 				else vec.emplace_back(errflag);
 			}
+			else if(v[i].type == Type::UNDEFINED && v[i].isFunction())
+			{
+				std::string fun = v[i].value.substr(0, v[i].value.find("("));
+				std::vector<var> args = math(lexer(v[i].value.substr(fun.length() + 1, v[i].value.length() - fun.length() - 2)), false);
+				function buff = functions.get(fun);
+				defined dbuff = dfunctions.get(fun);
+				bool errflag = false;
+				bool check = parse({ v[i].value.substr(fun.length(), v[i].value.length() - fun.length()) });
+
+				for (size_t i = 0; i < args.size(); ++i)
+				{
+					if (args[i].type == Type::UNDEFINED) errflag = true;
+				}
+
+				if (errflag) vec.emplace_back(v[i]);
+				else if (dbuff.name != "" && check)
+				{
+					var ret = newFunction(args, dbuff.lines);
+					ret.name.clear();
+					if (ret.value != "") vec.emplace_back(ret);
+				}
+				else if (buff.name != "" && check)
+				{
+					var ret = buff.exec(args);
+					ret.name.clear();
+					if (ret.value != "") vec.emplace_back(ret);
+				}
+				else vec.emplace_back(v[i]);
+			}
 			else if(v[i].type == Type::UNDEFINED)
 			{
-				if (v[i].value.find("(") != std::string::npos && v[i].value[v[i].value.length() - 1] == ')')
-				{
-					std::string fun = v[i].value.substr(0, v[i].value.find("("));
-					std::vector<var> args = math(lexer(v[i].value.substr(fun.length() + 1, v[i].value.length() - fun.length() - 2)), false);
-					function buff = functions.get(fun);
-					defined dbuff = dfunctions.get(fun);
-					bool errflag = false;
-
-					for (size_t i = 0; i < args.size(); ++i)
-					{
-						if (args[i].type == Type::UNDEFINED) errflag = true;
-					}
-
-					if (errflag) vec.emplace_back(v[i]);
-					else if (dbuff.name != "" && parse({ v[i].value.substr(fun.length(), v[i].value.length() - fun.length()) }))
-					{
-						var ret = newFunction(args, dbuff.lines);
-						if (ret.value != "") vec.emplace_back(ret);
-					}
-					else if (buff.name != "" && parse({ v[i].value.substr(fun.length(), v[i].value.length() - fun.length()) }))
-					{
-						vec.emplace_back(buff.exec(args));
-					}
-					else vec.emplace_back(v[i]);
-				}
-				else
-				{
-					var buff = getVar(v[i].value);
-					if (buff.type != Type::UNDEFINED) vec.emplace_back(buff);
-					else vec.emplace_back(v[i]);
-				}
+				var buff = getVar(v[i].value);
+				if (buff.type != Type::UNDEFINED) vec.emplace_back(buff);
+				else vec.emplace_back(v[i]);
 			}
 			else if (v[i].name != "") vec.emplace_back(getVar(v[i].name));
 			else vec.emplace_back(v[i]);
 		}
+
+		if (vec.size() <= 1) return vec;
 
 		// MATH WITH OPERATOR PRECEDENCE
 		bool assignment = false;
@@ -718,13 +717,14 @@ namespace cll
 
 					if (lvar.type == Type::SYMBOL || lvar.type == Type::BARE) continue;
 					if (fvar.type == Type::SYMBOL || fvar.type == Type::BARE) continue;
+					if (fvar.type != Type::UNDEFINED && fvar.name == "") continue;
 
 					if (lvar.name != "") lvar = getVar(lvar.name);
 					if (fvar.name != "") fvar = getVar(fvar.name);
-					
+
 					if (lvar.type == Type::UNDEFINED) continue;
 
-					if (symb.value == "=") ins = lvar.value;
+					if (symb.value == "=") ins = lvar;
 					else if (symb.value == "+=") ins = fvar + lvar;
 					else if (symb.value == "-=") ins = fvar - lvar;
 					else if (symb.value == "/=") ins = fvar / lvar;
@@ -1065,7 +1065,7 @@ namespace cll
 				if (elem[0].type == Type::UNDEFINED) return false;
 				if (elem.size() > 1) return false;
 
-				ret.setElement((size_t)elem[0].getInt(), v.value);
+				if (!ret.setElement((size_t)elem[0].getInt(), v.value)) return false;
 
 				return setVar(ret);
 			}

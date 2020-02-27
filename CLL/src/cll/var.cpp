@@ -646,8 +646,6 @@ namespace cll
 			if (val[0] == '[') val.erase(val.begin());
 			bool comma = false;
 
-			std::cout << "DEBUG" << v.value << " " << val << std::endl;
-
 			if (v.getSize() != 0 && getSize() != 0) comma = true;
 			else if ((type == Type::STRING || type == Type::ARRAY) && v.getSize() != 0) comma = true;
 

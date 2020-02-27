@@ -49,6 +49,9 @@ namespace cll
 		var(const std::string& v);
 		var(const std::string& n, const std::string& v);
 
+		// IS METHODS //
+		bool isFunction() const;
+
 		// SET METHODS //
 		void setName(const std::string& n); // Sets variable name and checks for special symbols and bare words
 		void setType(const std::string& v); // Sets types of variable based on its value

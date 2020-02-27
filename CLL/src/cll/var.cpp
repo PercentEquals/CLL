@@ -28,6 +28,13 @@ namespace cll
 		setValue(v);
 	}
 
+	// IS METHODS //
+	bool var::isFunction() const
+	{
+		if (value.length() > 0 && value.find("(") != std::string::npos && value[value.length() - 1] == ')') return true;
+		return false;
+	}
+
 	// SET METHODS //
 	void var::setName(const std::string& n)
 	{

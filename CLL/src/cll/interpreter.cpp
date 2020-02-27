@@ -11,7 +11,7 @@
 
 namespace cll
 {
-	const std::string Interpreter::version = "1.1.2";
+	const std::string Interpreter::version = "1.2.0";
 
 	// Constructor with already declared variables
 	Interpreter::Interpreter(const std::vector<var>& v)

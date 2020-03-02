@@ -1,10 +1,11 @@
 # CLL ![https://img.shields.io/github/license/PercentEquals/CLL](https://img.shields.io/github/license/PercentEquals/CLL) ![https://ci.appveyor.com/api/projects/status/github/PercentEquals/CLL?branch=master&svg=true](https://ci.appveyor.com/api/projects/status/github/PercentEquals/CLL?branch=master&svg=true)  
   
 CLL is my attempt at creating a 'simple' programming language with c-like syntax and ideas  
-such as operator precedence or data types. It also borrows some ideas from others interpreted  
-languages like Python or batch/bash such as triple equals sign and arguments passing.  
-It can be used to create scripts or can be embedded into a c++ project.  
+such as operator precedence or data types.  
+It also borrows some ideas from others interpreted languages like Python or batch/bash  
+such as triple equals sign and arguments passing.  
   
+CLL can be used to create scripts or can be embedded into a c++ project.   
 CLL is [turing complete](https://en.wikipedia.org/wiki/Turing_completeness), but it is **not** [object-oriented](https://en.wikipedia.org/wiki/Object-oriented_programming).  
 
 ## Useful links:  

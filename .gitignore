@@ -21,11 +21,8 @@ ipch/
 
 # Other
 
+build/
 .vscode/
 Interpreter/*.cll
 Debug/
 Release/
-
-# For development period
-
-CLL/lib/

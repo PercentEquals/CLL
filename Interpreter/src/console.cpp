@@ -1,4 +1,4 @@
-#include "console.h"
+#include "console.hpp"
 
 #ifdef _WIN32
 // WINDOWS WRAPPER //

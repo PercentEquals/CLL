@@ -1,11 +1,11 @@
 #pragma once
 
-#include "string.h"
-#include "math.h"
-#include "rand.h"
-#include "time.h"
-#include "type.h"
-#include "file.h"
+#include "string.hpp"
+#include "math.hpp"
+#include "rand.hpp"
+#include "time.hpp"
+#include "type.hpp"
+#include "file.hpp"
 
 // Header file for all CLL builtin functions
 //

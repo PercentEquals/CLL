@@ -3,8 +3,8 @@
 
 // Author: Bartosz Niciak
 
-#include "console.h"
-#include "CLL.h"
+#include "console.hpp"
+#include "CLL.hpp"
 
 // This main file acts as a real-time console interpreter 
 // and can be used to type code on the fly

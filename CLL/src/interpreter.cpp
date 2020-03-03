@@ -1,9 +1,9 @@
-#include "interpreter.h"
+#include "interpreter.hpp"
 
 // Author: Bartosz Niciak
 
-#include "utils/search.h"
-#include "lexer.h"
+#include "utils/search.hpp"
+#include "lexer.hpp"
 
 #include <algorithm>
 #include <iostream>

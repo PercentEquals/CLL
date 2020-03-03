@@ -2,9 +2,9 @@
 
 // Author: Bartosz Niciak
 
-#include "var.h"
-#include "functions.h"
-#include "defined.h"
+#include "var.hpp"
+#include "functions.hpp"
+#include "defined.hpp"
 
 #include <string>
 #include <vector>

@@ -2,7 +2,7 @@
 
 // Author: Bartosz Niciak
 
-#include "var.h"
+#include "var.hpp"
 
 #include <vector>
 

@@ -95,6 +95,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>Default</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)CLL\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -107,6 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>Default</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)CLL\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,6 +123,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>Default</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)CLL\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,6 +140,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>Default</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)CLL\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -145,29 +149,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\cll\defined.cpp" />
-    <ClCompile Include="src\cll\functions.cpp" />
-    <ClCompile Include="src\cll\interpreter.cpp" />
-    <ClCompile Include="src\cll\lexer.cpp" />
-    <ClCompile Include="src\cll\var.cpp" />
+    <ClCompile Include="src\defined.cpp" />
+    <ClCompile Include="src\functions.cpp" />
+    <ClCompile Include="src\interpreter.cpp" />
+    <ClCompile Include="src\lexer.cpp" />
+    <ClCompile Include="src\var.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\CLL.h" />
-    <ClInclude Include="src\cll\defined.h" />
-    <ClInclude Include="src\cll\functions.h" />
-    <ClInclude Include="src\cll\functions\file.h" />
-    <ClInclude Include="src\cll\functions\header.h" />
-    <ClInclude Include="src\cll\functions\math.h" />
-    <ClInclude Include="src\cll\functions\rand.h" />
-    <ClInclude Include="src\cll\functions\string.h" />
-    <ClInclude Include="src\cll\functions\time.h" />
-    <ClInclude Include="src\cll\functions\type.h" />
-    <ClInclude Include="src\cll\interpreter.h" />
-    <ClInclude Include="src\cll\lexer.h" />
-    <ClInclude Include="src\cll\static.h" />
-    <ClInclude Include="src\cll\utils\convert.h" />
-    <ClInclude Include="src\cll\utils\search.h" />
-    <ClInclude Include="src\cll\var.h" />
+    <ClInclude Include="include\CLL.hpp" />
+    <ClInclude Include="include\defined.hpp" />
+    <ClInclude Include="include\functions.hpp" />
+    <ClInclude Include="include\functions\file.hpp" />
+    <ClInclude Include="include\functions\header.hpp" />
+    <ClInclude Include="include\functions\math.hpp" />
+    <ClInclude Include="include\functions\rand.hpp" />
+    <ClInclude Include="include\functions\string.hpp" />
+    <ClInclude Include="include\functions\time.hpp" />
+    <ClInclude Include="include\functions\type.hpp" />
+    <ClInclude Include="include\interpreter.hpp" />
+    <ClInclude Include="include\lexer.hpp" />
+    <ClInclude Include="include\static.hpp" />
+    <ClInclude Include="include\utils\convert.hpp" />
+    <ClInclude Include="include\utils\search.hpp" />
+    <ClInclude Include="include\var.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

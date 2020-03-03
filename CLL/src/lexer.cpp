@@ -1,8 +1,8 @@
-#include "lexer.h"
+#include "lexer.hpp"
 
 // Author: Bartosz Niciak
 
-#include "static.h"
+#include "static.hpp"
 
 namespace cll
 {

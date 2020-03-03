@@ -1,8 +1,8 @@
-#include "defined.h"
+#include "defined.hpp"
 
 // Author: Bartosz Niciak
 
-#include "utils/search.h"
+#include "utils/search.hpp"
 
 #include <algorithm>
 

@@ -5,6 +5,6 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\console.h" />
+    <ClInclude Include="include\console.hpp" />
   </ItemGroup>
 </Project>

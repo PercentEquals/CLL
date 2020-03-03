@@ -1,11 +1,11 @@
-#include "var.h"
+#include "var.hpp"
 
 // Author: Bartosz Niciak
 
-#include "utils/convert.h"
+#include "utils/convert.hpp"
 
-#include "lexer.h"
-#include "static.h"
+#include "lexer.hpp"
+#include "static.hpp"
 
 #include <algorithm>
 #include <cmath>

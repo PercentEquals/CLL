@@ -1,9 +1,9 @@
-#include "functions.h"
+#include "functions.hpp"
 
 // Author: Bartosz Niciak
 
-#include "functions/header.h"
-#include "utils/search.h"
+#include "functions/header.hpp"
+#include "utils/search.hpp"
 
 #include <algorithm>
 

@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 namespace cll
 {
@@ -476,7 +477,7 @@ namespace cll
 			else if (v[0].value == "break") broke = true;
 			else if (v[0].value == "include")
 			{
-				std::fstream buff(v[1].getString(), std::ios::in, std::ios::binary);
+				std::fstream buff(v[1].getString(), std::ios::in);
 				std::string l;
 
 				if (buff.good())

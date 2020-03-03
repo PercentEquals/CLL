@@ -2,6 +2,7 @@
 
 #include "../var.hpp"
 
+#include <cstring>
 #include <string>
 #include <vector>
 

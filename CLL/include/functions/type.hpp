@@ -6,7 +6,7 @@
 
 namespace cll
 {
-	var typeof(const std::vector<var>& args)
+	var type(const std::vector<var>& args)
 	{
 		if (args.empty()) return var("\"UNDEFINED\"");
 		return "\"" + args[0].getType() + "\"";

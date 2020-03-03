@@ -866,7 +866,7 @@ namespace cll
 			if (v.type == Type::DOUBLE) val = std::to_string(std::pow(getFloat(), v.getDouble()));
 			else if (v.type == Type::FLOAT)
 			{
-				val = std::to_string(std::powf(getFloat(), v.getFloat()));
+				val = std::to_string(std::pow(getFloat(), v.getFloat()));
 				if (val.find('.') == std::string::npos) val += ".0f";
 				else val += "f";
 			}
@@ -875,7 +875,7 @@ namespace cll
 		else if (type == Type::FLOAT)
 		{
 			if (v.type == Type::DOUBLE) val = std::to_string(std::pow(getFloat(), v.getDouble()));
-			else val = std::to_string(std::powf(getFloat(), v.getFloat()));
+			else val = std::to_string(std::pow(getFloat(), v.getFloat()));
 
 			if (v.type != Type::DOUBLE)
 			{

@@ -28,7 +28,6 @@ void errorLog(const std::unique_ptr<cll::Interpreter>& i)
 int main(int argc, char* argv[])
 {
 	std::ios_base::sync_with_stdio(false);
-	std::cin.tie(NULL);
 
 	// Initializes console with title name passed as argument, also a simple unit test
 	console::init(cll::var("CLL Interpreter ").getValue() + PLATFORM); 

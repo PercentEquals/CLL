@@ -21,6 +21,7 @@ ipch/
 
 # Other
 
+.vscode/
 Interpreter/*.cll
 Debug/
 Release/

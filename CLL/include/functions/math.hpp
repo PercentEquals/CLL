@@ -3,6 +3,7 @@
 #include "../var.hpp"
 
 #include <vector>
+#include <cmath>
 
 namespace cll
 {

@@ -29,7 +29,7 @@ It allows for function execution by its name.
 - defined
 
 Contains `defined` struct that holds vector of lines to execute when function is called.  
-It allows for creation of functions inn CLL language.
+It allows for creation of functions in CLL language.
 
 - interpreter
 

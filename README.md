@@ -35,9 +35,8 @@ preferably using Visual Studio with v142 toolset on 10.0.18362.0 Windows SDK.
 ### Linux
 
 You need to compile it Yourself with g++. I prepared CMakeLists.txt to make it easier.  
-First install cmake: `sudo apt-get install cmake`  
-Then You need to download or clone the whole project  
-and lastly from the project directory You need to execute the following commands:
+First install cmake: `sudo apt-get install cmake`, then You need to download or clone the   
+whole project and lastly from the project directory You need to execute the following commands:
 
 ```batch
 mkdir build && cd build

@@ -1,5 +1,10 @@
 # CLL ![https://img.shields.io/github/license/PercentEquals/CLL](https://img.shields.io/github/license/PercentEquals/CLL) ![https://ci.appveyor.com/api/projects/status/github/PercentEquals/CLL?branch=master&svg=true](https://ci.appveyor.com/api/projects/status/github/PercentEquals/CLL?branch=master&svg=true)  
   
+<p align="center">
+  <img src="https://github.com/PercentEquals/CLL/blob/master/Preview.gif" alt="Demo gif">
+</p>
+
+
 CLL is my attempt at creating a 'simple' programming language with c-like syntax and ideas such as operator precedence or data types.  
   
 It also borrows some ideas from others interpreted languages like Python or batch/bash such as triple equals sign and the way arguments are passed.  
